@@ -3,7 +3,7 @@ import CTAButton from './components/button/CTAButton';
 import FreeButton from './components/button/FreeButton';
 import Input from './components/input/Input';
 import FreeInput from './components/input/FreeInput';
-import PopUpButton from './components/button/PopupButton';
+import PopUpButton from './components/button/PopUpButton';
 
 function App() {
   return (

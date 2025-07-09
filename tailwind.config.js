@@ -12,22 +12,22 @@ export default {
       'hgr-gradient':'linear-gradient(to bottom, #D9D9D9, #A6C6FF)', //HGR3, 연한 HGR3
     },
       colors: {
-          green:'#78F5BE', //c3
+          green:' #78F5BE', //c3
           gray :{
-            default : '#F9F9F9',//c4
-            5:'#F6F6F6', //c5
-            6:'#8E8E8E',//c6
-            7:'#DEDEDE',//c7
-            hover:'#797C82',//Dark:hover
-            active:'#5A5D62',//Dark:active
+            default : ' #F9F9F9',//c4
+            5:' #F6F6F6', //c5
+            6:' #8E8E8E',//c6
+            7:' #DEDEDE',//c7
+            hover:' #797C82',//Dark:hover
+            active:' #5A5D62',//Dark:active
 
           },
           blue : {
-            default : '#4D83FD',//c1
-            8:'#E0EAFF',//c8
-            '1-1' : '#E0EAFF',//c1-1
+            default : ' #4D83FD',//c1
+            8:' #E0EAFF',//c8
+            '1-1' : '# E0EAFF',//c1-1
           },
-          pink : '#FA9EFA', //c2
+          pink : ' #FA9EFA', //c2
         }
       },
   },
