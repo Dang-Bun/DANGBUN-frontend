@@ -1,3 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* bg-[image:var(--bg-green-gradient)] 왜 배경은 이렇게 써야하는지 모르겠음 일단 이렇게 해놓고 또 고쳐볼게*/
+@theme {
+  --bg-green-gradient: linear-gradient(
+    to bottom,
+    #78f4bd,
+    #6bf1b4,
+    #4ae99c,
+    #20df7f
+  ); /* 초록 그라 */
+  --bg-lightblue-gradient: linear-gradient(
+    to bottom,
+    #4d83fd,
+    #e0eaff
+  ); /* 그라데이션 */
+  --bg-darkblue-gradient: linear-gradient(
+    to bottom,
+    #061536,
+    #113b9c
+  ); /* 그라데2 */
+  --bg-bluegray-gradient: linear-gradient(
+    to bottom,
+    #949494,
+    #96b6ff
+  ); /* HGR1 */
+  --bg-blue-gradient: linear-gradient(to bottom, #4d83fd, #96b6ff); /* HGR3 */
+  --bg-hgr-gradient: linear-gradient(
+    to bottom,
+    #d9d9d9,
+    #a6c6ff
+  ); /* HGR3 연한 */
+
+  --color-green: #78f5be /*c3*/;
+  --color-gray-default: #f9f9f9 /* c4 */ --color-gray-5: #f6f6f6; /* c5 */
+  --color-gray-6: #8e8e8e; /* c6 */
+  --color-gray-7: #dedede; /* c7 */
+  --color-gray-hover: #797c82; /* hover */
+  --color-gray-active: #5a5d62; /* active */
+  --color-blue: #4d83fd; /* c1 */
+  --color-blue-8: #e0eaff; /* c8 */
+  --color-blue-1-1: #e0eaff; /* c1-1 */
+  --color-pink: #fa9efa; /* c2 */
+}
