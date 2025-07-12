@@ -7,9 +7,22 @@ import FreeInput from './components/input/FreeInput';
 import PopUpButton from './components/button/PopUpButton';
 import PopUpInput from './components/input/PopUpInput';
 import SelectableRoleCard from './components/place/SelectableRollCard';
+import PlaceRollCard from './components/place/PlaceRollCard';
 
 function App() {
   const [selected, setSelected] = useState<'manager' | 'member' | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<
+    | 'cafe'
+    | 'building'
+    | 'cinema'
+    | 'dormitory'
+    | 'gym'
+    | 'office'
+    | 'restaurant'
+    | 'school'
+    | 'plus'
+    | null
+  >(null);
 
   return (
     <>
@@ -33,6 +46,36 @@ function App() {
         selected={selected === 'member'}
         onClick={() =>
           setSelected((prev) => (prev === 'member' ? null : 'member'))
+        }
+      />
+      <PlaceRollCard
+        role='cinema'
+        selected={selectedPlace === 'cinema'}
+        onClick={() =>
+          setSelectedPlace((prev) => (prev === 'cinema' ? null : 'cinema'))
+        }
+      />
+      <PlaceRollCard
+        role='cafe'
+        selected={selectedPlace === 'cafe'}
+        onClick={() =>
+          setSelectedPlace((prev) => (prev === 'cafe' ? null : 'cafe'))
+        }
+      />
+      <PlaceRollCard
+        role='dormitory'
+        selected={selectedPlace === 'dormitory'}
+        onClick={() =>
+          setSelectedPlace((prev) =>
+            prev === 'dormitory' ? null : 'dormitory'
+          )
+        }
+      />
+      <PlaceRollCard
+        role='plus'
+        selected={selectedPlace === 'plus'}
+        onClick={() =>
+          setSelectedPlace((prev) => (prev === 'plus' ? null : 'plus'))
         }
       />
     </>
