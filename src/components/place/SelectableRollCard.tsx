@@ -21,7 +21,6 @@ const roleStyles = {
     bg: 'bg-[#e0eaff]',
     border: 'border-[#4d83fd]',
     text: 'text-[#4d83fd]',
-    check: 'bg-[#4d83fd]',
   },
   member: {
     image: memberImg,
@@ -29,7 +28,6 @@ const roleStyles = {
     bg: 'bg-[#ebfff6]',
     border: 'border-[#4ceba5]',
     text: 'text-[#4ceba5]',
-    check: 'bg-[#4ceba5]',
   },
 };
 
