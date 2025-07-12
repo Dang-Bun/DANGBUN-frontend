@@ -1,14 +1,26 @@
 import React from 'react';
 import classNames from 'classnames';
-import managerImg from '../../assets/placeIcon/managerImg.svg';
-import memberImg from '../../assets/placeIcon/memberImg.svg';
-import notSelectedImg from '../../assets/checkIcon/notSelectedImg.svg';
-import greenSelectedImg from '../../assets/checkIcon/greenSelected.svg';
-import blueSelectedImg from '../../assets/checkIcon/blueSelectedImg.svg';
+import buildingImg from '../../assets/placeIcon/buildingImg.svg';
+import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
+import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
+import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
+import gymImg from '../../assets/placeIcon/gymImg.svg';
+import officeImg from '../../assets/placeIcon/officeImg.svg';
+import plusImg from '../../assets/placeIcon/plusImg.svg';
+import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
+import schoolImg from '../../assets/placeIcon/schoolImg.svg';
 
-type RoleType = 'manager' | 'member';
+type RoleType =
+  | 'building'
+  | 'cinema'
+  | 'dormitory'
+  | 'gym'
+  | 'office'
+  | 'restaurant'
+  | 'school'
+  | 'plus';
 
-interface SelectableRollCardProps {
+interface SelectableRoleCardProps {
   role: RoleType;
   selected: boolean;
   onClick: () => void;
@@ -33,7 +45,7 @@ const roleStyles = {
   },
 };
 
-const SelectableRoleCard: React.FC<SelectableRollCardProps> = ({
+const SelectableRoleCard: React.FC<SelectableRoleCardProps> = ({
   role,
   selected,
   onClick,
