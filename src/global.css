@@ -2,6 +2,9 @@
 
 /* bg-[image:var(--bg-green-gradient)] 왜 배경은 이렇게 써야하는지 모르겠음 일단 이렇게 해놓고 또 고쳐볼게*/
 @theme {
+  --font-sans: 'Pretendard', sans;
+  --font-serif: 'Noto Serif KR', serif;
+
   --bg-green-gradient: linear-gradient(
     to bottom,
     #78f4bd,

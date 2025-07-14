@@ -38,13 +38,14 @@
 ```bash
 # 프로젝트 클론
 git clone https://github.com/your-username/dangbun.git
-cd dangbun
 
 # 패키지 설치
 yarn install
+cd DANGBUN
 
 # 개발 서버 실행
 yarn dev
+o + enter or 로컬호스트 접속
 ```
 
 ## 🧾 Git 커밋 메시지 컨벤션
