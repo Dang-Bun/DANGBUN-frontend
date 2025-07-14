@@ -63,7 +63,7 @@ const Z_OnBoarding = () => {
             <img
               src={item.img}
               alt={`onboarding-${index}`}
-              className='w-full object-contain'
+              className='w-full max-w-[392px] h-[610px] object-cover mx-auto overflow-hidden'
             />
           </SwiperSlide>
         ))}
