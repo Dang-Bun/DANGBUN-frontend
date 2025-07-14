@@ -8,6 +8,7 @@ import PopUpButton from './components/button/PopUpButton';
 import PopUpInput from './components/input/PopUpInput';
 import SelectableRoleCard from './components/place/SelectableRollCard';
 import PlaceRollCard from './components/place/PlaceRollCard';
+import BottomBar from './components/BottomBar';
 
 function App() {
   const [selected, setSelected] = useState<'manager' | 'member' | null>(null);
@@ -78,6 +79,7 @@ function App() {
           setSelectedPlace((prev) => (prev === 'plus' ? null : 'plus'))
         }
       />
+      <BottomBar></BottomBar>
     </>
   );
 }
