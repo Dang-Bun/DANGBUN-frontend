@@ -38,7 +38,6 @@
 ```bash
 # 프로젝트 클론
 git clone https://github.com/your-username/dangbun.git
-cd dangbun
 
 # 패키지 설치
 yarn install
