@@ -24,6 +24,7 @@ const Z_OnBoarding = () => {
   const navigate = useNavigate();
   const paginationRef = useRef<HTMLDivElement>(null);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleSkip = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
@@ -48,6 +49,7 @@ const Z_OnBoarding = () => {
       <Swiper
         modules={[Pagination, Autoplay]}
         onSwiper={setSwiperInstance}
+        onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
         pagination={{ clickable: true }}
         spaceBetween={0}
         slidesPerView={1}
@@ -77,7 +79,7 @@ const Z_OnBoarding = () => {
 
       {/* 버튼 */}
       <CTAButton onClick={handleSkip}>
-        {swiperInstance?.realIndex === onboardingData.length - 1
+        {currentIndex === onboardingData.length - 1
           ? '당번 시작하기'
           : '건너뛰기'}
       </CTAButton>
