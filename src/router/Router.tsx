@@ -1,21 +1,32 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
-import App from '../App';
-import CalendarPage from '../pages/CalendarPage'
 
+import SplashScreen from '../pages/SplashScreen';
+import Z_onBoarding from '../pages/Z_onBoarding';
+import StartPage from '../pages/StartPage';
+import CalendarPage from '../pages/CalendarPage';
 
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <SplashScreen />,
+  },
+  {
+    path: '/onboarding',
+    element: <Z_onBoarding />,
+  },
+  {
+    path: '/start',
+    element: <StartPage />,
+  },
+  {
+    path: '/calendar',
+    element: <CalendarPage />,
+  },
+]);
 
 const Router = () => {
-  const router = createBrowserRouter([
-    {
-      path: '/',
-      element: <App />,
-    },{
-      path: '/calendar',
-      element: <CalendarPage />,
-    }
-  ]);
   return <RouterProvider router={router} />;
 };
 
-export default Router; 
+export default Router;
