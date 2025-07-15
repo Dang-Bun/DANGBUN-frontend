@@ -5,6 +5,7 @@ import SplashScreen from '../pages/SplashScreen';
 import Z_onBoarding from '../pages/Z_onBoarding';
 import StartPage from '../pages/StartPage';
 import CalendarPage from '../pages/CalendarPage';
+import Notification from '../pages/Notification';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: '/calendar',
     element: <CalendarPage />,
+  },
+ {
+    path: '/alarm',
+    element: <Notification />,
   },
 ]);
 
