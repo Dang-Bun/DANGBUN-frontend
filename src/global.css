@@ -45,3 +45,19 @@
   --color-blue-1-1: #e0eaff; /* c1-1 */
   --color-pink: #fa9efa; /* c2 */
 }
+
+p {
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  max-width: 375px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+}
