@@ -3,7 +3,7 @@ import React from 'react';
 
 import SplashScreen from '../pages/SplashScreen';
 import Z_onBoarding from '../pages/Z_onBoarding';
-import StartPage from '../pages/StartPage';
+import LogIn from '../pages/LogIn';
 import CalendarPage from '../pages/CalendarPage';
 import Notification from '../pages/Notification';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
@@ -18,8 +18,8 @@ const router = createBrowserRouter([
     element: <Z_onBoarding />,
   },
   {
-    path: '/start',
-    element: <StartPage />,
+    path: '/login',
+    element: <LogIn />,
   },
   {
     path: '/calendar',
