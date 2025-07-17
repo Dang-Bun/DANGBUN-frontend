@@ -28,7 +28,7 @@ const Z_OnBoarding = () => {
 
   const handleSkip = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
-    navigate('/start');
+    navigate('/login');
   };
 
   useEffect(() => {

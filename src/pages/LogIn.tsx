@@ -4,7 +4,7 @@ import CTAButton from '../components/button/CTAButton';
 import Input from '../components/input/Input';
 import right_chevron from '../assets/checkIcon/right_chevronImg.svg';
 
-const StartPage = () => {
+const LogIn = () => {
   return (
     <div className='w-full min-h-screen'>
       <div className='flex justify-center pb-[104px] pt-[120px]'>
@@ -24,4 +24,4 @@ const StartPage = () => {
   );
 };
 
-export default StartPage;
+export default LogIn;
