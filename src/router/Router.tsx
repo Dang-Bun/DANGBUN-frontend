@@ -10,6 +10,7 @@ import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
 
 import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import RequestPopUp from '../components/PopUp/RequestPopUp';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
         <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
       </div>
     ),
+  },
+  {
+    path: '/popup',
+    element: <RequestPopUp />,
   },
 ]);
 
