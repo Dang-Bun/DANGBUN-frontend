@@ -2,7 +2,7 @@ import React from 'react';
 import icon from '../assets/Icon_reverse.svg';
 import CTAButton from '../components/button/CTAButton';
 import Input from '../components/input/Input';
-import right_chevron from '../assets/checkIcon/right_chevronImg.svg';
+import right_chevron from '../assets/chevron/right_chevronImg.svg';
 
 const LogIn = () => {
   return (
