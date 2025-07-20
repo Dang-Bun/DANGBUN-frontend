@@ -3,8 +3,13 @@ import icon from '../assets/Icon_reverse.svg';
 import CTAButton from '../components/button/CTAButton';
 import Input from '../components/input/Input';
 import right_chevron from '../assets/chevron/right_chevronImg.svg';
+import { useNavigate } from 'react-router-dom';
 
 const LogIn = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/join');
+  };
   return (
     <div className='w-full min-h-screen'>
       <div className='flex justify-center pb-[104px] pt-[120px]'>
@@ -18,7 +23,9 @@ const LogIn = () => {
           <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
           <img src={right_chevron} alt='오른쪽 화살표' />
         </div>
-        <CTAButton variant='gray'>회원가입</CTAButton>
+        <CTAButton onClick={handleClick} variant='gray'>
+          회원가입
+        </CTAButton>
       </div>
     </div>
   );
