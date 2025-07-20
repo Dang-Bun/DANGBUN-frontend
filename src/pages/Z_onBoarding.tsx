@@ -58,14 +58,14 @@ const Z_OnBoarding = () => {
           disableOnInteraction: false,
         }}
         speed={500}
-        className='w-full max-w-md'
+        className='w-full max-w-[392px]'
       >
         {onboardingData.map((item, index) => (
           <SwiperSlide key={index}>
             <img
               src={item.img}
               alt={`onboarding-${index}`}
-              className='w-full max-w-[392px] h-[610px] object-cover mx-auto overflow-hidden'
+              className='w-full max-w-[393px] h-[610px] object-cover mx-auto overflow-hidden'
             />
           </SwiperSlide>
         ))}
