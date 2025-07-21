@@ -13,18 +13,18 @@ const Join = () => {
   return (
     <>
       <div className='w-full max-w-[393px] min-h-screen mx-auto px-4 py-6 flex flex-col gap-6'>
-        <div className='flex items-center gap-2'>
-          <img src={left_chevron} alt='뒤로가기' />
-          <div className='text-[20px] font-medium mx-auto'>회원가입</div>
+        <div className='relative flex items-center mb-[48px]'>
+          <img src={left_chevron} alt='뒤로가기' className='absolute left-0' />
+          <div className='mx-auto text-[20px] font-medium'>회원가입</div>
         </div>
         <div>
-          <div className='flex flex-col gap-2'>
+          <div className='flex flex-col mb-[18px]'>
             <div className='text-[16px] font-medium'>이름</div>
             <Input placeholder='이름을 입력하세요' />
           </div>
-          <div>
-            <div className='flex flex-col gap-2'>
-              <div className='text-[16px] font-medium'>이메일</div>
+          <div className='mb-[24px]'>
+            <div className='flex flex-col mb-[12px]'>
+              <div className='text-[16px] font-medium mb-[8px]'>이메일</div>
               <div className='flex gap-2 items-center'>
                 <FreeInput
                   placeholder='이메일'
@@ -34,8 +34,13 @@ const Join = () => {
                 ></FreeInput>
                 <div>@</div>
                 <Dropdown
-                  options={['naver.com', 'gmail.com', 'daum.net', 'nate.com']}
-                  placeholder='직접 입력'
+                  options={[
+                    '직접입력',
+                    'naver.com',
+                    'gmail.com',
+                    'daum.net',
+                    'nate.com',
+                  ]}
                   onSelect={(val) => console.log('선택한 값:', val)}
                 />
               </div>
@@ -58,16 +63,16 @@ const Join = () => {
             </div>
           </div>
           <div>
-            <div className='text-[16px] font-medium'>
+            <div className='text-[16px] font-medium mb-[8px]'>
               비밀번호를 입력해 주세요.
             </div>
             <Input placeholder='비밀번호를 입력하세요.' />
-            <div className='text-[12px] text-gray-6'>
+            <div className='text-[12px] text-gray-6 mt-[2px]'>
               8~20자 영문, 숫자의 조합으로 입력해 주세요.
             </div>
           </div>
         </div>
-        <div>
+        <div className='fixed bottom-0 w-full mb-[25px]'>
           <CTAButton variant='thickGray'>회원가입 완료</CTAButton>
         </div>
       </div>
