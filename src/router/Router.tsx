@@ -37,7 +37,6 @@ const router = createBrowserRouter([
     element: <CalendarPage />,
   },
   {
-  {
     path: '/alarm',
     element: <Notification />,
   },
