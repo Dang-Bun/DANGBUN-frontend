@@ -11,6 +11,10 @@ import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
 import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import RequestPopUp from '../components/PopUp/RequestPopUp';
+import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
+
+import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 
 const router = createBrowserRouter([
   {
@@ -49,6 +53,19 @@ const router = createBrowserRouter([
   {
     path: '/popup',
     element: <RequestPopUp />,
+  },
+  {
+    path: 'placemake1',
+    element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
+  },
+  {
+    path: 'rollcard',
+    element: (
+      <div>
+        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
+        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
+      </div>
+    ),
   },
 ]);
 
