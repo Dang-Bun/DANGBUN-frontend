@@ -4,18 +4,18 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination, Autoplay } from 'swiper/modules';
 import { useNavigate } from 'react-router-dom';
-import CTAButton from '../components/button/CTAButton';
+import CTAButton from '../../components/button/CTAButton';
 
-import onBoarding1 from '../assets/onBoarding/onBoardingImg_1.svg';
-import onBoarding2 from '../assets/onBoarding/onBoardingImg_2.svg';
-import onBoarding3 from '../assets/onBoarding/onBoardingImg_3.svg';
-import onBoarding4 from '../assets/onBoarding/onBoardingImg_4.svg';
-import onBoarding5 from '../assets/onBoarding/onBoardingImg_5.svg';
+import onBoarding1 from '../../assets/onBoarding/onBoardingImg_1.svg';
+import onBoarding2 from '../../assets/onBoarding/onBoardingImg_2.svg';
+import onBoarding3 from '../../assets/onBoarding/onBoardingImg_3.svg';
+import onBoarding4 from '../../assets/onBoarding/onBoardingImg_4.svg';
+import onBoarding5 from '../../assets/onBoarding/onBoardingImg_5.svg';
 
 const onboardingData = [
   { img: onBoarding1 },
   { img: onBoarding2 },
-  { img: onBoarding3 },
+  { img: onBoarding3 }, 
   { img: onBoarding4 },
   { img: onBoarding5 },
 ];

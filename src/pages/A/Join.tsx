@@ -1,12 +1,12 @@
 import React from 'react';
-import { useEmailForm } from '../hooks/useEmailForm';
-import left_chevron from '../assets/chevron/left_chevronImg.svg';
+import { useEmailForm } from '../../hooks/useEmailForm';
+import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import { useNavigate } from 'react-router-dom';
-import Input from '../components/input/Input';
-import FreeInput from '../components/input/FreeInput';
-import CTAButton from '../components/button/CTAButton';
-import FreeButton from '../components/button/FreeButton';
-import Dropdown from '../components/input/Dropdown';
+import Input from '../../components/input/Input';
+import FreeInput from '../../components/input/FreeInput';
+import CTAButton from '../../components/button/CTAButton';
+import FreeButton from '../../components/button/FreeButton';
+import Dropdown from '../../components/input/Dropdown';
 
 const Join = () => {
   const navigate = useNavigate();
