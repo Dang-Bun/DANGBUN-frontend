@@ -58,20 +58,18 @@ const Z_OnBoarding = () => {
           disableOnInteraction: false,
         }}
         speed={500}
-        className='w-full max-w-[392px]'
+        className='w-full'
       >
         {onboardingData.map((item, index) => (
           <SwiperSlide key={index}>
             <img
               src={item.img}
               alt={`onboarding-${index}`}
-              className='w-full max-w-[393px] h-[610px] object-cover mx-auto overflow-hidden'
+              className='w-full h-[615px] object-cover overflow-hidden'
             />
           </SwiperSlide>
         ))}
       </Swiper>
-
-      {/* ✅ 여기! 이미지와 버튼 사이에 고정된 dot */}
       <div
         ref={paginationRef}
         className='swiper-pagination mt-1 mb-1 flex justify-center gap-2 !static'
