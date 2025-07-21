@@ -1,12 +1,12 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 
-import SplashScreen from '../pages/SplashScreen';
-import Z_onBoarding from '../pages/Z_onBoarding';
-import LogIn from '../pages/LogIn';
-import Join from '../pages/Join';
-import CalendarPage from '../pages/CalendarPage';
-import Notification from '../pages/Notification';
+import SplashScreen from '../pages/Z/SplashScreen';
+import Z_onBoarding from '../pages/Z/Z_onBoarding';
+import LogIn from '../pages/A/LogIn';
+import Join from '../pages/A/Join';
+import CalendarPage from '../pages/H/CalendarPage';
+import Notification from '../pages/G/Notification';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 
 const router = createBrowserRouter([
