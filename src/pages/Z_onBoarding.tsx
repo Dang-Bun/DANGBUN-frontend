@@ -65,22 +65,22 @@ const Z_OnBoarding = () => {
             <img
               src={item.img}
               alt={`onboarding-${index}`}
-              className='w-full h-[615px] object-cover overflow-hidden'
+              className='w-full h-[615px] object-cover overflow-hidden mb-[40px]'
             />
           </SwiperSlide>
         ))}
       </Swiper>
       <div
         ref={paginationRef}
-        className='swiper-pagination mt-1 mb-1 flex justify-center gap-2 !static'
+        className='swiper-pagination flex justify-center gap-2 !static'
       />
-
-      {/* 버튼 */}
-      <CTAButton onClick={handleSkip}>
-        {currentIndex === onboardingData.length - 1
-          ? '당번 시작하기'
-          : '건너뛰기'}
-      </CTAButton>
+      <div className='w-full mb-[15px]'>
+        <CTAButton onClick={handleSkip}>
+          {currentIndex === onboardingData.length - 1
+            ? '당번 시작하기'
+            : '건너뛰기'}
+        </CTAButton>
+      </div>
     </div>
   );
 };
