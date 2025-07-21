@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEmailForm } from '../hooks/useEmailForm';
 import left_chevron from '../assets/chevron/left_chevronImg.svg';
 import { useNavigate } from 'react-router-dom';
 import Input from '../components/input/Input';
@@ -9,12 +10,31 @@ import Dropdown from '../components/input/Dropdown';
 
 const Join = () => {
   const navigate = useNavigate();
+  const {
+    emailId,
+    setEmailId,
+    isCustomDomain,
+    handleDomainSelect,
+    emailDomain,
+    customDomain,
+    setCustomDomain,
+    isEmailFilled,
+  } = useEmailForm();
+
+  const handleGoback = () => {
+    navigate('/login');
+  };
 
   return (
     <>
       <div className='w-full max-w-[393px] min-h-screen mx-auto px-4 py-6 flex flex-col gap-6'>
         <div className='relative flex items-center mb-[48px]'>
-          <img src={left_chevron} alt='뒤로가기' className='absolute left-0' />
+          <img
+            src={left_chevron}
+            alt='뒤로가기'
+            className='absolute left-0 cursor-pointer'
+            onClick={handleGoback}
+          />
           <div className='mx-auto text-[20px] font-medium'>회원가입</div>
         </div>
         <div>
@@ -31,18 +51,31 @@ const Join = () => {
                   maxWidth={174}
                   height={50}
                   fontSize={16}
+                  value={emailId}
+                  onChange={(e) => setEmailId(e.target.value)}
                 ></FreeInput>
                 <div>@</div>
-                <Dropdown
-                  options={[
-                    '직접입력',
-                    'naver.com',
-                    'gmail.com',
-                    'daum.net',
-                    'nate.com',
-                  ]}
-                  onSelect={(val) => console.log('선택한 값:', val)}
-                />
+                {isCustomDomain ? (
+                  <FreeInput
+                    placeholder='직접입력'
+                    maxWidth={158}
+                    height={50}
+                    fontSize={16}
+                    value={customDomain}
+                    onChange={(e) => setCustomDomain(e.target.value)}
+                  />
+                ) : (
+                  <Dropdown
+                    options={[
+                      '직접입력',
+                      'naver.com',
+                      'gmail.com',
+                      'daum.net',
+                      'nate.com',
+                    ]}
+                    onSelect={handleDomainSelect}
+                  />
+                )}
               </div>
             </div>
             <div className='flex flex-row gap-2'>
@@ -53,7 +86,7 @@ const Join = () => {
                 fontSize={16}
               />
               <FreeButton
-                variant='thickGray'
+                variant={isEmailFilled ? 'blue' : 'thickGray'}
                 maxWidth={158}
                 height={50}
                 fontSize={16}
@@ -66,7 +99,7 @@ const Join = () => {
             <div className='text-[16px] font-medium mb-[8px]'>
               비밀번호를 입력해 주세요.
             </div>
-            <Input placeholder='비밀번호를 입력하세요.' />
+            <Input placeholder='비밀번호를 입력하세요.' type='password' />
             <div className='text-[12px] text-gray-6 mt-[2px]'>
               8~20자 영문, 숫자의 조합으로 입력해 주세요.
             </div>
