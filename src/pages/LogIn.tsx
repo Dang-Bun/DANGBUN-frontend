@@ -17,7 +17,7 @@ const LogIn = () => {
       </div>
       <div className='w-full flex flex-col items-center gap-[10px]'>
         <Input placeholder='이메일을 입력하세요.' />
-        <Input placeholder='비밀번호를 입력하세요.' />
+        <Input placeholder='비밀번호를 입력하세요.' type='password' />
         <CTAButton>로그인</CTAButton>
         <div className='w-[353px] flex flex-row justify-end -mt-[2.75px] -mb-[2px]'>
           <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
