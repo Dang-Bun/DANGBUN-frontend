@@ -25,12 +25,6 @@ const router = createBrowserRouter([
   {
     path: '/join',
     element: <Join />,
-    path: '/login',
-    element: <LogIn />,
-  },
-  {
-    path: '/join',
-    element: <Join />,
   },
   {
     path: '/calendar',
