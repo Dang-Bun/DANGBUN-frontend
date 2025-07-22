@@ -34,7 +34,7 @@ const Join = () => {
   };
 
   const handleJoinComplete = () => {
-    navigate('/selectPlace');
+    navigate('/joinComplete');
   };
 
   return (
