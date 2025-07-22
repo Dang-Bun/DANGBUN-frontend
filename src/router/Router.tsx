@@ -6,15 +6,11 @@ import Z_onBoarding from '../pages/Z_onBoarding';
 import StartPage from '../pages/StartPage';
 import CalendarPage from '../pages/CalendarPage';
 import Notification from '../pages/Notification';
-import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
 
 import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
-
-import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
-import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 
 const router = createBrowserRouter([
   {
