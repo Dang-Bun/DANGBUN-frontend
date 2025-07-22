@@ -14,6 +14,7 @@ import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
 import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
+import SelectPlace from '../pages/B/SelectPlace';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: '/join',
     element: <Join />,
+  },
+  {
+    path: '/selectPlace',
+    element: <SelectPlace />,
   },
   {
     path: '/calendar',

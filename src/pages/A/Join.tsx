@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEmailForm } from '../../hooks/useEmailForm';
+import { useJoinForm } from '../../hooks/B/useJoinForm';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/input/Input';
@@ -11,18 +11,30 @@ import Dropdown from '../../components/input/Dropdown';
 const Join = () => {
   const navigate = useNavigate();
   const {
+    name,
+    setName,
     emailId,
     setEmailId,
-    isCustomDomain,
-    handleDomainSelect,
     emailDomain,
+    setEmailDomain,
+    isCustomDomain,
     customDomain,
     setCustomDomain,
+    handleDomainSelect,
+    verificationCode,
+    setVerificationCode,
+    password,
+    setPassword,
+    isFormFilled,
     isEmailFilled,
-  } = useEmailForm();
+  } = useJoinForm();
 
   const handleGoback = () => {
     navigate('/login');
+  };
+
+  const handleJoinComplete = () => {
+    navigate('/selectPlace');
   };
 
   return (
@@ -40,7 +52,11 @@ const Join = () => {
         <div>
           <div className='flex flex-col mb-[18px]'>
             <div className='text-[16px] font-medium'>이름</div>
-            <Input placeholder='이름을 입력하세요' />
+            <Input
+              placeholder='이름을 입력하세요'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className='mb-[24px]'>
             <div className='flex flex-col mb-[12px]'>
@@ -84,6 +100,8 @@ const Join = () => {
                 maxWidth={187}
                 height={50}
                 fontSize={16}
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
               />
               <FreeButton
                 variant={isEmailFilled ? 'blue' : 'thickGray'}
@@ -99,14 +117,24 @@ const Join = () => {
             <div className='text-[16px] font-medium mb-[8px]'>
               비밀번호를 입력해 주세요.
             </div>
-            <Input placeholder='비밀번호를 입력하세요.' type='password' />
+            <Input
+              placeholder='비밀번호를 입력하세요.'
+              type='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
             <div className='text-[12px] text-gray-6 mt-[2px]'>
               8~20자 영문, 숫자의 조합으로 입력해 주세요.
             </div>
           </div>
         </div>
         <div className='fixed bottom-0 w-full mb-[25px]'>
-          <CTAButton variant='thickGray'>회원가입 완료</CTAButton>
+          <CTAButton
+            variant={isFormFilled ? 'blue' : 'thickGray'}
+            onClick={handleJoinComplete}
+          >
+            회원가입 완료
+          </CTAButton>
         </div>
       </div>
     </>
