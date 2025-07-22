@@ -11,6 +11,8 @@ interface PopUpCardProps {
   placeholder?: string;
   first?: string;
   second?: string;
+  onFirstClick?: () => void;
+  onSecondClick?: () => void;
 }
 
 const PopUpCard = ({
@@ -22,6 +24,8 @@ const PopUpCard = ({
   placeholder,
   first,
   second,
+  onFirstClick,
+  onSecondClick,
 }: PopUpCardProps) => {
   const [inputValue, setInputValue] = React.useState('');
 
@@ -35,7 +39,7 @@ const PopUpCard = ({
       onRequestClose={onRequestClose}
       ariaHideApp={false}
       className='flex justify-center items-center h-screen'
-      overlayClassName='fixed inset-0 w-[393px] h-[852px] bg-black/60 z-50 flex justify-center items-center'
+      overlayClassName='fixed inset-0 w-[393px] h-[852px] mx-auto bg-black/60 z-50 flex justify-center items-center'
     >
       <div
         className='flex flex-col justify-center items-center w-[306px] pt-8 pb-8 bg-[#fff] rounded-[8px] whitespace-pre-line '
@@ -61,11 +65,16 @@ const PopUpCard = ({
           <div
             className={`flex flex-row items-center w-[263px] mt-7 ${first && second ? 'justify-between' : 'justify-center'}`}
           >
-            {first && <Button variant='gray'>{first}</Button>}
+            {first && (
+              <Button variant='gray' onClick={onFirstClick}>
+                {first}
+              </Button>
+            )}
             {second && input && (
               <Button
                 style={{ cursor: inputValue ? 'pointer' : 'default' }}
                 variant={inputValue ? 'blue' : 'thickGray'}
+                onClick={onSecondClick}
               >
                 {second}
               </Button>
