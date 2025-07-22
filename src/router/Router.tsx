@@ -15,6 +15,8 @@ import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
 
 import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import LogIn from '../pages/A/LogIn';
+import Join from '../pages/A/Join';
 
 const router = createBrowserRouter([
   {
@@ -26,8 +28,12 @@ const router = createBrowserRouter([
     element: <Z_onBoarding />,
   },
   {
-    path: '/start',
-    element: <StartPage />,
+    path: '/login',
+    element: <LogIn />,
+  },
+  {
+    path: '/join',
+    element: <Join />,
   },
   {
     path: '/calendar',
@@ -54,19 +60,7 @@ const router = createBrowserRouter([
     path: '/popup',
     element: <RequestPopUp />,
   },
-  {
-    path: 'placemake1',
-    element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
-  },
-  {
-    path: 'rollcard',
-    element: (
-      <div>
-        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
-        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
-      </div>
-    ),
-  },
+
 ]);
 
 const Router = () => {

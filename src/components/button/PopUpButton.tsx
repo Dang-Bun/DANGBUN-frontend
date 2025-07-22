@@ -12,7 +12,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const base =
-    'w-full rounded-[8px] px-[12px] py-[10px] cursor-pointer transition-[background] duration-300 box-border border-0';
+    'w-full rounded-[8px] px-[12px] py-[10px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
 
   const sizeClass = 'max-w-[126px] h-[36px] text-[12px] font-[400]';
 
@@ -23,7 +23,11 @@ const Button: React.FC<ButtonProps> = ({
   }[variant];
 
   return (
-    <button className={classNames(base, sizeClass, variantClass)} {...props}>
+    <button
+      className={classNames(base, sizeClass, variantClass)}
+      disabled={variant === 'thickGray'}
+      {...props}
+    >
       {children}
     </button>
   );
