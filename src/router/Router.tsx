@@ -15,7 +15,7 @@ import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
 import PlaceJoin1 from '../pages/E/PlaceJoin1';
 import PlaceJoin2 from '../pages/E/PlaceJoin2';
-
+import SelectPlace from '../pages/B/SelectPlace';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -32,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: '/join',
     element: <Join />,
+  },
+  {
+    path: '/selectPlace',
+    element: <SelectPlace />,
   },
   {
     path: '/calendar',
