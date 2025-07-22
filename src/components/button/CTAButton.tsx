@@ -4,7 +4,6 @@ import classNames from 'classnames';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'blue' | 'thickGray' | 'gray';
   children: React.ReactNode;
-  className?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -24,10 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   }[variant];
 
   return (
-    <button
-      className={classNames(base, sizeClass, variantClass, props.className)}
-      {...props}
-    >
+    <button className={classNames(base, sizeClass, variantClass)} {...props}>
       {children}
     </button>
   );

@@ -41,9 +41,7 @@ const PlaceMake2 = () => {
       <CTAButton variant='gray' onClick={() => setIsModalOpen(true)}>
         목록 추가
       </CTAButton>
-      <CTAButton variant='blue' className='fixed bottom-[97px]'>
-        완료
-      </CTAButton>
+      <CTAButton variant='blue'>완료</CTAButton>
 
       <PopUpCard
         isOpen={isModalOpen}
