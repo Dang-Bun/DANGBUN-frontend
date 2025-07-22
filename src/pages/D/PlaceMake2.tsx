@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CTAButton from '../../components/button/CTAButton';
 import BlueX from '../../assets/placeMake/BlueX.svg';
 import PopUpCard from '../../components/PopUp/PopUpCard';
+import FreeButton from '../../components/button/FreeButton';
 
 const PlaceMake2 = () => {
   const location = useLocation();
@@ -26,14 +27,14 @@ const PlaceMake2 = () => {
   };
 
   return (
-    <div>
-      <div className='flex flex-col gap-2 mb-7.75'>
+    <div className='flex flex-col w-full h-screen items-center justify-start'>
+      <div className='flex flex-col items-start w-[375px] gap-2 mb-7.75 px-5'>
         <h1 className='text-xl font-normal leading-7'>정보를 작성해주세요.</h1>
         <h2 className='text-neutral-400 text-sm font-normal leading-tight'>
           멤버가 참여하기 전에 꼭 작성해야 할 목록이에요.
         </h2>
       </div>
-      <div className='flex flex-col gap-3 mb-20.5'>
+      <div className='flex flex-col items-start justify-start gap-3 mb-20.5'>
         <div className='flex flex-row'>
           <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
             이름
@@ -69,25 +70,16 @@ const PlaceMake2 = () => {
         ))}
       </div>
       {infoList.length < 4 && (
-        <CTAButton variant='gray' onClick={() => setIsModalOpen(true)}>
+        <FreeButton
+          variant='gray'
+          fontSize={14}
+          height={50}
+          maxWidth={353}
+          onClick={() => setIsModalOpen(true)}
+        >
           목록 추가
-        </CTAButton>
+        </FreeButton>
       )}
-
-      <CTAButton
-        variant='blue'
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'fixed',
-          bottom: '97px',
-        }}
-        onClick={handleNext}
-      >
-        완료
-      </CTAButton>
-
       <PopUpCard
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
@@ -105,6 +97,13 @@ const PlaceMake2 = () => {
           setIsModalOpen(false);
         }}
       />
+      <CTAButton
+        variant='blue'
+        style={{ position: 'fixed', bottom: '42px' }}
+        onClick={handleNext}
+      >
+        완료
+      </CTAButton>
     </div>
   );
 };
