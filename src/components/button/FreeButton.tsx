@@ -23,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({
     maxWidth: maxWidth ? `${maxWidth}px` : undefined,
   };
   const base =
-    'w-full rounded-[8px] px-[12px] py-[14px] cursor-pointer transition-[background] duration-300 box-border border-0';
+    'w-full rounded-[8px] px-[12px] py-[14px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
   const variantClass = {
     blue: 'bg-[#4d83fd] text-[#fff] font-[Pretendard] font-medium leading-[140%]',
     thickGray: 'bg-[#bdbdbd] text-[#fff]',
@@ -34,6 +34,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       className={classNames(base, variantClass)}
       style={inlineStyle}
+      disabled={variant === 'thickGray'}
       {...props}
     >
       {children}
