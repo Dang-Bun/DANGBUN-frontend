@@ -9,12 +9,7 @@ import Notification from '../pages/G/Notification';
 import SelectableRoleCard from '../components/place/PlaceRollCard';
 import PlaceRollCard from '../components/place/PlaceRollCard';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
-import PlaceMake1 from '../pages/D/PlaceMake1';
-import PlaceMake2 from '../pages/D/PlaceMake2';
-import PlaceMake3 from '../pages/D/PlaceMake3';
-import LogIn from '../pages/A/LogIn';
-import Join from '../pages/A/Join';
-import SelectPlace from '../pages/B/SelectPlace';
+import JoinComplete from '../pages/B/JoinComplete';
 
 const router = createBrowserRouter([
   {
@@ -34,8 +29,8 @@ const router = createBrowserRouter([
     element: <Join />,
   },
   {
-    path: '/selectPlace',
-    element: <SelectPlace />,
+    path: '/joinComplete',
+    element: <JoinComplete />,
   },
   {
     path: '/calendar',
