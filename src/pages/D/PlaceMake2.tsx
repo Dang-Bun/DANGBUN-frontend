@@ -40,7 +40,7 @@ const PlaceMake2 = () => {
           </p>
           <input
             type='text'
-            placeholder='입력'
+            placeholder='"예시 텍스트를 입력해주세요."'
             className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
           />
         </div>
@@ -62,15 +62,18 @@ const PlaceMake2 = () => {
             </p>
             <input
               type='text'
-              placeholder='입력'
+              placeholder='"예시 텍스트를 입력해주세요."'
               className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
             />
           </div>
         ))}
       </div>
-      <CTAButton variant='gray' onClick={() => setIsModalOpen(true)}>
-        목록 추가
-      </CTAButton>
+      {infoList.length < 4 && (
+        <CTAButton variant='gray' onClick={() => setIsModalOpen(true)}>
+          목록 추가
+        </CTAButton>
+      )}
+
       <CTAButton
         variant='blue'
         style={{

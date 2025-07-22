@@ -26,6 +26,7 @@ interface PlaceRollCardProps {
   role: RoleType;
   selected: boolean;
   onClick: () => void;
+  setPlusRole?: (role: string) => void;
 }
 
 const roleStyles = {
@@ -80,6 +81,7 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
   role,
   selected,
   onClick,
+  setPlusRole,
 }) => {
   const { image, label, size } = roleStyles[role];
 
@@ -94,10 +96,7 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
   };
 
   return (
-    <div
-      className='flex flex-col items-center gap-1 cursor-pointer'
-      onClick={onClick}
-    >
+    <div className='flex flex-col items-center gap-1 cursor-pointer'>
       <div
         className={classNames(
           'relative w-24 h-24 rounded-full flex flex-col items-center justify-center border transition-all',
@@ -105,6 +104,17 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
             ? 'bg-[#e0eaff] border-[#4d83fd]'
             : 'bg-[#f6f6f6] border-[#DEDEDE]'
         )}
+        onClick={() => {
+          onClick();
+          if (role === 'plus') {
+            if (submitted) {
+              setSubmitted(false);
+            } else if (text) {
+              setSubmitted(true);
+              setPlusRole?.(text);
+            }
+          }
+        }}
       >
         <img
           src={image}
@@ -130,7 +140,10 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
               placeholder='직접입력'
               className='w-[95.8px] h-5.25 flex justify-center items-center text-black text-center bg-neutral-100 rounded-lg text-sm font-normal'
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                setPlusRole?.(e.target.value);
+              }}
               onKeyDown={handleKeyDown}
             />
           )
