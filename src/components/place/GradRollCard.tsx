@@ -74,7 +74,7 @@ const GradRollCard: React.FC<GradRollCardProps> = ({ role }) => {
       <img
         src={image}
         alt={Array.isArray(label) ? label.join(' ') : label}
-        className={'absolute'}
+        className={'absolute h-[118px]'}
       />
     </div>
   );
