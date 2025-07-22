@@ -12,7 +12,7 @@ interface PopUpCardProps {
   first?: string;
   second?: string;
   onFirstClick?: () => void;
-  onSecondClick?: () => void;
+  onSecondClick?: (inputValue?: string) => void;
 }
 
 const PopUpCard = ({
@@ -74,7 +74,7 @@ const PopUpCard = ({
               <Button
                 style={{ cursor: inputValue ? 'pointer' : 'default' }}
                 variant={inputValue ? 'blue' : 'thickGray'}
-                onClick={onSecondClick}
+                onClick={() => onSecondClick?.(inputValue)}
               >
                 {second}
               </Button>
