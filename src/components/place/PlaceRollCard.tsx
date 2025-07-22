@@ -1,14 +1,15 @@
 import React from 'react';
+import { useState } from 'react';
 import classNames from 'classnames';
 import buildingImg from '../../assets/placeIcon/buildingImg.svg';
 import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
 import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
 import gymImg from '../../assets/placeIcon/gymImg.svg';
 import officeImg from '../../assets/placeIcon/officeImg.svg';
-import plusImg from '../../assets/placeIcon/plusImg.svg';
 import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
 import schoolImg from '../../assets/placeIcon/schoolImg.svg';
 import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
+import homeImg from '../../assets/placeIcon/homeImg.svg';
 
 type RoleType =
   | 'cafe'
@@ -45,7 +46,7 @@ const roleStyles = {
   },
   dormitory: {
     image: dormitoryImg,
-    label: '기숙사, 셰어하우스',
+    label: ['   기숙사,', '셰어하우스'],
     size: 'w-[53.73px] h-[44.63px]',
   },
   gym: {
@@ -69,9 +70,9 @@ const roleStyles = {
     size: 'w-[61.718px] h-[46.743px]',
   },
   plus: {
-    image: plusImg,
+    image: homeImg,
     label: '직접 입력',
-    size: 'w-[26.59px] h-[26.59px]',
+    size: 'w-[46.45px] h-[49.78px]',
   },
 };
 
@@ -82,33 +83,60 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
 }) => {
   const { image, label, size } = roleStyles[role];
 
+  const [text, setText] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setSubmitted(true);
+    }
+  };
+
   return (
     <div
-      className='flex flex-col items-center cursor-pointer'
+      className='flex flex-col items-center gap-1 cursor-pointer'
       onClick={onClick}
     >
       <div
         className={classNames(
-          'relative w-[91px] h-[91px] rounded-full flex flex-col items-center justify-center border transition-all',
+          'relative w-24 h-24 rounded-full flex flex-col items-center justify-center border transition-all',
           selected
             ? 'bg-[#e0eaff] border-[#4d83fd]'
             : 'bg-[#f6f6f6] border-[#DEDEDE]'
         )}
       >
-        <img src={image} alt={label} className={classNames(size)} />
+        <img
+          src={image}
+          alt={Array.isArray(label) ? label.join(' ') : label}
+          className={classNames(size)}
+        />
       </div>
 
       <div
         className={classNames(
-          'font-[Pretendard] text-[14px]',
-          role === 'plus'
-            ? 'text-[#bdbdbd]'
-            : selected
-              ? 'text-[#4d83fd]'
-              : 'text-black'
+          'font-[Pretendard] text-[14px] font-semibold whitespace-pre-wrap',
+          selected ? 'text-[#4d83fd]' : 'text-black'
         )}
       >
-        {label}
+        {Array.isArray(label) ? (
+          label.join('\n')
+        ) : role === 'plus' ? (
+          submitted ? (
+            text
+          ) : (
+            <input
+              type='text'
+              placeholder='직접입력'
+              className='w-[95.8px] h-5.25 flex justify-center items-center text-black text-center bg-neutral-100 rounded-lg text-sm font-normal'
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          )
+        ) : (
+          label
+        )}
       </div>
     </div>
   );

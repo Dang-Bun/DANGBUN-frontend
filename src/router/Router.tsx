@@ -1,13 +1,22 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 
-import SplashScreen from '../pages/Z/SplashScreen';
-import Z_onBoarding from '../pages/Z/Z_onBoarding';
+import SplashScreen from '../pages/SplashScreen';
+import Z_onBoarding from '../pages/Z_onBoarding';
+import StartPage from '../pages/StartPage';
+import CalendarPage from '../pages/CalendarPage';
+import Notification from '../pages/Notification';
+import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
+
+import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import RequestPopUp from '../components/PopUp/RequestPopUp';
+import PlaceMake1 from '../pages/D/PlaceMake1'; // Ensure this import is correct
+
+import SelectableRoleCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
+import PlaceRollCard from '../components/place/PlaceRollCard'; // Ensure this import is correct
 import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
-import CalendarPage from '../pages/H/CalendarPage';
-import Notification from '../pages/G/Notification';
-import RequestPopUp from '../components/PopUp/RequestPopUp';
 
 const router = createBrowserRouter([
   {
@@ -35,9 +44,23 @@ const router = createBrowserRouter([
     element: <Notification />,
   },
   {
+    path: 'placemake1',
+    element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
+  },
+  {
+    path: 'rollcard',
+    element: (
+      <div>
+        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
+        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
+      </div>
+    ),
+  },
+  {
     path: '/popup',
     element: <RequestPopUp />,
   },
+
 ]);
 
 const Router = () => {
