@@ -74,7 +74,10 @@ const PopUpCard = ({
               <Button
                 style={{ cursor: inputValue ? 'pointer' : 'default' }}
                 variant={inputValue ? 'blue' : 'thickGray'}
-                onClick={() => onSecondClick?.(inputValue)}
+                onClick={() => {
+                  onSecondClick?.(inputValue);
+                  setInputValue('');
+                }}
               >
                 {second}
               </Button>
