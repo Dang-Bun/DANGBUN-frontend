@@ -5,6 +5,9 @@ import PopUpCard from '../../components/PopUp/PopUpCard';
 
 const PlaceMake2 = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [infoList, setInfoList] = React.useState([
+    { label: '이메일', value: '' },
+  ]);
   return (
     <div>
       <div className='flex flex-col gap-2 mb-7.75'>
@@ -24,24 +27,45 @@ const PlaceMake2 = () => {
             className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
           />
         </div>
-        <div className='flex flex-row relative'>
-          <button className='absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer'>
-            <img src={BlueX} alt='X' />
-          </button>
-          <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
-            이메일
-          </p>
-          <input
-            type='text'
-            placeholder='입력'
-            className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
-          />
-        </div>
+
+        {infoList.map((item, index) => (
+          <div key={index} className='flex flex-row relative'>
+            <button
+              className='absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer'
+              onClick={() => {
+                const newList = [...infoList];
+                newList.splice(index, 1);
+                setInfoList(newList);
+              }}
+            >
+              <img src={BlueX} alt='X' />
+            </button>
+            <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
+              {item.label}
+            </p>
+            <input
+              type='text'
+              placeholder='입력'
+              className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
+            />
+          </div>
+        ))}
       </div>
       <CTAButton variant='gray' onClick={() => setIsModalOpen(true)}>
         목록 추가
       </CTAButton>
-      <CTAButton variant='blue'>완료</CTAButton>
+      <CTAButton
+        variant='blue'
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'fixed',
+          bottom: '97px',
+        }}
+      >
+        완료
+      </CTAButton>
 
       <PopUpCard
         isOpen={isModalOpen}
@@ -53,7 +77,12 @@ const PlaceMake2 = () => {
         first='취소'
         second='확인'
         onFirstClick={() => setIsModalOpen(false)}
-        onSecondClick={() => {}}
+        onSecondClick={(value) => {
+          if (value) {
+            setInfoList((prev) => [...prev, { label: value, value: '' }]);
+          }
+          setIsModalOpen(false);
+        }}
       />
     </div>
   );
