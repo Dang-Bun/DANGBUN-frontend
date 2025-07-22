@@ -1,13 +1,9 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import GradRollCard from '../../components/place/GradRollCard';
 import CTAButton from '../../components/button/CTAButton';
 import PopupCard from '../../components/PopUp/PopUpCard';
 import PopupCode from '../../components/PopUp/PopUpCode';
-
-interface PlaceMake3Props {
-  theme: string;
-  name: string;
-}
 
 type RoleType =
   | 'cafe'
@@ -20,9 +16,11 @@ type RoleType =
   | 'school'
   | 'plus';
 
-const PlaceMake3: React.FC<PlaceMake3Props> = ({ theme, name }) => {
+const PlaceMake3 = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isModalOpenCopy, setIsModalOpenCopy] = React.useState(false);
+  const location = useLocation();
+  const { placeName, role, infoList } = location.state || {};
 
   return (
     <div className='flex flex-col w-full h-screen items-center justify-center'>
@@ -30,7 +28,7 @@ const PlaceMake3: React.FC<PlaceMake3Props> = ({ theme, name }) => {
         <div className='flex flex-col items-center justify-center gap-3'>
           <div className='flex flex-row items-center justify-center gap-2'>
             <h1 className='bg-gradient-to-b from-[#fb66ff] to-[#5488fd] text-2xl font-semibold leading-loose text-transparent bg-clip-text'>
-              {name}
+              {placeName}
             </h1>
             <h1 className='text-2xl font-semibold leading-loose'>생성 완료!</h1>
           </div>
@@ -40,7 +38,7 @@ const PlaceMake3: React.FC<PlaceMake3Props> = ({ theme, name }) => {
         </div>
 
         <div>
-          <GradRollCard role={theme as RoleType} />
+          <GradRollCard role={role as RoleType} />
           <img />
         </div>
         <button

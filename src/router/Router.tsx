@@ -12,6 +12,7 @@ import PlaceRollCard from '../components/place/PlaceRollCard';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
+import PlaceMake3 from '../pages/D/PlaceMake3';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: 'placemake2',
     element: <PlaceMake2 />,
+  },
+  {
+    path: 'placemake3',
+    element: <PlaceMake3 theme='cinema' name='메가박스' />,
   },
   {
     path: 'rollcard',

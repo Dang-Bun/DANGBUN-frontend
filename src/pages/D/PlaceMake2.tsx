@@ -1,13 +1,30 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CTAButton from '../../components/button/CTAButton';
 import BlueX from '../../assets/placeMake/BlueX.svg';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 
 const PlaceMake2 = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { placeName, role } = location.state || {};
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [infoList, setInfoList] = React.useState([
     { label: '이메일', value: '' },
   ]);
+
+  const handleNext = () => {
+    if (placeName && role && infoList) {
+      navigate('/placemake3', {
+        state: {
+          placeName: placeName,
+          role: role,
+          infoList: infoList,
+        },
+      });
+    }
+  };
+
   return (
     <div>
       <div className='flex flex-col gap-2 mb-7.75'>
@@ -63,6 +80,7 @@ const PlaceMake2 = () => {
           position: 'fixed',
           bottom: '97px',
         }}
+        onClick={handleNext}
       >
         완료
       </CTAButton>
