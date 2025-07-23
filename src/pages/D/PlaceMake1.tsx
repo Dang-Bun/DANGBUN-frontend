@@ -1,10 +1,24 @@
 import React from 'react';
 import CTAButton from '../../components/button/CTAButton';
-
 import PlaceRollCard from '../../components/place/PlaceRollCard';
+import { useNavigate } from 'react-router-dom';
+
 const PlaceMake1 = () => {
+  const navigate = useNavigate();
+  const [plusRole, setPlusRole] = React.useState('');
   const [selectedRole, setSelectedRole] = React.useState<string | null>(null);
   const [text, setText] = React.useState('');
+
+  const handleNext = () => {
+    if (selectedRole && text) {
+      navigate('/placemake2', {
+        state: {
+          placeName: text,
+          role: selectedRole,
+        },
+      });
+    }
+  };
 
   return (
     <div className='w-[393px] h-[853px] flex flex-col items-center justify-center'>
@@ -75,9 +89,18 @@ const PlaceMake1 = () => {
           role='plus'
           selected={selectedRole === 'plus'}
           onClick={() => setSelectedRole('plus')}
+          setPlusRole={setPlusRole}
         />
       </div>
-      <CTAButton variant={selectedRole && text ? 'blue' : 'thickGray'}>
+      <CTAButton
+        variant={
+          (selectedRole !== 'plus' && text) ||
+          (selectedRole === 'plus' && plusRole !== '' && text)
+            ? 'blue'
+            : 'thickGray'
+        }
+        onClick={handleNext}
+      >
         다음
       </CTAButton>
     </div>

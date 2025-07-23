@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '../button/PopUpButton';
 import ReactModal from 'react-modal';
 
-interface PopUpCardProps {
+interface PopUpCodeProps {
   isOpen: boolean;
   onRequestClose: () => void;
   title: React.ReactNode;
@@ -13,25 +13,22 @@ interface PopUpCardProps {
   second?: string;
   onFirstClick?: () => void;
   onSecondClick?: (inputValue?: string) => void;
+  code?: string;
 }
 
-const PopUpCard = ({
+const PopUpCode = ({
   isOpen,
   onRequestClose,
   title,
   descript,
   input,
-  placeholder,
   first,
   second,
   onFirstClick,
   onSecondClick,
-}: PopUpCardProps) => {
+  code,
+}: PopUpCodeProps) => {
   const [inputValue, setInputValue] = React.useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
 
   return (
     <ReactModal
@@ -52,15 +49,10 @@ const PopUpCard = ({
           </p>
         )}
 
-        {input && (
-          <input
-            className='flex justify-center items-center h-10 w-[263px] mt-5 pt-2.5 pb-2.5 pl-3 rounded-[8px] bg-[#F9f9f9] text-sm font-normal'
-            type='text'
-            placeholder={placeholder}
-            value={inputValue}
-            onChange={handleInputChange}
-          />
-        )}
+        <p className='w-28 h-8 !mt-5 py-[6px] bg-zinc-300/20 rounded-lg text-center justify-center items-center text-blue-500 text-sm font-semibold leading-tight'>
+          {code}
+        </p>
+
         {(first || second) && (
           <div
             className={`flex flex-row items-center w-[263px] mt-7 ${first && second ? 'justify-between' : 'justify-center'}`}
@@ -70,10 +62,10 @@ const PopUpCard = ({
                 {first}
               </Button>
             )}
-            {second && input && (
+            {second && (
               <Button
-                style={{ cursor: inputValue ? 'pointer' : 'default' }}
-                variant={inputValue ? 'blue' : 'thickGray'}
+                style={{ cursor: 'pointer' }}
+                variant='blue'
                 onClick={() => {
                   onSecondClick?.(inputValue);
                   setInputValue('');
@@ -90,4 +82,4 @@ const PopUpCard = ({
   );
 };
 
-export default PopUpCard;
+export default PopUpCode;
