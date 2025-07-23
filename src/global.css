@@ -56,15 +56,9 @@ body {
 }
 
 #root {
-  max-width: 375px;
-  max-height: 852px;
+  max-width: 393px;
+
   margin-left: auto;
   margin-right: auto;
   padding: 0;
-}
-
-html{
-  width: 375px;
-  height:852px;
-  margin:0 auto
 }

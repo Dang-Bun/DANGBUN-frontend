@@ -13,6 +13,8 @@ import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
+import LogIn from '../pages/A/LogIn';
+import Join from '../pages/A/Join';
 
 const router = createBrowserRouter([
   {
@@ -24,8 +26,12 @@ const router = createBrowserRouter([
     element: <Z_onBoarding />,
   },
   {
-    path: '/start',
-    element: <StartPage />,
+    path: '/login',
+    element: <LogIn />,
+  },
+  {
+    path: '/join',
+    element: <Join />,
   },
   {
     path: '/calendar',
