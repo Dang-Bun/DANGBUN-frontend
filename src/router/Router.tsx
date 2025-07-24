@@ -1,11 +1,10 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 
-import SplashScreen from '../pages/SplashScreen';
-import Z_onBoarding from '../pages/Z_onBoarding';
-import StartPage from '../pages/StartPage';
-import CalendarPage from '../pages/CalendarPage';
-import Notification from '../pages/Notification';
+import SplashScreen from '../pages/Z/SplashScreen';
+import Z_onBoarding from '../pages/Z/Z_onBoarding';
+import CalendarPage from '../pages/H/CalendarPage';
+import Notification from '../pages/G/Notification';
 
 import SelectableRoleCard from '../components/place/PlaceRollCard';
 import PlaceRollCard from '../components/place/PlaceRollCard';
