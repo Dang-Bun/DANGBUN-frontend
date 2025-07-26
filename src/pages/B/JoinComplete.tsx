@@ -1,8 +1,14 @@
 import React from 'react';
 import joinComplete from '../../assets/checkIcon/joinCompleteImg.svg';
 import CTAButton from '../../components/button/CTAButton';
+import { useNavigate } from 'react-router-dom';
 
 const SelectPlace = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/MyPlace');
+  };
+
   return (
     <div className='flex flex-col items-center'>
       <div>
@@ -16,8 +22,8 @@ const SelectPlace = () => {
       <div className='mt-[56px]'>
         <img src={joinComplete} alt='회원가입 완료 표시' />
       </div>
-      <div>
-        <CTAButton>내 플레이스로 이동</CTAButton>
+      <div className='flex w-full justify-center mt-[219px]'>
+        <CTAButton onClick={handleClick}>내 플레이스로 이동</CTAButton>
       </div>
     </div>
   );
