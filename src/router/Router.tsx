@@ -3,13 +3,19 @@ import React from 'react';
 
 import SplashScreen from '../pages/Z/SplashScreen';
 import Z_onBoarding from '../pages/Z/Z_onBoarding';
+import LogIn from '../pages/A/LogIn';
+import Join from '../pages/A/Join';
+import JoinComplete from '../pages/B/JoinComplete';
+import MyPlace from '../pages/B/MyPlace';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 
 import SelectableRoleCard from '../components/place/PlaceRollCard';
 import PlaceRollCard from '../components/place/PlaceRollCard';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
-import JoinComplete from '../pages/B/JoinComplete';
+import PlaceMake1 from '../pages/D/PlaceMake1';
+import PlaceMake2 from '../pages/D/PlaceMake2';
+import PlaceMake3 from '../pages/D/PlaceMake3';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +37,10 @@ const router = createBrowserRouter([
   {
     path: '/joinComplete',
     element: <JoinComplete />,
+  },
+  {
+    path: '/myPlace',
+    element: <MyPlace />,
   },
   {
     path: '/calendar',
