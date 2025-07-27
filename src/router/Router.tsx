@@ -7,8 +7,6 @@ import Z_onBoarding from '../pages/Z/Z_onBoarding';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 
-import SelectableRoleCard from '../components/place/PlaceRollCard';
-import PlaceRollCard from '../components/place/PlaceRollCard';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
