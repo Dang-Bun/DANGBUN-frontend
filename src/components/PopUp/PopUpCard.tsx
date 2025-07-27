@@ -82,7 +82,16 @@ const PopUpCard = ({
                 {second}
               </Button>
             )}
-            {second && !input && <Button variant='blue'>{second}</Button>}
+            {second && !input && (
+              <Button
+                variant='blue'
+                onClick={() => {
+                  onSecondClick?.();
+                }}
+              >
+                {second}
+              </Button>
+            )}
           </div>
         )}
       </div>
