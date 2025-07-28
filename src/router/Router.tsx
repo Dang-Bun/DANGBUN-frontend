@@ -3,17 +3,18 @@ import React from 'react';
 
 import SplashScreen from '../pages/Z/SplashScreen';
 import Z_onBoarding from '../pages/Z/Z_onBoarding';
+//import StartPage from '../pages/StartPage';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 
-import SelectableRoleCard from '../components/place/PlaceRollCard';
-import PlaceRollCard from '../components/place/PlaceRollCard';
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
 import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
+import PlaceJoin1 from '../pages/E/PlaceJoin1';
+import PlaceJoin2 from '../pages/E/PlaceJoin2';
 
 const router = createBrowserRouter([
   {
@@ -50,16 +51,15 @@ const router = createBrowserRouter([
   },
   {
     path: 'placemake3',
-    element: <PlaceMake3 theme='cinema' name='메가박스' />,
+    element: <PlaceMake3 />,
   },
   {
-    path: 'rollcard',
-    element: (
-      <div>
-        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
-        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
-      </div>
-    ),
+    path: 'PlaceJoin1',
+    element: <PlaceJoin1 />,
+  },
+  {
+    path: 'PlaceJoin2',
+    element: <PlaceJoin2 />,
   },
   {
     path: '/popup',
