@@ -128,7 +128,7 @@ const Join = () => {
             </div>
           </div>
         </div>
-        <div className='fixed bottom-0 w-full mb-[25px]'>
+        <div className='w-full mt-[229px]'>
           <CTAButton
             variant={isFormFilled ? 'blue' : 'thickGray'}
             onClick={handleJoinComplete}
