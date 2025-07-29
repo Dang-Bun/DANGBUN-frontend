@@ -6,7 +6,7 @@ import notSelectedImg from '../../assets/checkIcon/notSelectedImg.svg';
 import greenSelectedImg from '../../assets/checkIcon/greenSelected.svg';
 import blueSelectedImg from '../../assets/checkIcon/blueSelectedImg.svg';
 
-type RoleType = 'manager' | 'member';
+export type RoleType = 'manager' | 'member';
 
 interface SelectableRollCardProps {
   role: RoleType;
