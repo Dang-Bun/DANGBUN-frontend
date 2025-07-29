@@ -7,6 +7,7 @@ import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
 import JoinComplete from '../pages/B/JoinComplete';
 import MyPlace from '../pages/B/MyPlace';
+import AddPlace from '../pages/B/AddPlace';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: '/myPlace',
     element: <MyPlace />,
+  },
+  {
+    path: '/addPlace',
+    element: <AddPlace />,
   },
   {
     path: '/calendar',
