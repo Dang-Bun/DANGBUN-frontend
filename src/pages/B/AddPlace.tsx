@@ -48,7 +48,16 @@ const AddPlace = () => {
         </div>
       </div>
       <div className='flex justify-center mt-[50px]'>
-        <CTAButton variant={selected ? 'blue' : 'thickGray'}>다음</CTAButton>
+        <CTAButton
+          variant={selected ? 'blue' : 'thickGray'}
+          onClick={
+            selected === 'manager'
+              ? () => navigate('/placemake1')
+              : () => navigate('/placemake3')
+          }
+        >
+          다음
+        </CTAButton>
       </div>
     </div>
   );

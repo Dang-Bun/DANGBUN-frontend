@@ -66,6 +66,15 @@ const router = createBrowserRouter([
     element: <PlaceMake3 />,
   },
   {
+    path: 'rollcard',
+    element: (
+      <div>
+        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
+        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
+      </div>
+    ),
+  },
+  {
     path: '/popup',
     element: <RequestPopUp />,
   },
