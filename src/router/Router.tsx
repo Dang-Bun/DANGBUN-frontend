@@ -15,6 +15,8 @@ import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
+import PlaceJoin1 from '../pages/E/PlaceJoin1';
+import PlaceJoin2 from '../pages/E/PlaceJoin2';
 
 const router = createBrowserRouter([
   {
@@ -66,13 +68,12 @@ const router = createBrowserRouter([
     element: <PlaceMake3 />,
   },
   {
-    path: 'rollcard',
-    element: (
-      <div>
-        <SelectableRoleCard role='cafe' selected={false} onClick={() => {}} />
-        <PlaceRollCard role='cafe' selected={false} onClick={() => {}} />
-      </div>
-    ),
+    path: 'PlaceJoin1',
+    element: <PlaceJoin1 />,
+  },
+  {
+    path: 'PlaceJoin2',
+    element: <PlaceJoin2 />,
   },
   {
     path: '/popup',
