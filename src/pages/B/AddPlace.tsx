@@ -1,4 +1,5 @@
-import { useState, React } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import left_Chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
 import SelectableRoleCard from './../../components/place/SelectableRollCard';
