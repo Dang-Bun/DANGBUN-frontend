@@ -1,21 +1,38 @@
 import React, { useState } from 'react';
 import type { StylesConfig } from 'react-select';
+
 import Select from 'react-select';
 import Header from '../../components/HeaderBar';
 import grayPlus from '../../assets/header/GrayPlus.svg';
 import grayRight from '../../assets/cleanUpList/grayRight.svg';
 import cleanUpImg from '../../assets/cleanUpList/cleanUp.svg';
+import searchIcon from '../../assets/cleanUpList/searchIcon.svg';
+import grayCheck from '../../assets/cleanUpList/GrayCheck.svg';
+import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
+
 import BottomBar from '../../components/BottomBar';
 import CleanUpCard from '../../components/cleanUp/CleanUpCard';
+import BottomSheet from '../../components/cleanUp/BottomSheet';
 
 const CleanUpList = () => {
   const options = [{ value: '당번1', label: '당번1' }];
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const [selectedOption, setSelectedOption] = useState<{
     value: string;
     label: string;
   } | null>(null);
 
   const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']);
+  const [members, setMembers] = useState<string[]>([
+    '박완',
+    '전예영',
+    '박한나',
+    '김도현',
+    '백상희',
+    '최준서',
+  ]);
+  const [clickedMembers, setClickedMembers] = useState<string[]>(['박완']);
 
   const handleChange = (option: { value: string; label: string } | null) => {
     console.log('opiton: ', option);
@@ -83,7 +100,7 @@ const CleanUpList = () => {
 
   return (
     <div className='flex flex-col w-[393px] px-5 '>
-      <div className='fixed w-[353px]'>
+      <div className='fixed w-[353px] bg-[#fff]'>
         <Header
           title='청소 관리'
           rightElement={<img src={grayPlus} alt='추가' />}
@@ -106,6 +123,15 @@ const CleanUpList = () => {
           placeholder='멤버'
           value={selectedOption}
         />
+        <button
+          className='bg-gray-50'
+          onClick={() => {
+            setOpen(true);
+            console.log('click!');
+          }}
+        >
+          click!
+        </button>
       </div>
 
       {clean.length === 0 ? (
@@ -125,6 +151,66 @@ const CleanUpList = () => {
           <CleanUpCard />
         </div>
       )}
+
+      <BottomSheet isOpen={open} onClose={() => setOpen(false)}>
+        <div className='w-[353px] h-[348px]'>
+          <div className='flex flex-col gap-[15px]'>
+            <div className='flex relative items-center '>
+              <img src={searchIcon} alt='SEARCH' className='absolute px-3' />
+              <input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+                placeholder='검색'
+                className='w-[353px] h-[41px] pl-[52px] bg-stone-50 rounded-[20.5px]'
+              />
+            </div>
+            <div className='flex flex-row w-[353px] items-center justify-end gap-2'>
+              <p className='text-zinc-500 text-base font-normal leading-snug'>
+                전체 선택
+              </p>
+              <button
+                className='w-6 h-6 cursor-pointer'
+                onClick={() => {
+                  if (members.length === clickedMembers.length)
+                    setClickedMembers([]);
+                  else setClickedMembers([...members]);
+                }}
+              >
+                <img
+                  src={
+                    members.length === clickedMembers.length
+                      ? greenCheck
+                      : grayCheck
+                  }
+                  alt='graycheck'
+                  className='w-6 h-6'
+                />
+              </button>
+            </div>
+          </div>
+          <div className='flex flex-wrap gap-2 max-w-[353px] mt-5'>
+            {members
+              .filter((name) => name.includes(search))
+              .map((name, index) => (
+                <button
+                  key={index}
+                  className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer ${clickedMembers.includes(name) ? 'bg-[#00dc7b]' : 'bg-[#e5e5e5]'}`}
+                  onClick={() => {
+                    setClickedMembers((prev) =>
+                      prev.includes(name)
+                        ? prev.filter((n) => n !== name)
+                        : [...prev, name]
+                    );
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+          </div>
+        </div>
+      </BottomSheet>
 
       <BottomBar />
     </div>
