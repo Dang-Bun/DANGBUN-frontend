@@ -6,7 +6,7 @@ interface WritingProps {
   selected?: boolean;
 }
 
-const WritingChip = ({ label, type, selected = false }: WritingProps) => {
+const WritingChip = ({ label, type, selected = true }: WritingProps) => {
   
     //bg color : default : gray, selected 색상 변경
    const bgColor =
