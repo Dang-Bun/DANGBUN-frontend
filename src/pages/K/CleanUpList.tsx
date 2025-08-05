@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
+
 import Header from '../../components/HeaderBar';
 import grayPlus from '../../assets/header/GrayPlus.svg';
 import grayRight from '../../assets/cleanUpList/grayRight.svg';
@@ -13,12 +14,12 @@ import BottomSheet from '../../components/cleanUp/BottomSheet';
 
 import grayX from '../../assets/cleanUpList/GrayX.svg';
 import DownImg from '../../assets/chevron/bottom_chevronImg.svg';
+import refresh from '../../assets/cleanUpList/refresh.svg';
 
 const CleanUpList = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
-
   const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']);
   const [members, setMembers] = useState<string[]>([
     '박완',
@@ -32,9 +33,17 @@ const CleanUpList = () => {
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [contentMargin, setContentMargin] = useState(0);
+
+  useLayoutEffect(() => {
+    const headerHeight = headerRef.current?.offsetHeight || 0;
+    setContentMargin(headerHeight);
+  });
+
   return (
     <div className='flex flex-col w-[393px] px-5 '>
-      <div className='fixed w-[353px] bg-[#fff]'>
+      <div ref={headerRef} className='fixed w-[353px] bg-[#fff]'>
         <Header
           title='청소 관리'
           rightElement={<img src={grayPlus} alt='추가' />}
@@ -68,22 +77,55 @@ const CleanUpList = () => {
           />
         </button>
 
-        <div className='flex flex-row gap-2'>
-          {filteredMembers.map((name, index) => (
-            <div key={index} className='flex flex-row w-fit'>
-              <p className='text-sm font-normal leading-tight text-[#00dc7b]'>
-                {name}
-              </p>
+        {filteredMembers.length !== 0 ? (
+          <div className='flex flex-row w-[353px] mb-3 justify-between items-center'>
+            <div className='flex flex-wrap gap-2 items-center'>
+              {filteredMembers.map((name, index) => (
+                <div key={index} className='flex flex-row w-fit'>
+                  <p className='text-sm font-normal leading-tight text-[#00dc7b]'>
+                    {name}
+                  </p>
+                  <button
+                    className='cursor-pointer'
+                    onClick={() => {
+                      setClickedMembers(
+                        filteredMembers.filter((m) => m !== name)
+                      );
+                      setFilteredMembers(
+                        filteredMembers.filter((m) => m !== name)
+                      );
+                    }}
+                  >
+                    <img src={grayX} alt='X' />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className='flex flex-row gap-2'>
+              <div className='w-0 h-4 origin-top-left rotate--90 outline-1 outline-offset-[-0.50px] outline-[#e5e5e5]' />
               <button className='cursor-pointer'>
-                <img src={grayX} alt='X' />
+                <img
+                  src={refresh}
+                  alt='새로고침'
+                  className='h-4 w-4'
+                  onClick={() => {
+                    setClickedMembers([]);
+                    setFilteredMembers([]);
+                  }}
+                />
               </button>
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
 
       {clean.length === 0 ? (
-        <div className='flex flex-col h-[calc(100vh-131.5px-83px)] mt-[131.5px]  items-center justify-center gap-5'>
+        <div
+          className='flex flex-col overflow-y-auto items-center justify-center gap-5'
+          style={{ paddingTop: contentMargin }}
+        >
           <img src={cleanUpImg} alt='empty' />
           <div className='flex flex-col gap-[11px] items-center'>
             <p className='text-zinc-500 text-base font-semibold leading-snug'>
@@ -95,7 +137,10 @@ const CleanUpList = () => {
           </div>
         </div>
       ) : (
-        <div className='flex flex-col h-[calc(100vh-131.5px-83px)] mt-[131.5px]  items-center justify-start'>
+        <div
+          className='flex flex-col overflow-y-auto items-center justify-start'
+          style={{ paddingTop: contentMargin }}
+        >
           <CleanUpCard />
         </div>
       )}
@@ -112,7 +157,6 @@ const CleanUpList = () => {
             <div className='flex relative items-center '>
               <img src={searchIcon} alt='SEARCH' className='absolute px-3' />
               <input
-
                 value={inputValue}
                 onChange={(e) => {
                   const v = e.target.value;
