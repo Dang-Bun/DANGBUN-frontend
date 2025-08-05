@@ -10,10 +10,11 @@ interface NotiChiptProps {
     title : string;
     descript : string;
     timeAgo : string;
+    onClick?: () => void;
 }
 
 
-const NotificationCard = ({type, read=false, title, descript, timeAgo}:NotiChiptProps) => {
+const NotificationCard = ({type, read=false, title, descript, timeAgo, onClick }:NotiChiptProps) => {
     let imgSrc = '';
     if(read){
         if(type ==='member'){
