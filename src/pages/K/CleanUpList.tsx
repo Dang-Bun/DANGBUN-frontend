@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import type { StylesConfig } from 'react-select';
-
-import Select from 'react-select';
 import Header from '../../components/HeaderBar';
 import grayPlus from '../../assets/header/GrayPlus.svg';
 import grayRight from '../../assets/cleanUpList/grayRight.svg';
@@ -14,14 +11,13 @@ import BottomBar from '../../components/BottomBar';
 import CleanUpCard from '../../components/cleanUp/CleanUpCard';
 import BottomSheet from '../../components/cleanUp/BottomSheet';
 
+import grayX from '../../assets/cleanUpList/GrayX.svg';
+import DownImg from '../../assets/chevron/bottom_chevronImg.svg';
+
 const CleanUpList = () => {
-  const options = [{ value: '당번1', label: '당번1' }];
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [selectedOption, setSelectedOption] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [inputValue, setInputValue] = useState('');
 
   const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']);
   const [members, setMembers] = useState<string[]>([
@@ -32,71 +28,9 @@ const CleanUpList = () => {
     '백상희',
     '최준서',
   ]);
-  const [clickedMembers, setClickedMembers] = useState<string[]>(['박완']);
 
-  const handleChange = (option: { value: string; label: string } | null) => {
-    console.log('opiton: ', option);
-    setSelectedOption(option);
-  };
-
-  const custom: StylesConfig<{ value: string; label: string }, false> = {
-    control: (provided, state) => ({
-      ...provided,
-      height: '32px',
-      borderRadius: '8px',
-      borderColor: '#E5e5e5',
-      padding: '5px 8px 5px 12px',
-      fontSize: '14px',
-      fontWeight: '400',
-      color: '#e5e5e5',
-      '&:hover': {
-        borderColor: '#bdbdbd',
-      },
-    }),
-    container: (provided) => ({
-      ...provided,
-      padding: '0',
-      margin: '0',
-    }),
-    valueContainer: (provided) => ({
-      ...provided,
-      padding: '0px',
-      width: 'auto',
-      height: 'auto',
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      padding: '0px',
-      margin: '0px',
-    }),
-    input: (provided) => ({
-      ...provided,
-      padding: '0',
-      margin: '0',
-    }),
-
-    indicatorSeparator: () => ({
-      display: 'none',
-      padding: '0',
-      margin: '0',
-    }),
-    dropdownIndicator: (provided) => ({
-      ...provided,
-      color: '#bebebe',
-      padding: '0 0 0 4.67px',
-      margin: '0',
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: '#bebebe',
-      width: '25px',
-    }),
-    menu: (provided) => ({
-      ...provided,
-      width: '70px',
-      marginTop: '4px',
-    }),
-  };
+  const [clickedMembers, setClickedMembers] = useState<string[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
 
   return (
     <div className='flex flex-col w-[393px] px-5 '>
@@ -115,23 +49,37 @@ const CleanUpList = () => {
             <img src={grayRight} alt='당번 미지정 청소' />
           </button>
         </div>
-        <Select
-          className='w-fit mb-3'
-          styles={custom}
-          options={options}
-          onChange={handleChange}
-          placeholder='멤버'
-          value={selectedOption}
-        />
+
         <button
-          className='bg-gray-50'
+          className='flex flex-row justify-center items-center w-fit mb-3 pt-1.5 pr-2 pb-1 pl-3 rounded-lg outline-1 outline-[#e5e5e5] cursor-pointer'
           onClick={() => {
             setOpen(true);
-            console.log('click!');
           }}
         >
-          click!
+          <p className='text-neutral-400 text-sm font-normal leading-tight'>
+            {filteredMembers.length === 0
+              ? '멤버'
+              : `멤버 ${filteredMembers.length}`}
+          </p>
+          <img
+            src={DownImg}
+            alt='멤버 보기'
+            className='w-5 h-5 px-[4.67px] py-[7px]'
+          />
         </button>
+
+        <div className='flex flex-row gap-2'>
+          {filteredMembers.map((name, index) => (
+            <div key={index} className='flex flex-row w-fit'>
+              <p className='text-sm font-normal leading-tight text-[#00dc7b]'>
+                {name}
+              </p>
+              <button className='cursor-pointer'>
+                <img src={grayX} alt='X' />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {clean.length === 0 ? (
@@ -152,21 +100,40 @@ const CleanUpList = () => {
         </div>
       )}
 
-      <BottomSheet isOpen={open} onClose={() => setOpen(false)}>
+      <BottomSheet
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          setFilteredMembers(clickedMembers);
+        }}
+      >
         <div className='w-[353px] h-[348px]'>
           <div className='flex flex-col gap-[15px]'>
             <div className='flex relative items-center '>
               <img src={searchIcon} alt='SEARCH' className='absolute px-3' />
               <input
-                value={search}
+
+                value={inputValue}
                 onChange={(e) => {
-                  setSearch(e.target.value);
+                  const v = e.target.value;
+                  setInputValue(e.target.value);
+                  if (v === '') {
+                    setSearch('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearch(inputValue);
+                  }
                 }}
                 placeholder='검색'
                 className='w-[353px] h-[41px] pl-[52px] bg-stone-50 rounded-[20.5px]'
               />
             </div>
-            <div className='flex flex-row w-[353px] items-center justify-end gap-2'>
+
+            <div
+              className={`${search.length == 0 ? 'flex' : 'hidden'} flex-row w-[353px] items-center justify-end gap-2 `}
+            >
               <p className='text-zinc-500 text-base font-normal leading-snug'>
                 전체 선택
               </p>
