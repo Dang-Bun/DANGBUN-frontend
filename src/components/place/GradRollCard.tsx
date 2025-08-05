@@ -8,7 +8,7 @@ import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
 import schoolImg from '../../assets/placeIcon/schoolImg.svg';
 import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
 import homeImg from '../../assets/placeIcon/homeImg.svg';
-import gradCircle from '../../assets/placeMake/gradCircle.svg';
+import gradCircle from '../../assets/placeMake/GradCircle.svg';
 
 type RoleType =
   | 'cafe'
