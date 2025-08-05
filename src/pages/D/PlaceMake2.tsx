@@ -5,6 +5,17 @@ import BlueX from '../../assets/placeMake/BlueX.svg';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import FreeButton from '../../components/button/FreeButton';
 
+import { placeApi, type createPlaceRequest } from '../../apis/placeApi';
+
+const createNewPlace = async (data: createPlaceRequest) => {
+  try {
+    const res = await placeApi.createPlace(data);
+    console.log(res.message);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 const PlaceMake2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,6 +27,18 @@ const PlaceMake2 = () => {
 
   const handleNext = () => {
     if (placeName && role && infoList) {
+      createNewPlace({
+        placeName: placeName,
+        category: role,
+        managerName: '',
+        information: infoList.reduce(
+          (acc, cur) => {
+            acc[cur.label] = cur.value;
+            return acc;
+          },
+          {} as Record<string, string>
+        ),
+      });
       navigate('/placemake3', {
         state: {
           placeName: placeName,
