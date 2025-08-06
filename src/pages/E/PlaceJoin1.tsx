@@ -5,6 +5,8 @@ import CTAButton from '../../components/button/CTAButton';
 import BlueX from '../../assets/placeMake/BlueX.svg';
 import PopupCard from '../../components/PopUp/PopUpCard';
 
+import { usePlaceApi } from '../../hooks/usePlaceApi';
+
 const PlaceJoin = () => {
   const navigate = useNavigate();
 
@@ -26,8 +28,24 @@ const PlaceJoin = () => {
     }
   };
 
-  const searchCode = () => {
+  const searchCode = async () => {
     setCode(inputValue);
+    try {
+      console.log(code);
+      const res = await usePlaceApi.inviteCodeCheck({ inviteCode: code });
+      console.log(res);
+
+      if (res?.data?.code === 20000) {
+        const infoArray = res.data.data.information.map((label: string) => ({
+          label,
+          value: '',
+        }));
+        setInfoList(infoArray);
+        setIsModalOpen(true);
+      }
+    } catch (e) {
+      console.error('code matching error', e);
+    }
   };
 
   return (

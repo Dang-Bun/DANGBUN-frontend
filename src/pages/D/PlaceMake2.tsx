@@ -25,7 +25,7 @@ const PlaceMake2 = () => {
       const data = {
         placeName: placeName,
         category: role,
-        managerName: localStorage.getItem('userName') || 'unknown',
+        managerName: localStorage.getItem('userId') || 'unknown',
         information,
       };
       try {
