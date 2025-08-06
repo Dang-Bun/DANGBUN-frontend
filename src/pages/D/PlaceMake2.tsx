@@ -25,14 +25,21 @@ const PlaceMake2 = () => {
       const data = {
         placeName: placeName,
         category: role,
-        managerName: 'admin',
+        managerName: localStorage.getItem('userName') || 'unknown',
         information,
       };
       try {
         const res = await usePlaceApi.placeMake(data);
         console.log('place maked!: ', res.data);
+        console.log(data);
       } catch (e) {
         console.error('place making failed:', e);
+      }
+      try {
+        const res = await usePlaceApi.placeList();
+        console.log('place list : ', res.data);
+      } catch (e) {
+        console.error('place search failed.', e);
       }
 
       navigate('/placemake3', {
