@@ -32,6 +32,7 @@ const PlaceMake1 = () => {
             placeholder='플레이스 이름 입력'
             className=' h-14 w-[353px] px-3 py-3.5 rounded-lg bg-neutral-100 text-black text-base font-normal'
             value={text}
+            maxLength={20}
             onChange={(e) => setText(e.target.value)}
           ></input>
         </div>

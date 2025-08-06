@@ -140,6 +140,7 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
               placeholder='직접입력'
               className='w-[95.8px] h-5.25 flex justify-center items-center text-black text-center bg-neutral-100 rounded-lg text-sm font-normal'
               value={text}
+              maxLength={10}
               onChange={(e) => {
                 setText(e.target.value);
                 setPlusRole?.(e.target.value);
