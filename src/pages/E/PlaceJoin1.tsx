@@ -18,7 +18,22 @@ const PlaceJoin = () => {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    try {
+      const information = Object.fromEntries(
+        infoList.map(({ label, value }) => [label, value])
+      );
+      const data = {
+        inviteCode: code,
+        name: 'name',
+        information: information,
+      };
+      const res = await usePlaceApi.joinRequest(data);
+      console.log('request', res);
+    } catch (e) {
+      console.error('error', e);
+    }
+
     if (code) {
       navigate('/placejoin2', {
         state: {
