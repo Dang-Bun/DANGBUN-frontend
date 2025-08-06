@@ -5,22 +5,42 @@ import BlueX from '../../assets/placeMake/BlueX.svg';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import FreeButton from '../../components/button/FreeButton';
 
+import { usePlaceApi } from '../../hooks/usePlaceApi';
+
 const PlaceMake2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { placeName, role } = location.state || {};
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [infoList, setInfoList] = React.useState([
+    { label: '이름', value: '' },
     { label: '이메일', value: '' },
   ]);
 
-  const handleNext = () => {
-    if (placeName && role && infoList) {
+  const handleNext = async () => {
+    if (placeName && role) {
+      const information = Object.fromEntries(
+        infoList.map(({ label, value }) => [label, value])
+      );
+      const data = {
+        placeName: placeName,
+        category: role,
+        managerName: 'admin',
+        information,
+      };
+      try {
+        const res = await usePlaceApi.placeMake(data);
+        console.log('place maked!: ', res.data);
+      } catch (e) {
+        console.error('place making failed:', e);
+      }
+
       navigate('/placemake3', {
         state: {
           placeName: placeName,
           role: role,
           infoList: infoList,
+          information,
         },
       });
     }
@@ -35,21 +55,10 @@ const PlaceMake2 = () => {
         </h2>
       </div>
       <div className='flex flex-col items-start justify-start gap-3 mb-20.5'>
-        <div className='flex flex-row'>
-          <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
-            이름
-          </p>
-          <input
-            type='text'
-            placeholder='"예시 텍스트를 입력해주세요."'
-            className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
-          />
-        </div>
-
         {infoList.map((item, index) => (
           <div key={index} className='flex flex-row relative'>
             <button
-              className='absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer'
+              className={`absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer ${item.label === '이름' ? 'hidden' : ''}`}
               onClick={() => {
                 const newList = [...infoList];
                 newList.splice(index, 1);
@@ -65,6 +74,12 @@ const PlaceMake2 = () => {
               type='text'
               placeholder='"예시 텍스트를 입력해주세요."'
               className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
+              value={item.value}
+              onChange={(e) => {
+                const newList = [...infoList];
+                newList[index].value = e.target.value;
+                setInfoList(newList);
+              }}
             />
           </div>
         ))}
