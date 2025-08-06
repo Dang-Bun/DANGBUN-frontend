@@ -17,6 +17,7 @@ import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
 import PlaceJoin1 from '../pages/E/PlaceJoin1';
 import PlaceJoin2 from '../pages/E/PlaceJoin2';
+import Setting from '../pages/I/Setting';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
   {
     path: 'PlaceJoin2',
     element: <PlaceJoin2 />,
+  },
+  {
+    path: '/setting',
+    element: <Setting />,
   },
   {
     path: '/popup',
