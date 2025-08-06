@@ -31,6 +31,7 @@ const Join = () => {
     setPassword,
     isFormFilled,
     isEmailFilled,
+    isPasswordValid,
   } = useJoinForm();
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -205,7 +206,12 @@ const Join = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <div className='text-[12px] text-gray-6 mt-[2px]'>
+            <div
+              className={classNames(
+                'text-[12px] mt-[2px]',
+                isPasswordValid ? 'text-gray-6' : 'text-[#d32f2f]'
+              )}
+            >
               8~20자 영문, 숫자의 조합으로 입력해 주세요.
             </div>
           </div>

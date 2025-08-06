@@ -54,7 +54,7 @@ const AddPlace = () => {
           onClick={
             selected === 'manager'
               ? () => navigate('/placemake1')
-              : () => navigate('/placemake3')
+              : () => navigate('/PlaceJoin1')
           }
         >
           다음
