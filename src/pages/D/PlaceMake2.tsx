@@ -28,6 +28,7 @@ const PlaceMake2 = () => {
         managerName: 'admin',
         information,
       };
+      console.log(data);
       try {
         const res = await usePlaceApi.createPlace(data);
         console.log('place maked!: ', res.data);
@@ -84,7 +85,7 @@ const PlaceMake2 = () => {
           </div>
         ))}
       </div>
-      {infoList.length < 4 && (
+      {infoList.length <= 4 && (
         <FreeButton
           variant='gray'
           fontSize={14}
