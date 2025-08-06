@@ -12,12 +12,20 @@ export const useJoinForm = () => {
   const selectedDomain = isCustomDomain ? customDomain : emailDomain;
 
   const isEmailFilled = !!(emailId && selectedDomain);
+  // 내부에 추가
+  const isValidPassword = (pw: string): boolean => {
+    const pwRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+    return pwRegex.test(pw);
+  };
+
+  const isPasswordValid = isValidPassword(password);
+
   const isFormFilled = !!(
     name &&
     emailId &&
     selectedDomain &&
     verificationCode &&
-    password
+    isPasswordValid
   );
 
   const handleDomainSelect = (value: string) => {
@@ -47,5 +55,6 @@ export const useJoinForm = () => {
     setPassword,
     isFormFilled,
     isEmailFilled,
+    isPasswordValid,
   };
 };
