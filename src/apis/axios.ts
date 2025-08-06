@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'https://dangbun.o-r.kr/',
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,6 +10,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
+    console.log('Token:', localStorage.getItem('accessToken'));
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
