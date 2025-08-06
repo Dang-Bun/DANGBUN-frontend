@@ -6,7 +6,6 @@ import PopUpCard from '../../components/PopUp/PopUpCard';
 import FreeButton from '../../components/button/FreeButton';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
-import type { createPlaceRequest } from '../../apis/types';
 
 const PlaceMake2 = () => {
   const location = useLocation();
