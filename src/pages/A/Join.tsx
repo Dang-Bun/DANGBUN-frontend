@@ -10,6 +10,7 @@ import FreeButton from '../../components/button/FreeButton';
 import Dropdown from '../../components/input/Dropdown';
 import api from '../../apis/axios';
 import classNames from 'classnames';
+import { signupUser } from '../../apis/user';
 
 const Join = () => {
   const navigate = useNavigate();
@@ -59,12 +60,13 @@ const Join = () => {
     const email = `${emailId}@${isCustomDomain ? customDomain : emailDomain}`;
 
     try {
-      const response = await api.post('/api/users/auth-code', {
-        email,
-      });
+      const response = await api.post(
+        '/users/email-code',
+        { email },
+        { withCredentials: false }
+      );
 
       if (response.data.code === 20000) {
-        alert('✅ 인증번호가 전송되었습니다!');
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -73,12 +75,29 @@ const Join = () => {
     }
   };
 
-  const handleGoback = () => {
-    navigate('/login');
+  const handleJoinComplete = async () => {
+    const email = `${emailId}@${isCustomDomain ? customDomain : emailDomain}`;
+
+    try {
+      const response = await signupUser({
+        email,
+        password,
+        name,
+        certCode: verificationCode,
+      });
+
+      if (response.data.code === 20000) {
+        navigate('/joinComplete');
+      } else {
+        alert(`❗ 실패: ${response.data.message}`);
+      }
+    } catch (err: any) {
+      alert(`❌ 에러: ${err.response?.data?.message || err.message}`);
+    }
   };
 
-  const handleJoinComplete = () => {
-    navigate('/joinComplete');
+  const handleGoback = () => {
+    navigate('/login');
   };
 
   return (
