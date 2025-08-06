@@ -26,6 +26,10 @@ const PlaceJoin = () => {
     }
   };
 
+  const searchCode = () => {
+    setCode(inputValue);
+  };
+
   return (
     <div className='w-full h-screen flex flex-col items-center'>
       <div className='px-5 flex flex-col gap-3 w-full'>
@@ -45,9 +49,7 @@ const PlaceJoin = () => {
             fontSize={16}
             height={56}
             maxWidth={77}
-            onClick={() => {
-              setCode(inputValue);
-            }} // API request
+            onClick={searchCode} // API request
           >
             확인
           </FreeButton>
@@ -56,21 +58,10 @@ const PlaceJoin = () => {
       <div className='px-5 flex flex-col w-full gap-5'>
         <h2 className='text-xl font-normal leading-7'>정보를 작성해주세요.</h2>
         <div className='flex flex-col items-start justify-start gap-3 mb-20.5'>
-          <div className='flex flex-row'>
-            <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
-              이름
-            </p>
-            <input
-              type='text'
-              placeholder='입력'
-              className='w-64 h-14 px-3 py-3.5 bg-stone-50 rounded-lg'
-            />
-          </div>
-
           {infoList.map((item, index) => (
             <div key={index} className='flex flex-row relative'>
               <button
-                className='absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer'
+                className={`absolute w-4 h-4 bg-neutral-100 rounded-full flex justify-center items-center cursor-pointer ${item.label === '이름' ? 'hidden' : ''}`}
                 onClick={() => {
                   const newList = [...infoList];
                   newList.splice(index, 1);
