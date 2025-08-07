@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import CreateNotificationIcon from '../../assets/notificationIcon/CreateNotificationIcon.svg';
 import NotificationTab from '../../components/notification/NotificationTab';
 import NotificationCard from '../../components/notification/NotificationCard';
+import BottomBar from '../../components/BottomBar';
 
 const notifications = [
   {
@@ -36,7 +37,10 @@ const notifications = [
 
 const Notification = () => {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>('inbox');
+  const location = useLocation();
+  const defaultTab = location.state?.tab === 'transmit' ? 'transmit' : 'inbox'; 
+  const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(defaultTab);
+
 
   const handleWriteClick = () => {
     navigate('/alarm/create');
@@ -61,7 +65,9 @@ const Notification = () => {
         }
         onRightClick={handleWriteClick}
       />
-      <NotificationTab selectedTab={selectedTab} onChange={setSelectedTab} />
+
+      <NotificationTab selectedTab={selectedTab} onChange={setSelectedTab}/>
+
       <div className="flex flex-col items-center gap-4 mt-4">
         {filtered.map(n => (
           <NotificationCard
@@ -76,6 +82,7 @@ const Notification = () => {
         ))}
       </div>
       <p className="text-xs text-[#848484]">모든 알림은 최대 <b>30일</b> 동안 저장됩니다.</p>
+      <BottomBar></BottomBar>
     </div>
   );
 };

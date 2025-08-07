@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import WritingChip from '../../components/notification/WritingChip';
 import ScrollToTop from '../../components/notification/ScrollToTop';
+import BottomBar from '../../components/BottomBar';
 
 const dummyNotifications = [
   {
@@ -56,7 +57,8 @@ const NotificationDetail = () => {
 
             <p className="text-sm leading-relaxed mt-[6px] whitespace-pre-wrap">{notification.content}</p>
         </div>
-         <ScrollToTop></ScrollToTop>
+         <ScrollToTop/>
+         <BottomBar/>
     </div>
   );
 };
