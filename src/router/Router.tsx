@@ -20,6 +20,7 @@ import PlaceJoin2 from '../pages/E/PlaceJoin2';
 import Setting from '../pages/I/Setting';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
+import CleanAdd from '../pages/K/CleanAdd';
 
 const router = createBrowserRouter([
   {
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
   {
     path: '/cleanupcard',
     element: <CleanUpCard />,
+  },
+  {
+    path: '/cleanadd',
+    element: <CleanAdd />,
   },
 ]);
 
