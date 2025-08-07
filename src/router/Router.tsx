@@ -8,6 +8,7 @@ import Join from '../pages/A/Join';
 import JoinComplete from '../pages/B/JoinComplete';
 import MyPlace from '../pages/B/MyPlace';
 import AddPlace from '../pages/B/AddPlace';
+import MyInfo from '../pages/C/MyInfo';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
   {
     path: '/addPlace',
     element: <AddPlace />,
+  },
+  {
+    path: '/myInfo',
+    element: <MyInfo />,
   },
   {
     path: '/calendar',
