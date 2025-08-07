@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
-import Header from '../../components/HeaderBar';
 import GrayPlus from '../../assets/header/GrayPlus.svg';
 import ReactSwitch from 'react-switch';
 import '../../styles/CalendarOverride.css';
@@ -9,8 +10,19 @@ import DangbunList from '../../components/cleanUp/DangbunList';
 
 import BlackDown from '../../assets/cleanUpList/BlackDown.svg';
 import BlackUp from '../../assets/cleanUpList/BlackUp.svg';
+import BottomSheet from '../../components/cleanUp/BottomSheet';
+import searchIcon from '../../assets/cleanUpList/searchIcon.svg';
+import grayCheck from '../../assets/cleanUpList/GrayCheck.svg';
+import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
+
+import CTAButton from '../../components/button/CTAButton';
+import PopUpCard from '../../components/PopUp/PopUpCard';
+import arrowBack from '../../assets/nav/arrowBack.svg';
 
 const CleanAdd = () => {
+  const [name, setName] = useState('');
+  const navigate = useNavigate();
+
   //switch
   const [checked1, setChecked1] = useState(false);
   const [checked2, setChecked2] = useState(false);
@@ -85,16 +97,52 @@ const CleanAdd = () => {
   //dangbun
 
   const [dangbun, setDangbun] = useState('');
+  const [open, setOpen] = useState(false);
+  const [clickedMembers, setClickedMembers] = useState<string[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [search, setSearch] = useState('');
+  const [members, setMembers] = useState<string[]>([
+    '박완',
+    '전예영',
+    '박한나',
+    '김도현',
+    '백상희',
+    '최준서',
+  ]);
+
+  const [isModalOpen1, setIsModalOpen1] = useState(false);
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
+
+  const confirmHandle = () => {
+    if (dangbun.length === 0) {
+      setIsModalOpen1(true);
+    } else {
+      setIsModalOpen2(true);
+    }
+  };
 
   return (
     <div className='flex flex-col mt-[52px] px-5 gap-5'>
-      <Header title='' showBackButton={true} />
-      <div className='flex flex-col'>
+      <div className='fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center '>
+        <button
+          onClick={() => setIsModalOpen3(true)}
+          className='absolute left-4 cursor-pointer'
+          aria-label='뒤로가기'
+        >
+          <img src={arrowBack} alt='뒤로가기' className='w-5 h-5' />
+        </button>
+      </div>
+
+      <div className='flex flex-col gap-3'>
         <p className='text-lg font-normal leading-relaxed'>청소 이름</p>
         <input
           type='text'
           placeholder='바닥 쓸기'
           className='h-14 px-3 py-3.5 bg-stone-50 rounded-lg justify-start items-center text-base font-normal'
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         ></input>
       </div>
 
@@ -204,7 +252,7 @@ const CleanAdd = () => {
             ))}
           </select>
         </div>
-        <div className='w-[344px] h-fit py-5 flex justify-center items-center mt-4 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)'>
+        <div className='w-[353px] h-fit py-5 flex justify-center items-center mt-4 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)'>
           <Calendar
             className='w-80'
             onClickDay={handleDateClick}
@@ -241,21 +289,189 @@ const CleanAdd = () => {
           />
         </div>
       </div>
-      <div className='flex flex-col'>
+      <div className='flex flex-col gap-3'>
         <p className='text-lg font-normal leading-relaxed'>당번 지정</p>
-        <DangbunList />
+        <DangbunList onChange={(value) => setDangbun(value)} />
       </div>
-      <div>
-        <div
-          className={`flex flex-row items-center justify-between ${dangbun.length === 0 ? 'hidden' : ''}`}
-        >
+      <div
+        className={`flex flex-col gap-3 ${dangbun.length === 0 ? 'hidden' : ''}`}
+      >
+        <div className={`flex flex-row items-center justify-between`}>
           <p className='text-lg font-normal leading-relaxed'>담당 멤버</p>
-          <button className='cursor-pointer'>
+          <button className='cursor-pointer' onClick={() => setOpen(true)}>
             <img src={GrayPlus} alt='추가하기' />
           </button>
         </div>
+        <div className='flex flex-wrap gap-2 max-w-[353px]'>
+          {filteredMembers
+            .filter((name) => name.includes(search))
+            .map((name, index) => (
+              <div
+                key={index}
+                className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer bg-[#00dc7b]`}
+              >
+                {name}
+              </div>
+            ))}
+        </div>
       </div>
-      <div className='h-300'></div>
+
+      <div className='h-20'></div>
+
+      <BottomSheet
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          setFilteredMembers(clickedMembers);
+        }}
+      >
+        <div className='w-[353px] h-[348px]'>
+          <div className='flex flex-col gap-[15px]'>
+            <div className='flex relative items-center '>
+              <img src={searchIcon} alt='SEARCH' className='absolute px-3' />
+              <input
+                value={inputValue}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setInputValue(e.target.value);
+                  if (v === '') {
+                    setSearch('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearch(inputValue);
+                  }
+                }}
+                placeholder='검색'
+                className='w-[353px] h-[41px] pl-[52px] bg-stone-50 rounded-[20.5px]'
+              />
+            </div>
+
+            <div
+              className={`${search.length == 0 ? 'flex' : 'hidden'} flex-row w-[353px] items-center justify-end gap-2 `}
+            >
+              <p className='text-zinc-500 text-base font-normal leading-snug'>
+                전체 선택
+              </p>
+              <button
+                className='w-6 h-6 cursor-pointer'
+                onClick={() => {
+                  if (members.length === clickedMembers.length)
+                    setClickedMembers([]);
+                  else setClickedMembers([...members]);
+                }}
+              >
+                <img
+                  src={
+                    members.length === clickedMembers.length
+                      ? greenCheck
+                      : grayCheck
+                  }
+                  alt='graycheck'
+                  className='w-6 h-6'
+                />
+              </button>
+            </div>
+          </div>
+          <div className='flex flex-wrap gap-2 max-w-[353px] mt-5'>
+            {members
+              .filter((name) => name.includes(search))
+              .map((name, index) => (
+                <button
+                  key={index}
+                  className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer ${clickedMembers.includes(name) ? 'bg-[#00dc7b]' : 'bg-[#e5e5e5]'}`}
+                  onClick={() => {
+                    setClickedMembers((prev) =>
+                      prev.includes(name)
+                        ? prev.filter((n) => n !== name)
+                        : [...prev, name]
+                    );
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+          </div>
+        </div>
+      </BottomSheet>
+
+      <PopUpCard
+        isOpen={isModalOpen1}
+        onRequestClose={() => setIsModalOpen1(false)}
+        title={
+          <>
+            <h2 className='font-normal text-center'>
+              당번을 설정하지 않아 <br />
+              <span className='text-blue-500'>당번 미지정 청소</span>로 임시
+              저장 됩니다.
+              <br />
+              이대로 완료하시겠습니까?
+            </h2>
+          </>
+        }
+        descript=''
+        input={false}
+        placeholder=''
+        first='아니오'
+        second='네'
+        onFirstClick={() => setIsModalOpen1(false)}
+        onSecondClick={() => {}}
+      />
+
+      <PopUpCard
+        isOpen={isModalOpen2}
+        onRequestClose={() => setIsModalOpen2(false)}
+        title={
+          <>
+            <h2 className='font-normal text-center'>
+              이대로 <span className='font-semibold'>"{name}"</span> 청소를
+              <br />
+              <span className='text-blue-500'>생성</span>할까요?
+              <br />
+            </h2>
+          </>
+        }
+        descript={<>이후에도 내용 수정이 가능합니다.</>}
+        input={false}
+        placeholder=''
+        first='아니오'
+        second='네'
+        onFirstClick={() => setIsModalOpen2(false)}
+        onSecondClick={() => {}}
+      />
+
+      <PopUpCard
+        isOpen={isModalOpen3}
+        onRequestClose={() => setIsModalOpen3(false)}
+        title={
+          <>
+            <h2 className='font-normal text-center'>
+              <span className='font-semibold'>청소 생성</span>이 완료되지
+              않았습니다.
+              <br /> 정말 나가시겠습니까?
+            </h2>
+          </>
+        }
+        descript={<>작성중인 내용은 저장되지 않습니다.</>}
+        input={false}
+        placeholder=''
+        first='아니오'
+        second='네'
+        onFirstClick={() => setIsModalOpen3(false)}
+        onSecondClick={() => {
+          if (window.history.length > 1) navigate(-1);
+          else navigate('/');
+        }}
+      />
+
+      <CTAButton
+        variant={name ? 'blue' : 'gray'}
+        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
+        onClick={name ? confirmHandle : () => {}}
+      >
+        완료
+      </CTAButton>
     </div>
   );
 };

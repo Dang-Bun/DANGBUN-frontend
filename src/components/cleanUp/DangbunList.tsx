@@ -10,7 +10,11 @@ import c6 from '../../assets/cleanIcon/moppingImg_3.svg';
 import c7 from '../../assets/cleanIcon/polishImg.svg';
 import c8 from '../../assets/cleanIcon/sprayerImg.svg';
 
-const DangbunList = () => {
+interface DangbunListProps {
+  onChange: (value: string) => void;
+}
+
+const DangbunList = ({ onChange }: DangbunListProps) => {
   const options = [
     {
       value: 'sweep',
@@ -29,8 +33,12 @@ const DangbunList = () => {
     },
   ];
 
+  const handleChange = (option: any) => {
+    onChange(option.value);
+  };
+
   const custom = ({ data }: any) => (
-    <div className=' h-[34px] flex flex-row gap-3 text-center justify-start items-center'>
+    <div className='flex flex-row gap-3 items-center h-[34px] text-black text-base font-normal leading-snug'>
       <img src={data.icon} alt='icon' className='w-9 h-9' />
       {data.label}
     </div>
@@ -42,7 +50,7 @@ const DangbunList = () => {
       <div
         ref={innerRef}
         {...innerProps}
-        className=' h-[34px] flex flex-row gap-3 text-center justify-start items-center'
+        className='  h-[34px] p-[10px] flex flex-row gap-3 my-4 text-center justify-start items-center cursor-pointer'
       >
         <img src={data.icon} alt='icon' className='w-9 h-9' />
         {data.label}
@@ -57,13 +65,43 @@ const DangbunList = () => {
           options={options}
           placeholder='선택'
           components={{ SingleValue: custom, Option: customOption }}
-          className='w-[353px] h-14 py-[17px] pl-3 pr-6 rounded-lg outline-1 outline-neutral-200 bg-stone-50'
+          onChange={handleChange}
           styles={{
             control: (provided) => ({
               ...provided,
-              height: '34px',
+              display: 'flex',
+              height: '56px',
+              paddingLeft: '12px',
+              paddingRight: '15px',
+              alignItems: 'center',
               borderRadius: '8px',
               fontSize: '16px',
+              color: '#8e8e8e',
+              borderColor: '#dedede',
+            }),
+            option: (provided) => ({
+              ...provided,
+              display: 'flex',
+              alignItems: 'center',
+            }),
+            indicatorSeparator: () => ({ display: 'none' }),
+            dropdownIndicator: () => ({
+              cursor: 'pointer',
+            }),
+            menu: () => ({
+              display: 'flex',
+              width: '353px',
+              borderRadius: '8px',
+              background: '#fff',
+              boxShadow: '0 0 8px 0 rgba(0,0,0,0.10)',
+              marginTop: '12px',
+            }),
+            input: () => ({
+              display: 'none',
+            }),
+            valueContainer: () => ({
+              padding: 0,
+              margin: 0,
             }),
           }}
         />

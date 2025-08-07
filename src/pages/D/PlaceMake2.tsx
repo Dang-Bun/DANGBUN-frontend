@@ -7,9 +7,6 @@ import FreeButton from '../../components/button/FreeButton';
 import Header from '../../components/HeaderBar';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
-
-import { usePlaceApi } from '../../hooks/usePlaceApi';
-
 const PlaceMake2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,7 +57,6 @@ const PlaceMake2 = () => {
         </h2>
       </div>
       <div className='flex flex-col items-start justify-start gap-3 mb-20.5'>
-
         <div className='flex flex-row relative'>
           <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
             이름

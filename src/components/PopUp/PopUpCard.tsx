@@ -6,7 +6,7 @@ interface PopUpCardProps {
   isOpen: boolean;
   onRequestClose: () => void;
   title: React.ReactNode;
-  descript: string;
+  descript: React.ReactNode;
   input?: boolean;
   placeholder?: string;
   first?: string;
