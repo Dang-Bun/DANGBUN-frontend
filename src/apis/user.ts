@@ -1,4 +1,8 @@
-import api from './axios'; // 너가 설정한 axios 인스턴스
+import api from './axios';
+
+export const fetchMyInfo = () => {
+  return api.get('/users/me');
+};
 
 export const signupUser = async ({
   email,
