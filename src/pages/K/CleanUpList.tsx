@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
 
 import Header from '../../components/HeaderBar';
 import grayPlus from '../../assets/header/GrayPlus.svg';
@@ -15,6 +15,8 @@ import BottomSheet from '../../components/cleanUp/BottomSheet';
 import grayX from '../../assets/cleanUpList/GrayX.svg';
 import DownImg from '../../assets/chevron/bottom_chevronImg.svg';
 import refresh from '../../assets/cleanUpList/refresh.svg';
+
+import { useCleaningApi } from '../../hooks/useCleaningApi';
 
 const CleanUpList = () => {
   const [open, setOpen] = useState(false);
@@ -40,6 +42,15 @@ const CleanUpList = () => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     setContentMargin(headerHeight);
   });
+
+  const memberDuty = async () => {
+    try {
+      const res = await useCleaningApi.searchDuty();
+      console.log(res.data);
+    } catch (e) {
+      console.error('fail:', e);
+    }
+  };
 
   return (
     <div className='flex flex-col w-[393px] px-5 '>

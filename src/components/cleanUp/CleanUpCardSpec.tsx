@@ -7,7 +7,7 @@ const CleanUpCardSpec = () => {
   return (
     <div className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'>
       <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
-      <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-white rounded-lg justify-center items-start'>
+      <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
         <div className='flex flex-col justify-center items-start gap-1.5'>
           <p className='text-black text-base font-normal leading-snug'>
             바닥 쓸기
