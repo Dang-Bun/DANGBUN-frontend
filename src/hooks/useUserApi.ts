@@ -6,6 +6,7 @@ export const useUserApi = {
   logout: () => {},
   login: (data: { email: string; password: string }) =>
     api.post('users/login', data),
+
   emailcode: () => {},
   me: () => {},
 };
