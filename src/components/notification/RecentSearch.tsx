@@ -12,7 +12,7 @@ const RecentSearch = ({ label, deleted = false }: RecentSearchProps) => {
         ? 'bg-[#F6F6F6]' : 'bg-[#BDBDBD]';
 
   return (
-    <div className={`w-fit p-[16px] h-[31px] rounded-[8px] gap-[5px] ${bgColor} flex items-center justify-center text-sm font-medium`}>
+    <div className={`w-fit p-[16px] h-[31px] rounded-[8px] gap-[5px] text-sm font-normal ${bgColor} flex items-center justify-center text-sm font-medium`}>
       {label}
       <img src={closeIcon} alt="닫기" />
     </div>
