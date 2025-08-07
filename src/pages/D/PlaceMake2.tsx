@@ -8,10 +8,13 @@ import Header from '../../components/HeaderBar';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
+import { usePlaceApi } from '../../hooks/usePlaceApi';
+
 const PlaceMake2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { placeName, role } = location.state || {};
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [infoList, setInfoList] = useState([{ label: '이메일', value: '' }]);
   const [name, setName] = useState('');
@@ -34,7 +37,6 @@ const PlaceMake2 = () => {
       } catch (e) {
         console.error('place making failed:', e);
       }
-
       navigate('/placemake3', {
         state: {
           placeName: placeName,
@@ -58,6 +60,7 @@ const PlaceMake2 = () => {
         </h2>
       </div>
       <div className='flex flex-col items-start justify-start gap-3 mb-20.5'>
+
         <div className='flex flex-row relative'>
           <p className='w-24 px-4 py-3.5 text-center text-base font-semibold leading-snug'>
             이름
