@@ -8,7 +8,6 @@ import Header from '../../components/HeaderBar';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
-import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 const PlaceMake2 = () => {
   const location = useLocation();

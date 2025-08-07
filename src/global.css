@@ -62,3 +62,15 @@ body {
   margin-right: auto;
   padding: 0;
 }
+
+html{
+  width : 393px;
+  height: 852px;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
