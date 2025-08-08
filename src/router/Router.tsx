@@ -14,8 +14,6 @@ import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 import NotificationDetail from '../pages/G/NotificationDetail';
 import NotificationCreate from '../pages/G/NotificationCreate';
-
-import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
@@ -28,6 +26,7 @@ import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
+import DangerZone from '../pages/N/DangerZone';
 
 const router = createBrowserRouter([
   {
@@ -84,7 +83,7 @@ const router = createBrowserRouter([
   },
   {
     path: 'placemake1',
-    element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
+    element: <PlaceMake1 />,
   },
   {
     path: 'placemake2',
@@ -105,10 +104,6 @@ const router = createBrowserRouter([
   {
     path: '/setting',
     element: <Setting />,
-  },
-  {
-    path: '/popup',
-    element: <RequestPopUp />,
   },
   {
     path: '/cleanuplist',
@@ -133,6 +128,10 @@ const router = createBrowserRouter([
   {
     path: '/cleaninfo',
     element: <CleanInfo data={undefined} />,
+  },
+  {
+    path: '/dangerzone',
+    element: <DangerZone />,
   },
 ]);
 

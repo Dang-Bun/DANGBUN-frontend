@@ -16,23 +16,24 @@ import api from '../../apis/axios';
 
 const Setting = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
+  //아래 주석은 플레이스 연동 완료 후 연동 예정
+  // const [name, setName] = useState('');
 
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const res = await api.get('/places/{placeId}/members/me');
-        const memberName = res.data.data;
-        setName({ memberName });
-      } catch (error) {
-        console.error('유저 정보 불러오기 실패:', error);
-        // 인증 만료 시 로그인 페이지로 이동
-        navigate('/login');
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserName = async () => {
+  //     try {
+  //       const res = await api.get('/places/{placeId}/members/me');
+  //       const memberName = res.data.data;
+  //       setName({ memberName });
+  //     } catch (error) {
+  //       console.error('유저 정보 불러오기 실패:', error);
+  //       // 인증 만료 시 로그인 페이지로 이동
+  //       navigate('/login');
+  //     }
+  //   };
 
-    fetchUserName();
-  }, [navigate]);
+  //   fetchUserName();
+  // }, [navigate]);
 
   return (
     <div className='w-full min-h-screen flex flex-col justify-between'>
@@ -139,7 +140,10 @@ const Setting = () => {
             </div>
             <img src={blue_right_chevron} alt='>' />
           </div>
-          <div className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'>
+          <div
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px] cursor-pointer'
+            onClick={() => navigate('/dangerzone')}
+          >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
                 <div className='absolute inset-0 bg-[#D4E0FD] rounded-full z-0' />
