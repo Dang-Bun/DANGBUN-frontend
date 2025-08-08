@@ -26,7 +26,8 @@ import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
-import DangerZone from '../pages/N/DangerZone';
+import DangerZoneManager from '../pages/N/DangerZoneManager';
+import DangerZoneMember from '../pages/N/DangerZoneMember';
 
 const router = createBrowserRouter([
   {
@@ -130,8 +131,12 @@ const router = createBrowserRouter([
     element: <CleanInfo data={undefined} />,
   },
   {
-    path: '/dangerzone',
-    element: <DangerZone />,
+    path: '/dangerzone/manager',
+    element: <DangerZoneManager />,
+  },
+  {
+    path: '/dangerzone/member',
+    element: <DangerZoneMember />,
   },
 ]);
 
