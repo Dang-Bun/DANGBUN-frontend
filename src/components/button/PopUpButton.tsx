@@ -12,7 +12,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const base =
-    'w-full rounded-[8px] px-[12px] py-[10px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
+    'w-full rounded-[8px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
 
   const sizeClass = 'max-w-[126px] h-[36px] text-[12px] font-[400]';
 
