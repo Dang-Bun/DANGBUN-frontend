@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'blue' | 'thickGray' | 'gray';
+  variant?: 'blue' | 'thickGray' | 'gray' | 'red';
   fontSize?: number; // px 단위
   height?: number; // px 단위
   maxWidth?: number; // px 단위
@@ -28,6 +28,7 @@ const Button: React.FC<ButtonProps> = ({
     blue: 'bg-[#4d83fd] text-[#fff] font-[Pretendard] font-medium leading-[140%]',
     thickGray: 'bg-[#bdbdbd] text-[#fff]',
     gray: 'bg-[#f6f6f6] text-[#8e8e8e] border-[1px] border-solid border-[#dedede]',
+    red: 'bg-[#ffe5e6] text-[#ff0000] border-[1px] border-solid border-[#ff0000]',
   }[variant];
 
   return (
