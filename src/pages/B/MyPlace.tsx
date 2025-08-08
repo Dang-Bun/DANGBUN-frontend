@@ -16,7 +16,13 @@ const MyPlace = () => {
         <div className='flex w-full text-[20px] justify-center'>
           내 플레이스
         </div>
-        <img src={threebar} alt='목록' />
+        <img
+          src={threebar}
+          alt='목록'
+          onClick={() => {
+            navigate('/myInfo');
+          }}
+        />
       </div>
       <div className='w-full flex justify-center mb-[229px]'>
         <img src={nothingPlace} alt='플레이스 없음' />

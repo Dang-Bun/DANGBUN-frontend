@@ -11,25 +11,28 @@ import NameTag from '../../assets/setting/NameTag.svg';
 import Cinema from '../../assets/placeIcon/cinemaImg.svg';
 import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
-import { fetchMyInfo } from '../../apis/user';
 import { useNavigate } from 'react-router-dom';
+import api from '../../apis/axios';
 
 const Setting = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
 
   useEffect(() => {
-    const getUserInfo = async () => {
+    const fetchUserName = async () => {
       try {
-        const res = await fetchMyInfo();
-        setName(res.data.data.name);
-      } catch (e) {
-        console.error('유저 정보 가져오기 실패:', e);
+        const res = await api.get('/places/{placeId}/members/me');
+        const memberName = res.data.data;
+        setName({ memberName });
+      } catch (error) {
+        console.error('유저 정보 불러오기 실패:', error);
+        // 인증 만료 시 로그인 페이지로 이동
+        navigate('/login');
       }
     };
 
-    getUserInfo();
-  }, []);
+    fetchUserName();
+  }, [navigate]);
 
   return (
     <div className='w-full min-h-screen flex flex-col justify-between'>

@@ -63,10 +63,6 @@ body {
   padding: 0;
 }
 
-html{
-  width : 393px;
-  height: 852px;
-}
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

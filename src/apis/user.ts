@@ -1,9 +1,5 @@
 import api from './axios';
 
-export const fetchMyInfo = () => {
-  return api.get('/users/me');
-};
-
 export const signupUser = async ({
   email,
   password,
@@ -20,5 +16,11 @@ export const signupUser = async ({
     password,
     name,
     certCode,
+  });
+};
+
+export const withdrawUser = async (email: string) => {
+  return await api.delete('/users/me', {
+    data: { email },
   });
 };
