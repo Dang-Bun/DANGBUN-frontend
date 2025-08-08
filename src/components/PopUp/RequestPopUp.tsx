@@ -1,6 +1,7 @@
 import React from 'react';
 import PopupCard from './PopUpCard';
 import { useNavigate } from 'react-router-dom';
+import { withdrawUser } from '../../apis/user';
 
 const RequestPopUp = ({
   isWithdrawalOpen,
@@ -18,12 +19,10 @@ const RequestPopUp = ({
         isOpen={isWithdrawalOpen}
         onRequestClose={closeWithdrawal}
         title={
-          <>
-            <h2 className='font-normal'>
-              정말 당번에서 <span className='font-bold'>탈퇴</span>
-              하시나요?
-            </h2>
-          </>
+          <span className='font-normal'>
+            정말 당번에서 <span className='font-bold'>탈퇴</span>
+            하시나요?
+          </span>
         }
         descript={`당번에서 사용하고 저장한 정보는\n탈퇴 후 복구되지 않습니다.\n계속해서 탈퇴를 진행하시려면\n“사용자 이메일”을 입력하세요.`}
         input={true}
@@ -31,11 +30,27 @@ const RequestPopUp = ({
         first='취소'
         second='탈퇴'
         onFirstClick={closeWithdrawal}
-        onSecondClick={(email) => {
-          // 여기서 탈퇴 처리 로직 넣어도 됨
-          // 예: await api.withdraw(email);
-          closeWithdrawal(); // 현재 모달 닫고
-          setIsModalOpen2(true); // 완료 모달 열기
+        onSecondClick={async (email) => {
+          try {
+            const response = await withdrawUser(email);
+
+            if (response.data.code === 20000) {
+              // 1. 토큰 삭제
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+
+              // 2. 모달 전환
+              closeWithdrawal();
+              setIsModalOpen2(true);
+              console.log(`탈퇴 성공!: $${response.data.message}`);
+            } else {
+              alert(`❗ 탈퇴 실패: ${response.data.message}`);
+            }
+          } catch (error: any) {
+            alert(
+              `❌ 탈퇴 요청 중 에러 발생: ${error.response?.data?.message || error.message}`
+            );
+          }
         }}
       />
 
@@ -43,11 +58,9 @@ const RequestPopUp = ({
         isOpen={isModalOpen2}
         onRequestClose={() => setIsModalOpen2(false)}
         title={
-          <>
-            <h2 className='font-normal'>
-              <span className='font-bold'>탈퇴</span>가 완료 되었습니다.
-            </h2>
-          </>
+          <span className='font-normal'>
+            <span className='font-bold'>탈퇴</span>가 완료 되었습니다.
+          </span>
         }
         descript=''
         input={false}

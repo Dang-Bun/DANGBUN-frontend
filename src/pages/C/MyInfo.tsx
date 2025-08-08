@@ -16,6 +16,19 @@ const MyInfoPage = () => {
     email: string;
   } | null>(null);
 
+  const logoutUser = async () => {
+    try {
+      const res = await api.post('/users/logout');
+      if (res.data.code === 20000) {
+        console.log('✅ 로그아웃 성공');
+      } else {
+        console.warn('⚠️ 로그아웃 응답: ', res.data.message);
+      }
+    } catch (error) {
+      console.error('❌ 로그아웃 실패: ', error);
+    }
+  };
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -32,7 +45,7 @@ const MyInfoPage = () => {
 
   return (
     <>
-      <div className='relative w-full max-w-[393px] min-h-screen mx-auto bg-white flex flex-col py-6 px-4'>
+      <div className='relative w-full max-w-[393px] min-h-screen bg-white flex flex-col py-6 px-4'>
         {/* 상단 헤더 */}
         <div className='mb-[500px]'>
           <div className='flex items-center justify-center mt-[72px] mb-[34px]'>
@@ -90,12 +103,10 @@ const MyInfoPage = () => {
         isOpen={isModalOpen3}
         onRequestClose={() => setIsModalOpen3(false)}
         title={
-          <>
-            <h2 className='font-normal'>
-              정말 당번에서 <span className='font-bold'>로그아웃</span>
-              하시나요?
-            </h2>
-          </>
+          <span className='font-normal'>
+            정말 당번에서 <span className='font-bold'>로그아웃</span>
+            하시나요?
+          </span>
         }
         descript=''
         input={false}
@@ -103,10 +114,15 @@ const MyInfoPage = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen3(false)}
-        onSecondClick={() => {
+        onSecondClick={async () => {
           setIsModalOpen3(false);
-          setIsModalOpen4(true);
 
+          await logoutUser();
+
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+
+          setIsModalOpen4(true);
           setTimeout(() => {
             navigate('/login');
           }, 3000);
@@ -116,11 +132,9 @@ const MyInfoPage = () => {
         isOpen={isModalOpen4}
         onRequestClose={() => setIsModalOpen4(false)}
         title={
-          <>
-            <h2 className='font-normal'>
-              <span className='font-bold'>로그아웃</span>이 완료 되었습니다.
-            </h2>
-          </>
+          <span className='font-normal'>
+            <span className='font-bold'>로그아웃</span>이 완료 되었습니다.
+          </span>
         }
         descript=''
         input={false}

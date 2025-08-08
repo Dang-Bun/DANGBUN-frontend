@@ -18,3 +18,9 @@ export const signupUser = async ({
     certCode,
   });
 };
+
+export const withdrawUser = async (email: string) => {
+  return await api.delete('/users/me', {
+    data: { email },
+  });
+};
