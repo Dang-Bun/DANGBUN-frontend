@@ -74,7 +74,7 @@ const CleanInfo: React.FC<CleanInfoProps> = () => {
 
   return (
     <div className='flex justify-center px-5'>
-      <HeaderBar title='청소 정보' />
+      <HeaderBar title='청소 정보' showBackButton={true} />
       <div className='flex flex-col mt-[52px] w-[353px] gap-8'>
         <div className='flex flex-row justify-between items-center'>
           <span className='text-base font-semibold'>청소 이름</span>
