@@ -116,9 +116,7 @@ const CleanEdit = () => {
   const [isModalOpen3, setIsModalOpen3] = useState(false);
 
   const confirmHandle = () => {
-    if (dangbun.length !== 0) {
-      setIsModalOpen2(true);
-    }
+    setIsModalOpen2(true);
   };
 
   const deleteHandle = () => {
@@ -404,7 +402,7 @@ const CleanEdit = () => {
         title={
           <>
             <h2 className='font-normal text-center'>
-              정말 <span className='font-semibold'>"{name}"</span> 를
+              정말 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
               <span className='text-blue-500'>삭제</span>할까요?
               <br />
@@ -417,7 +415,7 @@ const CleanEdit = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => {}} //삭제 API 연결
       />
 
       <PopUpCard
@@ -439,7 +437,7 @@ const CleanEdit = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen2(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => {}} //수정 API 연결
       />
 
       <PopUpCard
@@ -465,22 +463,23 @@ const CleanEdit = () => {
           else navigate('/');
         }}
       />
+      <div>
+        <CTAButton
+          variant={name ? 'blue' : 'gray'}
+          style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
+          onClick={name ? confirmHandle : () => {}}
+        >
+          완료
+        </CTAButton>
 
-      <CTAButton
-        variant={name ? 'blue' : 'gray'}
-        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
-        onClick={name ? confirmHandle : () => {}}
-      >
-        완료
-      </CTAButton>
-
-      <CTAButton
-        variant={'gray'}
-        style={{ marginBottom: '40px', cursor: 'pointer' }}
-        onClick={name ? deleteHandle : () => {}}
-      >
-        완료
-      </CTAButton>
+        <CTAButton
+          variant={'gray'}
+          style={{ marginBottom: '40px', cursor: 'pointer' }}
+          onClick={deleteHandle}
+        >
+          삭제하기
+        </CTAButton>
+      </div>
     </div>
   );
 };
