@@ -19,10 +19,18 @@ const LogIn = () => {
   const handleSign = async () => {
     try {
       const res = await useUserApi.login({
-        email: email,
-        password: password,
+        email,
+        password,
       });
-      const { accessToken, refreshToken } = res.data.data;
+
+      const tokenData = res.data?.data;
+
+      // 토큰 데이터가 없는 경우 (로그인 실패 또는 서버 오류)
+      if (!tokenData || !tokenData.accessToken || !tokenData.refreshToken) {
+        throw new Error('accessToken 또는 refreshToken이 없습니다.');
+      }
+
+      const { accessToken, refreshToken } = tokenData;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
