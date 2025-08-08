@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import CTAButton from '../../components/button/CTAButton';
 import FreeButton from '../../components/button/FreeButton';
-import PopUpCard from '../../components/PopUp/PopUpCard';
+import PopUpCardDanger from '../../components/PopUp/PopUpCardDanger';
 
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import bottom_chevron from '../../assets/chevron/bottom_chevronImg.svg';
@@ -12,10 +12,11 @@ import profile from '../../assets/setting/profile.svg';
 
 const DangerZone = () => {
   const [isListCollapsed, setIsListCollapsed] = useState(true);
-  const [showExpelModal, setShowExpelModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [dPlaceModalOpen1, setdPlaceModalOpen1] = React.useState(false);
   const [dPlaceModalOpen2, setdPlaceModalOpen2] = React.useState(false);
+  const [dMemberModalOpen1, setdMemberModalOpen1] = React.useState(false);
+  const [dMemberModalOpen2, setdMemberModalOpen2] = React.useState(false);
 
   const navigate = useNavigate();
 
@@ -27,7 +28,7 @@ const DangerZone = () => {
 
   const handleExpel = (name: string) => {
     setSelectedMember(name);
-    setShowExpelModal(true);
+    setdMemberModalOpen1(true);
   };
 
   return (
@@ -92,15 +93,8 @@ const DangerZone = () => {
         </CTAButton>
       </div>
 
-      {/* 추방 모달 */}
-      {showExpelModal && (
-        <div className='modal'>
-          <p>{selectedMember}님을 정말 추방하시겠습니까?</p>
-          <button onClick={() => setShowExpelModal(false)}>닫기</button>
-        </div>
-      )}
-
-      <PopUpCard
+      {/* 플레이스 삭제 모달 */}
+      <PopUpCardDanger
         isOpen={dPlaceModalOpen1}
         onRequestClose={() => setdPlaceModalOpen1(false)}
         title={
@@ -118,8 +112,8 @@ const DangerZone = () => {
           setdPlaceModalOpen1(false);
           setdPlaceModalOpen2(true);
         }}
-      ></PopUpCard>
-      <PopUpCard
+      ></PopUpCardDanger>
+      <PopUpCardDanger
         isOpen={dPlaceModalOpen2}
         onRequestClose={() => setdPlaceModalOpen2(false)}
         title={
@@ -134,7 +128,44 @@ const DangerZone = () => {
         onSecondClick={() => {
           navigate('/myPlace');
         }}
-      ></PopUpCard>
+      ></PopUpCardDanger>
+
+      {/* 맴버 추방 모달 */}
+      <PopUpCardDanger
+        isOpen={dMemberModalOpen1}
+        onRequestClose={() => setdMemberModalOpen1(false)}
+        title={
+          <span className='font-normal'>
+            해당 맴버를 <span className='font-bold'>추방</span>하시겠습니까?
+          </span>
+        }
+        descript={`계속하시려면 “멤버 이름”을 입력해주세요.`}
+        input={true}
+        placeholder='맴버 이름 입력'
+        first='취소'
+        second='추방'
+        onFirstClick={() => setdMemberModalOpen1(false)}
+        onSecondClick={async () => {
+          setdMemberModalOpen1(false);
+          setdMemberModalOpen2(true);
+        }}
+      ></PopUpCardDanger>
+      <PopUpCardDanger
+        isOpen={dMemberModalOpen2}
+        onRequestClose={() => setdMemberModalOpen2(false)}
+        title={
+          <span className='font-normal'>
+            <span className='font-bold'>추방</span>이 완료 되었습니다.
+          </span>
+        }
+        descript=''
+        input={false}
+        placeholder=''
+        second='확인'
+        onSecondClick={() => {
+          setdMemberModalOpen2(false);
+        }}
+      ></PopUpCardDanger>
     </div>
   );
 };
