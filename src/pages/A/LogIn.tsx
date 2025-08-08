@@ -54,7 +54,13 @@ const LogIn = () => {
         <CTAButton onClick={handleSign}>로그인</CTAButton>
         <div className='w-[353px] flex flex-row justify-end -mt-[2.75px] -mb-[2px]'>
           <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
-          <img src={right_chevron} alt='오른쪽 화살표' />
+          <img
+            src={right_chevron}
+            alt='오른쪽 화살표'
+            onClick={() => {
+              navigate('/findPassWord');
+            }}
+          />
         </div>
         <CTAButton onClick={handleClick} variant='gray'>
           회원가입
