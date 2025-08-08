@@ -7,6 +7,7 @@ import FreeButton from '../../components/button/FreeButton';
 import Header from '../../components/HeaderBar';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
+
 const PlaceMake2 = () => {
   const location = useLocation();
   const navigate = useNavigate();

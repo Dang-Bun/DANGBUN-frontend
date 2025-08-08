@@ -6,6 +6,7 @@ import speakerImg from '../../assets/notificationIcon/speakerImg.svg';
 interface TemplateCardProps {
   type : 'clean' | 'newMember' | 'update'
   selected?: boolean;
+  onClick? : () => void;
 }
 
 const typeToText : Record<TemplateCardProps['type'], string> = {
@@ -20,7 +21,7 @@ const typeToImg : Record<TemplateCardProps['type'], string> = {
   update : speakerImg,
 };
 
-const TemplateCard = ({ type, selected = false }: TemplateCardProps) =>{
+const TemplateCard = ({ type, selected = false, onClick }: TemplateCardProps) =>{
   
   const bgColor = 
     selected 
@@ -29,7 +30,9 @@ const TemplateCard = ({ type, selected = false }: TemplateCardProps) =>{
   const icon = typeToImg[type];
 
   return (
-    <div className={`w-[353px] h-[56px] rounded-xl flex ${bgColor} flex px-[16px] items-center gap-[10px]`}>
+    <div 
+    onClick={onClick}
+    className={`w-[353px] h-[56px] rounded-xl flex ${bgColor} flex px-[16px] items-center gap-[10px]`}>
       <img src={icon} alt="아이콘" className='w-[32px] h-[32px]'/>
       <p className='text-base'>{text}</p>
     </div>
