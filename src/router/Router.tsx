@@ -22,6 +22,7 @@ import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
+import UnDangbun from '../pages/K/UnDangbun';
 
 const router = createBrowserRouter([
   {
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
   {
     path: '/cleanedit',
     element: <CleanEdit />,
+  },
+  {
+    path: '/undangbun',
+    element: <UnDangbun />,
   },
 ]);
 
