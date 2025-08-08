@@ -142,7 +142,7 @@ const Setting = () => {
           </div>
           <div
             className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px] cursor-pointer'
-            onClick={() => navigate('/dangerzone')}
+            onClick={() => navigate('/dangerzone/manager')}
           >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>

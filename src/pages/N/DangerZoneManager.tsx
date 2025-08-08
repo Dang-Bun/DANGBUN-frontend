@@ -10,7 +10,7 @@ import bottom_chevron from '../../assets/chevron/bottom_chevronImg.svg';
 import top_chevron from '../../assets/chevron/top_chevron.svg';
 import profile from '../../assets/setting/profile.svg';
 
-const DangerZone = () => {
+const DangerZoneManager = () => {
   const [isListCollapsed, setIsListCollapsed] = useState(true);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [dPlaceModalOpen1, setdPlaceModalOpen1] = React.useState(false);
@@ -170,4 +170,4 @@ const DangerZone = () => {
   );
 };
 
-export default DangerZone;
+export default DangerZoneManager;
