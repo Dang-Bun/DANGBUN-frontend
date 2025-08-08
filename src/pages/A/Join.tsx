@@ -62,12 +62,13 @@ const Join = () => {
 
     try {
       const response = await api.post(
-        '/users/email-code',
+        '/users/signup/email-code',
         { email },
         { withCredentials: false }
       );
 
       if (response.data.code === 20000) {
+        console.log('회원가입 성공');
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
