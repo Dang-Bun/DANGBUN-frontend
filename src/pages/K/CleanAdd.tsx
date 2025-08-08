@@ -31,6 +31,7 @@ const CleanAdd = () => {
   };
   const cleanChange = (nextChecked: boolean) => {
     setChecked2(nextChecked);
+    setSelectedCycle('');
   };
 
   //radio
@@ -88,6 +89,8 @@ const CleanAdd = () => {
       setSelectedDates([new Date(year, month, 1)]);
     } else if (selectedCycle === '매달 마지막 날') {
       setSelectedDates([new Date(year, month, daysInMonth)]);
+    } else {
+      setSelectedDates([]);
     }
     function getDayName(dayNumber: number): string {
       return ['일', '월', '화', '수', '목', '금', '토'][dayNumber];
@@ -186,16 +189,19 @@ const CleanAdd = () => {
                   value={option}
                   checked={selectedCycle === option}
                   onChange={() => setSelectedCycle(option)}
+                  disabled={checked2}
                   className='hidden'
                 />
                 <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 cursor-pointer ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 ${checked2 ? 'cursor-default' : 'cursor-pointer'}  ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
                 >
                   {selectedCycle === option && (
                     <span className='flex items-center justify-center  w-3.5 h-3.5 bg-blue-500 rounded-full' />
                   )}
                 </span>
-                <span className='flex text-zinc-600 text-base font-normal leading-snug text-center justify-center items-center'>
+                <span
+                  className={`flex ${checked2 ? 'text-neutral-200' : 'text-zinc-600'} text-base font-normal leading-snug text-center justify-center items-center`}
+                >
                   {option}
                 </span>
               </label>
