@@ -5,6 +5,7 @@ import SplashScreen from '../pages/Z/SplashScreen';
 import Z_onBoarding from '../pages/Z/Z_onBoarding';
 import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
+import FindPassword from '../pages/A/FindPassword';
 import JoinComplete from '../pages/B/JoinComplete';
 import MyPlace from '../pages/B/MyPlace';
 import AddPlace from '../pages/B/AddPlace';
@@ -12,7 +13,7 @@ import MyInfo from '../pages/C/MyInfo';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 import NotificationDetail from '../pages/G/NotificationDetail';
-import NotificationCreate from '../pages/G/NotificationCreate'; 
+import NotificationCreate from '../pages/G/NotificationCreate';
 
 import RequestPopUp from '../components/PopUp/RequestPopUp';
 import PlaceMake1 from '../pages/D/PlaceMake1';
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
     element: <LogIn />,
   },
   {
+    path: '/findPassWord',
+    element: <FindPassword />,
+  },
+  {
     path: '/join',
     element: <Join />,
   },
@@ -69,14 +74,14 @@ const router = createBrowserRouter([
     path: '/alarm',
     element: <Notification />,
   },
- {
+  {
     path: '/alarm/:id',
     element: <NotificationDetail />,
   },
   {
     path: '/alarm/create',
     element: <NotificationCreate />,
-  }, 
+  },
   {
     path: 'placemake1',
     element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
