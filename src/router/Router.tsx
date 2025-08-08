@@ -5,6 +5,7 @@ import SplashScreen from '../pages/Z/SplashScreen';
 import Z_onBoarding from '../pages/Z/Z_onBoarding';
 import LogIn from '../pages/A/LogIn';
 import Join from '../pages/A/Join';
+import FindPassword from '../pages/A/FindPassword';
 import JoinComplete from '../pages/B/JoinComplete';
 import MyPlace from '../pages/B/MyPlace';
 import AddPlace from '../pages/B/AddPlace';
@@ -12,9 +13,7 @@ import MyInfo from '../pages/C/MyInfo';
 import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 import NotificationDetail from '../pages/G/NotificationDetail';
-import NotificationCreate from '../pages/G/NotificationCreate'; 
-
-import RequestPopUp from '../components/PopUp/RequestPopUp';
+import NotificationCreate from '../pages/G/NotificationCreate';
 import PlaceMake1 from '../pages/D/PlaceMake1';
 import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
@@ -27,6 +26,8 @@ import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
+import DangerZoneManager from '../pages/N/DangerZoneManager';
+import DangerZoneMember from '../pages/N/DangerZoneMember';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LogIn />,
+  },
+  {
+    path: '/findPassWord',
+    element: <FindPassword />,
   },
   {
     path: '/join',
@@ -69,17 +74,17 @@ const router = createBrowserRouter([
     path: '/alarm',
     element: <Notification />,
   },
- {
+  {
     path: '/alarm/:id',
     element: <NotificationDetail />,
   },
   {
     path: '/alarm/create',
     element: <NotificationCreate />,
-  }, 
+  },
   {
     path: 'placemake1',
-    element: <PlaceMake1 />, // Ensure PlaceMake1 is imported correctly
+    element: <PlaceMake1 />,
   },
   {
     path: 'placemake2',
@@ -100,10 +105,6 @@ const router = createBrowserRouter([
   {
     path: '/setting',
     element: <Setting />,
-  },
-  {
-    path: '/popup',
-    element: <RequestPopUp />,
   },
   {
     path: '/cleanuplist',
@@ -128,6 +129,14 @@ const router = createBrowserRouter([
   {
     path: '/cleaninfo',
     element: <CleanInfo data={undefined} />,
+  },
+  {
+    path: '/dangerzone/manager',
+    element: <DangerZoneManager />,
+  },
+  {
+    path: '/dangerzone/member',
+    element: <DangerZoneMember />,
   },
 ]);
 

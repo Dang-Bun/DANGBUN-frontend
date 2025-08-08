@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useJoinForm } from '../../hooks/B/useJoinForm';
+import { useFindForm } from '../../hooks/B/useFindForm';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/input/Input';
@@ -10,13 +10,10 @@ import FreeButton from '../../components/button/FreeButton';
 import Dropdown from '../../components/input/Dropdown';
 import api from '../../apis/axios';
 import classNames from 'classnames';
-import { signupUser } from '../../apis/user';
 
-const Join = () => {
+const FindPassword = () => {
   const navigate = useNavigate();
   const {
-    name,
-    setName,
     emailId,
     setEmailId,
     emailDomain,
@@ -32,7 +29,7 @@ const Join = () => {
     isFormFilled,
     isEmailFilled,
     isPasswordValid,
-  } = useJoinForm();
+  } = useFindForm();
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
@@ -47,7 +44,6 @@ const Join = () => {
   const handleRequestVerification = () => {
     setIsRequested(true);
     setTimeLeft(180); // 3분
-    // TODO: 실제 인증번호 요청 API 호출
   };
 
   const formatTime = (seconds: number) => {
@@ -62,13 +58,13 @@ const Join = () => {
 
     try {
       const response = await api.post(
-        '/users/signup/email-code',
+        '/users/email-code',
         { email },
         { withCredentials: false }
       );
 
       if (response.data.code === 20000) {
-        console.log('회원가입 성공');
+        alert('✅ 인증번호가 이메일로 전송되었습니다.');
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -77,19 +73,19 @@ const Join = () => {
     }
   };
 
-  const handleJoinComplete = async () => {
+  const handlePasswordReset = async () => {
     const email = `${emailId}@${isCustomDomain ? customDomain : emailDomain}`;
 
     try {
-      const response = await signupUser({
+      const response = await api.post('/users/me/password', {
         email,
-        password,
-        name,
         certCode: verificationCode,
+        password, // 사용자가 새로 입력한 비밀번호
       });
 
       if (response.data.code === 20000) {
-        navigate('/joinComplete');
+        alert('✅ 비밀번호가 성공적으로 재설정되었습니다.');
+        navigate('/login'); // 비밀번호 변경 후 로그인 페이지로 이동
       } else {
         alert(`❗ 실패: ${response.data.message}`);
       }
@@ -112,17 +108,9 @@ const Join = () => {
             className='absolute left-0 cursor-pointer'
             onClick={handleGoback}
           />
-          <div className='mx-auto text-[20px] font-medium'>회원가입</div>
+          <div className='mx-auto text-[20px] font-medium'>비밀번호 찾기</div>
         </div>
         <div>
-          <div className='flex flex-col mb-[18px]'>
-            <div className='text-[16px] font-medium'>이름</div>
-            <Input
-              placeholder='이름을 입력하세요'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
           <div className='mb-[24px]'>
             <div className='flex flex-col mb-[12px]'>
               <div className='text-[16px] font-medium mb-[8px]'>이메일</div>
@@ -199,7 +187,7 @@ const Join = () => {
           </div>
           <div>
             <div className='text-[16px] font-medium mb-[8px]'>
-              비밀번호를 입력해 주세요.
+              신규 비밀번호를 입력해 주세요.
             </div>
             <Input
               placeholder='비밀번호를 입력하세요.'
@@ -217,12 +205,12 @@ const Join = () => {
             </div>
           </div>
         </div>
-        <div className='w-full mt-[229px]'>
+        <div className='w-full mt-[333px]'>
           <CTAButton
             variant={isFormFilled ? 'blue' : 'thickGray'}
-            onClick={handleJoinComplete}
+            onClick={handlePasswordReset}
           >
-            회원가입 완료
+            비밀번호 변경 완료
           </CTAButton>
         </div>
       </div>
@@ -230,4 +218,4 @@ const Join = () => {
   );
 };
 
-export default Join;
+export default FindPassword;

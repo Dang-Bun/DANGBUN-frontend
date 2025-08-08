@@ -19,10 +19,18 @@ const LogIn = () => {
   const handleSign = async () => {
     try {
       const res = await useUserApi.login({
-        email: email,
-        password: password,
+        email,
+        password,
       });
-      const { accessToken, refreshToken } = res.data.data;
+
+      const tokenData = res.data?.data;
+
+      // 토큰 데이터가 없는 경우 (로그인 실패 또는 서버 오류)
+      if (!tokenData || !tokenData.accessToken || !tokenData.refreshToken) {
+        throw new Error('accessToken 또는 refreshToken이 없습니다.');
+      }
+
+      const { accessToken, refreshToken } = tokenData;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
@@ -54,7 +62,13 @@ const LogIn = () => {
         <CTAButton onClick={handleSign}>로그인</CTAButton>
         <div className='w-[353px] flex flex-row justify-end -mt-[2.75px] -mb-[2px]'>
           <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
-          <img src={right_chevron} alt='오른쪽 화살표' />
+          <img
+            src={right_chevron}
+            alt='오른쪽 화살표'
+            onClick={() => {
+              navigate('/findPassWord');
+            }}
+          />
         </div>
         <CTAButton onClick={handleClick} variant='gray'>
           회원가입

@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'blue' | 'thickGray' | 'gray';
+  variant?: 'blue' | 'thickGray' | 'gray' | 'red';
   children: React.ReactNode;
 }
 
@@ -12,7 +12,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const base =
-    'w-full rounded-[8px] px-[12px] py-[10px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
+    'w-full rounded-[8px] cursor-pointer transition-[background] duration-300 box-border border-0 disabled:cursor-not-allowed';
 
   const sizeClass = 'max-w-[126px] h-[36px] text-[12px] font-[400]';
 
@@ -20,6 +20,7 @@ const Button: React.FC<ButtonProps> = ({
     blue: 'bg-[#4d83fd] text-[#fff] font-[Pretendard] font-medium leading-[140%]',
     thickGray: 'bg-[#bdbdbd] text-[#fff]',
     gray: 'bg-[#f6f6f6] text-[#8e8e8e] border-[1px] border-solid border-[#dedede]',
+    red: 'bg-[#ffe5e6] text-[#ff0000] border-[1px] border-solid border-[#ff0000]',
   }[variant];
 
   return (
