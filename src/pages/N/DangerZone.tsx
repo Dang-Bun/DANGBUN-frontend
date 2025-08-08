@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import CTAButton from '../../components/button/CTAButton';
 import FreeButton from '../../components/button/FreeButton';
+import PopUpCard from '../../components/PopUp/PopUpCard';
 
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import bottom_chevron from '../../assets/chevron/bottom_chevronImg.svg';
@@ -12,8 +13,9 @@ import profile from '../../assets/setting/profile.svg';
 const DangerZone = () => {
   const [isListCollapsed, setIsListCollapsed] = useState(true);
   const [showExpelModal, setShowExpelModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [dPlaceModalOpen1, setdPlaceModalOpen1] = React.useState(false);
+  const [dPlaceModalOpen2, setdPlaceModalOpen2] = React.useState(false);
 
   const navigate = useNavigate();
 
@@ -85,7 +87,7 @@ const DangerZone = () => {
 
       {/* 6. 플레이스 삭제 */}
       <div className='flex justify-center cursor-pointer'>
-        <CTAButton variant='red' onClick={() => setShowDeleteModal(true)}>
+        <CTAButton variant='red' onClick={() => setdPlaceModalOpen1(true)}>
           플레이스 삭제
         </CTAButton>
       </div>
@@ -98,13 +100,41 @@ const DangerZone = () => {
         </div>
       )}
 
-      {/* 플레이스 삭제 모달 */}
-      {showDeleteModal && (
-        <div className='modal'>
-          <p>정말 이 플레이스를 삭제하시겠습니까?</p>
-          <button onClick={() => setShowDeleteModal(false)}>닫기</button>
-        </div>
-      )}
+      <PopUpCard
+        isOpen={dPlaceModalOpen1}
+        onRequestClose={() => setdPlaceModalOpen1(false)}
+        title={
+          <span className='font-normal'>
+            정말 플레이스를 삭제 하시겠습니까?
+          </span>
+        }
+        descript={`해당 플레이스의 모든 정보는 복구할 수 없습니다.\n삭제 신청 후 7일 뒤에 플레이스가 완전히 삭제되며,\n신청과 동시에 멤버 모두에게 알림이 전송됩니다.\n계속하시려면 “플레이스 이름”을 입력해주세요.`}
+        input={true}
+        placeholder='플레이스 이름 입력'
+        first='취소'
+        second='삭제'
+        onFirstClick={() => setdPlaceModalOpen1(false)}
+        onSecondClick={async () => {
+          setdPlaceModalOpen1(false);
+          setdPlaceModalOpen2(true);
+        }}
+      ></PopUpCard>
+      <PopUpCard
+        isOpen={dPlaceModalOpen2}
+        onRequestClose={() => setdPlaceModalOpen2(false)}
+        title={
+          <span className='font-normal'>
+            <span className='font-bold'>삭제</span>가 완료 되었습니다.
+          </span>
+        }
+        descript=''
+        input={false}
+        placeholder=''
+        second='확인'
+        onSecondClick={() => {
+          navigate('/myPlace');
+        }}
+      ></PopUpCard>
     </div>
   );
 };
