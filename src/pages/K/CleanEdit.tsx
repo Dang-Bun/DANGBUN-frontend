@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import '../../styles/CalendarOverride.css';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
 import GrayPlus from '../../assets/header/GrayPlus.svg';
 import ReactSwitch from 'react-switch';
+import '../../styles/CalendarOverride.css';
 import DangbunList from '../../components/cleanUp/DangbunList';
 
 import BlackDown from '../../assets/cleanUpList/BlackDown.svg';
@@ -19,7 +19,7 @@ import CTAButton from '../../components/button/CTAButton';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import arrowBack from '../../assets/nav/arrowBack.svg';
 
-const CleanAdd = () => {
+const CleanEdit = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
 
@@ -31,7 +31,6 @@ const CleanAdd = () => {
   };
   const cleanChange = (nextChecked: boolean) => {
     setChecked2(nextChecked);
-    setSelectedCycle('');
   };
 
   //radio
@@ -89,8 +88,6 @@ const CleanAdd = () => {
       setSelectedDates([new Date(year, month, 1)]);
     } else if (selectedCycle === '매달 마지막 날') {
       setSelectedDates([new Date(year, month, daysInMonth)]);
-    } else {
-      setSelectedDates([]);
     }
     function getDayName(dayNumber: number): string {
       return ['일', '월', '화', '수', '목', '금', '토'][dayNumber];
@@ -119,11 +116,11 @@ const CleanAdd = () => {
   const [isModalOpen3, setIsModalOpen3] = useState(false);
 
   const confirmHandle = () => {
-    if (dangbun.length === 0) {
-      setIsModalOpen1(true);
-    } else {
-      setIsModalOpen2(true);
-    }
+    setIsModalOpen2(true);
+  };
+
+  const deleteHandle = () => {
+    setIsModalOpen1(true);
   };
 
   return (
@@ -189,19 +186,16 @@ const CleanAdd = () => {
                   value={option}
                   checked={selectedCycle === option}
                   onChange={() => setSelectedCycle(option)}
-                  disabled={checked2}
                   className='hidden'
                 />
                 <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 ${checked2 ? 'cursor-default' : 'cursor-pointer'}  ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 cursor-pointer ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
                 >
                   {selectedCycle === option && (
                     <span className='flex items-center justify-center  w-3.5 h-3.5 bg-blue-500 rounded-full' />
                   )}
                 </span>
-                <span
-                  className={`flex ${checked2 ? 'text-neutral-200' : 'text-zinc-600'} text-base font-normal leading-snug text-center justify-center items-center`}
-                >
+                <span className='flex text-zinc-600 text-base font-normal leading-snug text-center justify-center items-center'>
                   {option}
                 </span>
               </label>
@@ -408,11 +402,10 @@ const CleanAdd = () => {
         title={
           <>
             <h2 className='font-normal text-center'>
-              당번을 설정하지 않아 <br />
-              <span className='text-blue-500'>당번 미지정 청소</span>로 임시
-              저장 됩니다.
+              정말 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
-              이대로 완료하시겠습니까?
+              <span className='text-blue-500'>삭제</span>할까요?
+              <br />
             </h2>
           </>
         }
@@ -422,7 +415,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => {}} //삭제 API 연결
       />
 
       <PopUpCard
@@ -433,7 +426,7 @@ const CleanAdd = () => {
             <h2 className='font-normal text-center'>
               이대로 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
-              <span className='text-blue-500'>생성</span>할까요?
+              <span className='text-blue-500'>수정</span>할까요?
               <br />
             </h2>
           </>
@@ -444,7 +437,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen2(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => {}} //수정 API 연결
       />
 
       <PopUpCard
@@ -470,16 +463,25 @@ const CleanAdd = () => {
           else navigate('/');
         }}
       />
+      <div>
+        <CTAButton
+          variant={name ? 'blue' : 'gray'}
+          style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
+          onClick={name ? confirmHandle : () => {}}
+        >
+          완료
+        </CTAButton>
 
-      <CTAButton
-        variant={name ? 'blue' : 'gray'}
-        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
-        onClick={name ? confirmHandle : () => {}}
-      >
-        완료
-      </CTAButton>
+        <CTAButton
+          variant={'gray'}
+          style={{ marginBottom: '40px', cursor: 'pointer' }}
+          onClick={deleteHandle}
+        >
+          삭제하기
+        </CTAButton>
+      </div>
     </div>
   );
 };
 
-export default CleanAdd;
+export default CleanEdit;
