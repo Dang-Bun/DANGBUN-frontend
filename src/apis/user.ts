@@ -1,9 +1,5 @@
 import api from './axios';
 
-export const fetchMyInfo = () => {
-  return api.get('/users/me');
-};
-
 export const signupUser = async ({
   email,
   password,
