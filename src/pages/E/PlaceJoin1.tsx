@@ -11,7 +11,7 @@ const PlaceJoin = () => {
   const navigate = useNavigate();
 
   const [infoList, setInfoList] = React.useState([
-    { label: '이메일', value: '' },
+    // { label: '이메일', value: '' },
   ]);
   const [code, setCode] = React.useState('');
   const [inputValue, setInputValue] = React.useState('');
@@ -46,9 +46,7 @@ const PlaceJoin = () => {
   const searchCode = async () => {
     setCode(inputValue);
     try {
-      console.log(code);
       const res = await usePlaceApi.inviteCodeCheck({ inviteCode: code });
-      console.log(res);
 
       if (res?.data?.code === 20000) {
         const infoArray = res.data.data.information.map((label: string) => ({
