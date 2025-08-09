@@ -37,7 +37,7 @@ const DangerZoneManager = () => {
         <img
           src={left_chevron}
           alt='뒤로가기'
-          onClick={() => navigate('/setting')}
+          onClick={() => navigate('/setting/manager')}
           className='cursor-pointer mb-[19px]'
         />
       </div>
