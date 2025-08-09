@@ -126,7 +126,10 @@ const SettingManager = () => {
             <img src={blue_right_chevron} alt='>' />
           </div>
 
-          <div className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'>
+          <div
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
+            onClick={() => navigate('/alarm')}
+          >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
                 <div className='absolute inset-0 bg-[#D4E0FD] rounded-full z-0' />
