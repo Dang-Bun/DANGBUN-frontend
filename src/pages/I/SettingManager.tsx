@@ -14,7 +14,7 @@ import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
 import api from '../../apis/axios';
 
-const Setting = () => {
+const SettingManager = () => {
   const navigate = useNavigate();
   //아래 주석은 플레이스 연동 완료 후 연동 예정
   // const [name, setName] = useState('');
@@ -164,4 +164,4 @@ const Setting = () => {
   );
 };
 
-export default Setting;
+export default SettingManager;
