@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import axios from 'axios';
+
 import GradRollCard from '../../components/place/GradRollCard';
 import CTAButton from '../../components/button/CTAButton';
 import PopupCard from '../../components/PopUp/PopUpCard';
 import PopupCode from '../../components/PopUp/PopUpCode';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 type RoleType =
   | 'cafe'
@@ -20,7 +23,24 @@ const PlaceMake3 = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isModalOpenCopy, setIsModalOpenCopy] = React.useState(false);
   const location = useLocation();
-  const { placeName, role, infoList } = location.state || {};
+  const { placeName, role, placeId } = location.state || {};
+
+  const [code, setCode] = useState('');
+
+  const handleOpen1 = async () => {
+    setIsModalOpen(true);
+    if (!placeId) {
+      console.log('placeid empty');
+      return;
+    }
+    try {
+      const res = await usePlaceApi.makeInviteCode(placeId);
+      console.log('참여코드:', res.data.data.inviteCode);
+      setCode(res.data.data.inviteCode);
+    } catch (e) {
+      console.error('참여코드 없음', e);
+    }
+  };
 
   return (
     <div className='flex flex-col w-full h-screen items-center justify-center'>
@@ -43,7 +63,7 @@ const PlaceMake3 = () => {
         </div>
         <button
           className='w-40 h-9 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)] text-center text-neutral-400 text-base font-semibold leading-snug cursor-pointer'
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpen1}
         >
           참여코드 생성
         </button>
@@ -54,9 +74,9 @@ const PlaceMake3 = () => {
         onRequestClose={() => setIsModalOpen(false)}
         title={
           <>
-            <h2 className='font-normal'>
+            <span className='font-normal'>
               <span className='font-bold'>참여코드</span>가 생성되었습니다.
-            </h2>
+            </span>
           </>
         }
         descript='참여코드를 통해 멤버들을 플레이스에 초대할 수 있어요.'
@@ -64,7 +84,7 @@ const PlaceMake3 = () => {
         first='복사하기'
         second='공유하기'
         onFirstClick={() => {
-          navigator.clipboard.writeText('참여코드 내용'); // 참여코드 복사!
+          navigator.clipboard.writeText(code); // 참여코드 복사!
           setIsModalOpenCopy(true);
           setIsModalOpen(false);
           setTimeout(() => {
@@ -74,7 +94,7 @@ const PlaceMake3 = () => {
         onSecondClick={() => {
           if (navigator.share) {
             navigator
-              .share({ title: '참여코드 공유', text: '참여코드 내용' })
+              .share({ title: '당번 : 참여코드 공유', text: code })
               .then(() => setIsModalOpen(false))
               .catch(() => setIsModalOpen(false));
           } else {
@@ -84,16 +104,16 @@ const PlaceMake3 = () => {
             setIsModalOpen(false);
           }
         }}
-        code='AQ3536'
+        code={code}
       />
       <PopupCard
         isOpen={isModalOpenCopy}
         onRequestClose={() => setIsModalOpenCopy(false)}
         title={
           <>
-            <h2 className='font-normal'>
+            <span className='font-normal'>
               <span className='font-bold'>복사</span>가 완료 되었습니다.
-            </h2>
+            </span>
           </>
         }
         descript=''

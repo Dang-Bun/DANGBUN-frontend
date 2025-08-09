@@ -25,24 +25,24 @@ const PlaceMake2 = () => {
       const data = {
         placeName: placeName,
         category: role,
-        managerName: 'admin',
+        managerName: name,
         information,
       };
       console.log(data);
       try {
-        const res = await usePlaceApi.createPlace(data);
+        const res = await usePlaceApi.placeMake(data);
         console.log('place maked!: ', res.data);
+        const placeId = res.data.data.placeId;
+        navigate('/placemake3', {
+          state: {
+            placeName: placeName,
+            role: role,
+            placeId: placeId,
+          },
+        });
       } catch (e) {
         console.error('place making failed:', e);
       }
-      navigate('/placemake3', {
-        state: {
-          placeName: placeName,
-          role: role,
-          infoList: infoList,
-          information,
-        },
-      });
     }
   };
 
