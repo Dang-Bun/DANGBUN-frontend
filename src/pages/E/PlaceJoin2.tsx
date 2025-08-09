@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import GradRollCard from '../../components/place/GradRollCard';
 import CTAButton from '../../components/button/CTAButton';
 import PopupCard from '../../components/PopUp/PopUpCard';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 type RoleType =
   | 'cafe'
@@ -17,19 +18,27 @@ type RoleType =
 
 const PlaceJoin2 = () => {
   const location = useLocation();
-  const { code } = location.state || {};
+  const { placeName, category, placeId } = location.state || {};
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isModalOpenCopy, setIsModalOpenCopy] = React.useState(false);
 
   const handleNext = () => {
-    navigate('/B001', {
-      //B001로 이동.
-      state: {
-        //code: code,
-      },
-    });
+    navigate('/MyPlace'); //B001 이동
+  };
+
+  const handleCancel = async () => {
+    setIsModalOpen(false);
+
+    try {
+      const res = await usePlaceApi.placeJoinCancel(placeId);
+      console.log('request', res);
+    } catch (e) {
+      console.error('error', e);
+    }
+
+    setIsModalOpenCopy(true);
   };
 
   return (
@@ -38,8 +47,7 @@ const PlaceJoin2 = () => {
         <div className='flex flex-col items-center justify-center gap-3'>
           <div className='flex flex-row items-center justify-center gap-2'>
             <h1 className='bg-gradient-to-b from-[#fb66ff] to-[#5488fd] text-2xl font-semibold leading-loose text-transparent bg-clip-text'>
-              {/* {placeName} */}
-              메가박스
+              {placeName}
             </h1>
             <h1 className='text-2xl font-semibold leading-loose'>
               {' '}
@@ -49,7 +57,9 @@ const PlaceJoin2 = () => {
         </div>
 
         <div>
-          <GradRollCard role={/*role as RoleType*/ 'cinema' as RoleType} />
+          <GradRollCard
+            role={/*{ category }*/ 'cinema' as unknown as RoleType}
+          />
           <img />
         </div>
 
@@ -66,7 +76,7 @@ const PlaceJoin2 = () => {
           <>
             <h2 className='font-normal text-center'>
               정말
-              <span className='font-bold'>asdfas</span>참여를 <br />
+              <span className='font-bold'> {placeName} </span>참여를 <br />
               <span className='text-blue-500 text-base font-semibold leading-snug'>
                 취소
               </span>
@@ -80,12 +90,8 @@ const PlaceJoin2 = () => {
         second='네'
         onFirstClick={() => {
           setIsModalOpen(false);
-          handleNext();
         }}
-        onSecondClick={() => {
-          setIsModalOpen(false);
-          setIsModalOpenCopy(true);
-        }}
+        onSecondClick={handleCancel}
       />
       <PopupCard
         isOpen={isModalOpenCopy}
@@ -93,7 +99,7 @@ const PlaceJoin2 = () => {
         title={
           <>
             <h2 className='font-normal text-center'>
-              <span className='font-bold'>&quot{}&quot</span>
+              <span className='font-bold'>"{placeName}"</span>
               <br /> 참여취소가 완료 되었습니다.
             </h2>
           </>
