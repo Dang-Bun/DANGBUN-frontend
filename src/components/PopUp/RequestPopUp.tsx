@@ -1,21 +1,23 @@
 import React from 'react';
-import PopupCard from './PopUpCard';
+import PopupCardDelete from './PopUpCardDelete';
 import { useNavigate } from 'react-router-dom';
 import { withdrawUser } from '../../apis/user';
 
 const RequestPopUp = ({
   isWithdrawalOpen,
   closeWithdrawal,
+  userEmail,
 }: {
   isWithdrawalOpen: boolean;
   closeWithdrawal: () => void;
+  userEmail: string;
 }) => {
   const [isModalOpen2, setIsModalOpen2] = React.useState(false);
   const navigate = useNavigate();
 
   return (
     <div>
-      <PopupCard
+      <PopupCardDelete
         isOpen={isWithdrawalOpen}
         onRequestClose={closeWithdrawal}
         title={
@@ -29,6 +31,7 @@ const RequestPopUp = ({
         placeholder='이메일 입력'
         first='취소'
         second='탈퇴'
+        userEmail={userEmail}
         onFirstClick={closeWithdrawal}
         onSecondClick={async (email) => {
           try {
@@ -54,7 +57,7 @@ const RequestPopUp = ({
         }}
       />
 
-      <PopupCard
+      <PopupCardDelete
         isOpen={isModalOpen2}
         onRequestClose={() => setIsModalOpen2(false)}
         title={
@@ -67,7 +70,7 @@ const RequestPopUp = ({
         placeholder=''
         second='확인'
         onSecondClick={() => navigate('/login')}
-      ></PopupCard>
+      ></PopupCardDelete>
     </div>
   );
 };
