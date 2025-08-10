@@ -74,14 +74,14 @@ const PlaceJoin2 = () => {
         onRequestClose={() => setIsModalOpen(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               정말
               <span className='font-bold'> {placeName} </span>참여를 <br />
               <span className='text-blue-500 text-base font-semibold leading-snug'>
                 취소
               </span>
               할까요?
-            </h2>
+            </p>
           </>
         }
         descript='입력한 정보는 저장되지 않습니다.'
