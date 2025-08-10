@@ -28,6 +28,7 @@ const initialTasks: Task[] = [
   { id: 2, title: '바닥 닦기', dueTime: '20:20', members: ['박한나'], isCamera: true, isChecked: false },
   { id: 3, title: '창문 닦기', dueTime: '20:20', members: ['멤버 전체'], isCamera: false, isChecked: false },
   { id: 4, title: '창문 닦기', dueTime: '20:20', members: [''], isCamera: false, isChecked: false },
+  { id: 4, title: '창문 닦기', dueTime: '20:20', members: [''], isCamera: false, isChecked: false },
 ];
 
 const Home: React.FC = () => {
