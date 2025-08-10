@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeaderBar from '../../components/HeaderBar';
 import cleanUpImg from '../../assets/cleanUpList/cleanUp.svg';
 import CleanUpCard from '../../components/cleanUp/CleanUpCard';
 import BottomBar from '../../components/BottomBar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import useCleaningApi from '../../hooks/useCleaningApi';
 
 const UnDangbun = () => {
   const [clean, setClean] = useState<string[]>(['qkr']);
-  const [undangbunList, setUndangbunList] = useState<string[]>([
-    '박완',
-    '전예영',
-    '박한나',
-    '김도현',
-    '백상희',
-    '최준서',
-  ]);
+  const [undangbunList, setUndangbunList] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const placeId = state as number | undefined;
+
+  useEffect(() => {
+    if (placeId == null) return;
+    const fetchunassigned = async () => {
+      try {
+        const res = await useCleaningApi.cleaningUnAssigned(placeId);
+        console.log(res.data);
+        setUndangbunList(res.data?.cleaningName ?? []);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchunassigned();
+  }, [placeId]);
 
   return (
     <div>
@@ -37,7 +49,9 @@ const UnDangbun = () => {
             <button
               key={index}
               className='flex flex-row cursor-pointer'
-              onClick={() => {}} //edit page로 연결.
+              onClick={() => {
+                navigate('/cleanedit', { state: { name: name } });
+              }}
             >
               <div className='w-[9px] h-[52px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
               <div className='flex flex-col w-[344px] h-[52px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>

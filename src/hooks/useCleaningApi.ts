@@ -2,7 +2,6 @@ import api from '../apis/axios';
 
 export const useCleaningApi = {
   searchDuty: () => api.get('/cleanings/duties'),
-
   editCleaning: (id: number) => api.put(`/cleanings/${id}`),
   deleteCleaning: (id: number) => api.delete(`/cleanings/${id}`),
   makeCleaning: (data: {
