@@ -28,6 +28,9 @@ import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
+import MemberList from '../pages/L/MemberList';
+import MemberConfirm from '../pages/L/MemberConfirm';
+import ManagerInfo from '../pages/L/ManagerInfo';
 
 const router = createBrowserRouter([
   {
@@ -137,6 +140,18 @@ const router = createBrowserRouter([
   {
     path: '/dangerzone/member',
     element: <DangerZoneMember />,
+  },
+  {
+    path: '/memberlist',
+    element: <MemberList />,
+  },
+  {
+    path: '/memberconfirm',
+    element: <MemberConfirm />,
+  },
+  {
+    path: '/managerinfo',
+    element: <ManagerInfo />,
   },
 ]);
 
