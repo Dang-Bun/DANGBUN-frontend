@@ -47,56 +47,56 @@ const PlaceMake1 = () => {
       </div>
       <div className='grid grid-cols-3 grid-rows-3 gap-5 '>
         <PlaceRollCard
-          role='cafe'
-          selected={selectedRole === 'cafe'}
-          onClick={() => setSelectedRole('cafe')}
+          role='CAFE'
+          selected={selectedRole === 'CAFE'}
+          onClick={() => setSelectedRole('CAFE')}
         />
         <PlaceRollCard
-          role='restaurant'
-          selected={selectedRole === 'restaurant'}
-          onClick={() => setSelectedRole('restaurant')}
+          role='RESTAURANT'
+          selected={selectedRole === 'RESTAURANT'}
+          onClick={() => setSelectedRole('RESTAURANT')}
         />
         <PlaceRollCard
-          role='cinema'
-          selected={selectedRole === 'cinema'}
-          onClick={() => setSelectedRole('cinema')}
+          role='THEATER'
+          selected={selectedRole === 'THEATER'}
+          onClick={() => setSelectedRole('THEATER')}
         />
         <PlaceRollCard
-          role='dormitory'
-          selected={selectedRole === 'dormitory'}
-          onClick={() => setSelectedRole('dormitory')}
+          role='DORMITORY'
+          selected={selectedRole === 'DORMITORY'}
+          onClick={() => setSelectedRole('DORMITORY')}
         />
         <PlaceRollCard
-          role='building'
-          selected={selectedRole === 'building'}
-          onClick={() => setSelectedRole('building')}
+          role='BUILDING'
+          selected={selectedRole === 'BUILDING'}
+          onClick={() => setSelectedRole('BUILDING')}
         />
         <PlaceRollCard
-          role='office'
-          selected={selectedRole === 'office'}
-          onClick={() => setSelectedRole('office')}
+          role='OFFICE'
+          selected={selectedRole === 'OFFICE'}
+          onClick={() => setSelectedRole('OFFICE')}
         />
         <PlaceRollCard
-          role='school'
-          selected={selectedRole === 'school'}
-          onClick={() => setSelectedRole('school')}
+          role='SCHOOL'
+          selected={selectedRole === 'SCHOOL'}
+          onClick={() => setSelectedRole('SCHOOL')}
         />
         <PlaceRollCard
-          role='gym'
-          selected={selectedRole === 'gym'}
-          onClick={() => setSelectedRole('gym')}
+          role='GYM'
+          selected={selectedRole === 'GYM'}
+          onClick={() => setSelectedRole('GYM')}
         />
         <PlaceRollCard
-          role='plus'
-          selected={selectedRole === 'plus'}
-          onClick={() => setSelectedRole('plus')}
+          role='ETC'
+          selected={selectedRole === 'ETC'}
+          onClick={() => setSelectedRole('ETC')}
           setPlusRole={setPlusRole}
         />
       </div>
       <CTAButton
         variant={
-          (selectedRole !== 'plus' && text) ||
-          (selectedRole === 'plus' && plusRole !== '' && text)
+          (selectedRole !== 'ETC' && text) ||
+          (selectedRole === 'ETC' && plusRole !== '' && text)
             ? 'blue'
             : 'thickGray'
         }

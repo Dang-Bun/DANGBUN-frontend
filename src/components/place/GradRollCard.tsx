@@ -11,54 +11,54 @@ import homeImg from '../../assets/placeIcon/homeImg.svg';
 import gradCircle from '../../assets/placeMake/GradCircle.svg';
 
 type RoleType =
-  | 'cafe'
-  | 'building'
-  | 'cinema'
-  | 'dormitory'
-  | 'gym'
-  | 'office'
-  | 'restaurant'
-  | 'school'
-  | 'plus';
+  | 'CAFE'
+  | 'RESTAURANT'
+  | 'THEATER'
+  | 'DORMITORY'
+  | 'BUILDING'
+  | 'OFFICE'
+  | 'SCHOOL'
+  | 'GYM'
+  | 'ETC';
 
 interface GradRollCardProps {
   role: RoleType;
 }
 
 const roleStyles = {
-  cafe: {
+  CAFE: {
     image: cafeSmallImg,
     label: '카페',
   },
-  building: {
+  BUILDING: {
     image: buildingImg,
     label: '빌딩',
   },
-  cinema: {
+  THEATER: {
     image: cinemaImg,
     label: '영화관',
   },
-  dormitory: {
+  DORMITORY: {
     image: dormitoryImg,
     label: ['   기숙사,', '셰어하우스'],
   },
-  gym: {
+  GYM: {
     image: gymImg,
     label: '헬스장',
   },
-  office: {
+  OFFICE: {
     image: officeImg,
     label: '사무실',
   },
-  restaurant: {
+  RESTAURANT: {
     image: restaurantImg,
     label: '식당',
   },
-  school: {
+  SCHOOL: {
     image: schoolImg,
     label: '학교',
   },
-  plus: {
+  ETC: {
     image: homeImg,
     label: '직접 입력',
   },

@@ -12,15 +12,15 @@ import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
 import homeImg from '../../assets/placeIcon/homeImg.svg';
 
 type RoleType =
-  | 'cafe'
-  | 'building'
-  | 'cinema'
-  | 'dormitory'
-  | 'gym'
-  | 'office'
-  | 'restaurant'
-  | 'school'
-  | 'plus';
+  | 'CAFE'
+  | 'RESTAURANT'
+  | 'THEATER'
+  | 'DORMITORY'
+  | 'BUILDING'
+  | 'OFFICE'
+  | 'SCHOOL'
+  | 'GYM'
+  | 'ETC';
 
 interface PlaceRollCardProps {
   role: RoleType;
@@ -30,47 +30,47 @@ interface PlaceRollCardProps {
 }
 
 const roleStyles = {
-  cafe: {
+  CAFE: {
     image: cafeSmallImg,
     label: '카페',
     size: 'w-[39.879px] h-[62.469px]',
   },
-  building: {
+  BUILDING: {
     image: buildingImg,
     label: '빌딩',
     size: 'w-[53.11px] h-[55.072px]',
   },
-  cinema: {
+  THEATER: {
     image: cinemaImg,
     label: '영화관',
     size: 'w-[51.54px] h-[54.122px]',
   },
-  dormitory: {
+  DORMITORY: {
     image: dormitoryImg,
     label: ['   기숙사,', '셰어하우스'],
     size: 'w-[53.73px] h-[44.63px]',
   },
-  gym: {
+  GYM: {
     image: gymImg,
     label: '헬스장',
     size: 'w-[64.871px] h-[37.981px]',
   },
-  office: {
+  OFFICE: {
     image: officeImg,
     label: '사무실',
     size: 'w-[54.707px] h-[48.425px]',
   },
-  restaurant: {
+  RESTAURANT: {
     image: restaurantImg,
     label: '식당',
     size: 'w-[59.93px] h-[47.475px]',
   },
-  school: {
+  SCHOOL: {
     image: schoolImg,
     label: '학교',
     size: 'w-[61.718px] h-[46.743px]',
   },
-  plus: {
+  ETC: {
     image: homeImg,
     label: '직접 입력',
     size: 'w-[46.45px] h-[49.78px]',
@@ -106,7 +106,7 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
         )}
         onClick={() => {
           onClick();
-          if (role === 'plus') {
+          if (role === 'ETC') {
             if (submitted) {
               setSubmitted(false);
             } else if (text) {
@@ -131,7 +131,7 @@ const SelectableRoleCard: React.FC<PlaceRollCardProps> = ({
       >
         {Array.isArray(label) ? (
           label.join('\n')
-        ) : role === 'plus' ? (
+        ) : role === 'ETC' ? (
           submitted ? (
             text
           ) : (
