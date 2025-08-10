@@ -19,13 +19,15 @@ import PlaceMake2 from '../pages/D/PlaceMake2';
 import PlaceMake3 from '../pages/D/PlaceMake3';
 import PlaceJoin1 from '../pages/E/PlaceJoin1';
 import PlaceJoin2 from '../pages/E/PlaceJoin2';
-import Setting from '../pages/I/Setting';
+import SettingManager from '../pages/I/SettingManager';
+import SettingMember from '../pages/I/SettingMember';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
+import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
 
@@ -103,8 +105,12 @@ const router = createBrowserRouter([
     element: <PlaceJoin2 />,
   },
   {
-    path: '/setting',
-    element: <Setting />,
+    path: '/setting/manager',
+    element: <SettingManager />,
+  },
+  {
+    path: '/setting/member',
+    element: <SettingMember />,
   },
   {
     path: '/cleanuplist',
@@ -129,6 +135,10 @@ const router = createBrowserRouter([
   {
     path: '/cleaninfo',
     element: <CleanInfo data={undefined} />,
+  },
+  {
+    path: '/placedetailed',
+    element: <PlaceDetailed />,
   },
   {
     path: '/dangerzone/manager',
