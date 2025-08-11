@@ -20,8 +20,8 @@ const BottomBar = () => {
           alt='캘린더'
         />
       </div>
-      <div onClick={() => navigate('/')}>
-        <img src={location.pathname === '/' ? HomePressed : Home} alt='홈' />
+      <div onClick={() => navigate('/home')}>
+        <img src={location.pathname === '/home' ? HomePressed : Home} alt='홈' />
       </div>
       <div onClick={() => navigate('/setting')}>
         <img
