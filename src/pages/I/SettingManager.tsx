@@ -12,28 +12,31 @@ import Cinema from '../../assets/placeIcon/cinemaImg.svg';
 import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
-import api from '../../apis/axios';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 const SettingManager = () => {
   const navigate = useNavigate();
-  //아래 주석은 플레이스 연동 완료 후 연동 예정
-  // const [name, setName] = useState('');
+  const [name, setName] = useState('');
+  const placeId = Number(localStorage.getItem('placeId'));
 
-  // useEffect(() => {
-  //   const fetchUserName = async () => {
-  //     try {
-  //       const res = await api.get('/places/{placeId}/members/me');
-  //       const memberName = res.data.data;
-  //       setName({ memberName });
-  //     } catch (error) {
-  //       console.error('유저 정보 불러오기 실패:', error);
-  //       // 인증 만료 시 로그인 페이지로 이동
-  //       navigate('/login');
-  //     }
-  //   };
+  useEffect(() => {
+    if (!placeId) return;
 
-  //   fetchUserName();
-  // }, [navigate]);
+    (async () => {
+      try {
+        const res = await useMemberApi.me(placeId); // ✅ API 호출
+        // 응답 구조에 따라 name 키가 다를 수 있으니 안전하게 파싱
+        const payload = res?.data?.data;
+        const memberName =
+          payload?.name ?? payload?.memberName ?? payload?.userName ?? '';
+
+        setName(memberName); // ✅ 문자열로 세팅
+        // console.log('내 멤버 정보:', payload);
+      } catch (error) {
+        console.error('유저 정보 불러오기 실패:', error);
+      }
+    })();
+  }, [placeId]);
 
   return (
     <div className='w-full min-h-screen flex flex-col justify-between'>
@@ -81,7 +84,10 @@ const SettingManager = () => {
         </div>
         <div className='bg-white rounded-xl p-4 mb-6 flex justify-between items-center shadow-sm h-[103px]'>
           {/* 당번 관리 */}
-          <div className='flex flex-col items-center flex-1'>
+          <div
+            className='flex flex-col items-center flex-1 cursor-pointer'
+            onClick={() => navigate('/management/manager')}
+          >
             <img src={NameTag} alt='당번 관리' />
             <div className='text-sm mt-1'>당번 관리</div>
           </div>
@@ -90,7 +96,7 @@ const SettingManager = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 청소 관리 */}
-          <div className='flex flex-col items-center flex-1'>
+          <div className='flex flex-col items-center flex-1 cursor-pointer'>
             <img src={Sweep} alt='청소 관리' className='w-[24px] h-[32.39px]' />
             <div className='text-sm mt-1'>청소 관리</div>
           </div>
@@ -99,7 +105,7 @@ const SettingManager = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 멤버 목록 */}
-          <div className='flex flex-col items-center flex-1'>
+          <div className='flex flex-col items-center flex-1 cursor-pointer'>
             <img
               src={Member}
               alt='멤버 목록'
