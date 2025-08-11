@@ -27,7 +27,8 @@ export const useMemberApi = {
   me: (placeId) => api.get(`/places/${placeId}/members/me`),
 
   // 플레이스 나가기(내 멤버십 삭제)
-  leave: (placeId) => api.delete(`/places/${placeId}/members/me`),
+  leave: (placeId: number, placeName: string) =>
+    api.delete(`/places/${placeId}/members/me`, { data: { placeName } }),
 
   // 대기 멤버 거절
   rejectWaiting: (placeId, memberId) =>
