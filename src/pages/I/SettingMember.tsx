@@ -11,9 +11,32 @@ import Cinema from '../../assets/placeIcon/cinemaImg.svg';
 import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 const SettingMember = () => {
   const navigate = useNavigate();
+
+  const [name, setName] = useState('');
+  const placeId = Number(localStorage.getItem('placeId'));
+
+  useEffect(() => {
+    if (!placeId) return;
+
+    (async () => {
+      try {
+        const res = await useMemberApi.me(placeId); // ✅ API 호출
+        // 응답 구조에 따라 name 키가 다를 수 있으니 안전하게 파싱
+        const payload = res?.data?.data;
+        const memberName =
+          payload?.name ?? payload?.memberName ?? payload?.userName ?? '';
+
+        setName(memberName); // ✅ 문자열로 세팅
+        // console.log('내 멤버 정보:', payload);
+      } catch (error) {
+        console.error('유저 정보 불러오기 실패:', error);
+      }
+    })();
+  }, [placeId]);
 
   return (
     <div className='w-full min-h-screen flex flex-col justify-between'>
