@@ -242,7 +242,7 @@ const MyPlace: React.FC = () => {
       </div>
 
       {/* 하단 CTA */}
-      <div className='mt-8 mb-8'>
+      <div className='absolute bottom-0 w-full mt-8 mb-8'>
         <CTAButton onClick={handleAdd}>플레이스 추가</CTAButton>
       </div>
     </div>
