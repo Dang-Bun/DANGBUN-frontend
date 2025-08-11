@@ -91,7 +91,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 />
               )}
             </div>
-            <div className="flex items-start gap-1">
+            <div className="flex items-center gap-1">
               <div
                 className={`inline-block whitespace-nowrap rounded-[300px] px-[7px] py-[2px] text-[11px] ${
                   isChecked ? 'bg-white text-[#8E8E8E]' : 'bg-[#EBFFF6] text-[#00DD7C]'
