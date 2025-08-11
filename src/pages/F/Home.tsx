@@ -10,7 +10,6 @@ import BottomBar from '../../components/BottomBar';
 import page0 from '../../assets/home/page0.svg';
 import page100 from '../../assets/home/page100.svg';
 import pageMiddle from '../../assets/home/pageMiddle.svg';
-import sort from '../../assets/home/sortIcon.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
 import CategoryChip from '../../components/home/CategoryChip';
 
@@ -142,8 +141,6 @@ const Home: React.FC = () => {
                 </div>
               )}
             </div>
-
-            <img src={sort} alt="정렬" />
           </div>
 
           <div className="flex flex-col gap-3">
