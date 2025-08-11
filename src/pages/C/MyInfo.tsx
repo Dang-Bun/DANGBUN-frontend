@@ -97,6 +97,7 @@ const MyInfoPage = () => {
       <RequestPopUp
         isWithdrawalOpen={isWithdrawalOpen}
         closeWithdrawal={() => setIsWithdrawalOpen(false)}
+        userEmail={userInfo?.email}
       />
 
       <PopupCard

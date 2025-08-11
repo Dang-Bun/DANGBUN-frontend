@@ -2,6 +2,7 @@ import React from 'react';
 import CTAButton from '../../components/button/CTAButton';
 import PlaceRollCard from '../../components/place/PlaceRollCard';
 import { useNavigate } from 'react-router-dom';
+import left_Chevron from '../../assets/chevron/left_chevronImg.svg';
 
 const PlaceMake1 = () => {
   const navigate = useNavigate();
@@ -22,6 +23,13 @@ const PlaceMake1 = () => {
 
   return (
     <div className='w-[393px] h-[853px] flex flex-col items-center justify-center'>
+      <div className='mt-[68px] pl-[12px]'>
+        <img
+          src={left_Chevron}
+          alt='뒤로가기'
+          onClick={() => navigate('/addPlace')}
+        />
+      </div>
       <div className='flex flex-col gap-[35px] mb-5'>
         <div className='flex flex-col items-start gap-4'>
           <h1 className='w-[353px] text-xl font-normal leading-7'>

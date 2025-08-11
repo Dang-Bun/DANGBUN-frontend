@@ -97,7 +97,12 @@ const PlaceJoin2 = () => {
         onSecondClick={handleNext}
       />
 
-      <CTAButton style={{ position: 'fixed', bottom: '103px' }}>완료</CTAButton>
+      <CTAButton
+        style={{ position: 'fixed', bottom: '103px' }}
+        onClick={() => navigate('/myPlace')}
+      >
+        완료
+      </CTAButton>
       <CTAButton
         style={{ position: 'fixed', bottom: '39px' }}
         variant='thickGray'
