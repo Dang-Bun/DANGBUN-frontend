@@ -26,8 +26,8 @@ export const usePlaceApi = {
     }
   ) => api.patch(`/places/${placeId}/settings/time`, data),
   placeSearch: (placeId: number) => api.get(`/places/${placeId}`),
-  placeDelete: (placeId: number) => api.delete(`/places/${placeId}`),
+  placeDelete: (placeId: number, placeName: string) =>
+    api.delete(`/places/${placeId}`, { data: { placeName } }),
   placeJoinCancel: (placeId: number) =>
     api.delete(`/places/${placeId}/join-requests`),
-
 };

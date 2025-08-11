@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 import GradRollCard from '../../components/place/GradRollCard';
 import CTAButton from '../../components/button/CTAButton';
@@ -24,6 +25,7 @@ const PlaceMake3 = () => {
   const [isModalOpenCopy, setIsModalOpenCopy] = React.useState(false);
   const location = useLocation();
   const { placeName, role, placeId } = location.state || {};
+  const navigate = useNavigate();
 
   const [code, setCode] = useState('');
 
