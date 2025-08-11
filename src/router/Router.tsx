@@ -30,6 +30,7 @@ import CleanInfo from '../pages/K/CleanInfo';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
+import Home from '../pages/F/Home';
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
   {
     path: '/calendar',
     element: <CalendarPage />,
+  },
+  {
+    path: '/home',
+    element: <Home />,
   },
   {
     path: '/alarm',

@@ -13,15 +13,15 @@ const BottomBar = () => {
   const location = useLocation();
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 w-full h-[83px] z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
+    <div className='fixed bottom-0 left-0 right-0 w-full h-[83px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
       <div onClick={() => navigate('/calendar')}>
         <img
           src={location.pathname === '/calendar' ? CalendarPressed : Calendar}
           alt='캘린더'
         />
       </div>
-      <div onClick={() => navigate('/')}>
-        <img src={location.pathname === '/' ? HomePressed : Home} alt='홈' />
+      <div onClick={() => navigate('/home')}>
+        <img src={location.pathname === '/home' ? HomePressed : Home} alt='홈' />
       </div>
       <div onClick={() => navigate('/setting')}>
         <img
