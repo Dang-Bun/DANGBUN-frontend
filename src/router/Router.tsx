@@ -21,6 +21,9 @@ import PlaceJoin1 from '../pages/E/PlaceJoin1';
 import PlaceJoin2 from '../pages/E/PlaceJoin2';
 import SettingManager from '../pages/I/SettingManager';
 import SettingMember from '../pages/I/SettingMember';
+import ManagementManager from '../pages/J/ManagementManager';
+import ManagementMember from '../pages/J/ManagementMember';
+import CreateDangbun from '../pages/J/CreateDangbun';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
@@ -117,6 +120,18 @@ const router = createBrowserRouter([
   {
     path: '/setting/member',
     element: <SettingMember />,
+  },
+  {
+    path: '/management/manager',
+    element: <ManagementManager />,
+  },
+  {
+    path: '/management/member',
+    element: <ManagementMember />,
+  },
+  {
+    path: '/management/manager/create',
+    element: <CreateDangbun />,
   },
   {
     path: '/cleanuplist',
