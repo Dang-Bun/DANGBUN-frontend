@@ -169,7 +169,14 @@ const MyPlace: React.FC = () => {
           <button
             key={p.placeId}
             className='w-full h-[117px] bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 text-left'
-            onClick={() => navigate(`/places/${p.placeId}`)}
+            onClick={() =>
+              navigate(`/home`, {
+                state: {
+                  role: p.role,
+                  placeId: p.placeId,
+                },
+              })
+            }
           >
             {/* 아이콘 원 */}
             <div
