@@ -9,8 +9,8 @@ export const useDutyApi = {
   //   delete: (placeId: number, dutyId: number) =>
   //     api.delete(`/places/${placeId}/duties/${dutyId}`),
 
-  // 당번 목록 조회
-  //   list: (placeId: number) => api.get(`/places/${placeId}/duties`),
+  //   당번 목록 조회
+  list: (placeId: number) => api.get(`/places/${placeId}/duties`),
 
   // 당번 생성
   create: (placeId: number, data: any) =>
