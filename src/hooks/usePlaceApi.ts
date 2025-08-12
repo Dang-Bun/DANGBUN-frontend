@@ -22,7 +22,9 @@ export const usePlaceApi = {
     placeId: number,
     body: { startTime: string; endTime: string; isToday: boolean }
   ) => api.patch(`/places/${placeId}/settings/time`, body),
-
+  //체크리스트 시간 가져오기
+  getTime: (placeId: number) => api.get(`/places/${placeId}/settings/time`),
+  //플레이스 조회
   placeSearch: (placeId: number) => api.get(`/places/${placeId}`),
   // 플레이스 삭제
   placeDelete: (placeId: number, placeName: string) =>

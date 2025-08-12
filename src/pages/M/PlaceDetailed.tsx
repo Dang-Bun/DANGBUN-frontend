@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
+//준서야 당일, 다음날도 저장할 수 있게 바꿔야돼
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
@@ -31,7 +32,7 @@ export default function PlaceDetailed() {
     const placeId = Number(localStorage.getItem('placeId'));
     const fetchTimeSettings = async () => {
       try {
-        const res = await usePlaceApi.getTime(placeId); // GET /places/{placeId}/settings/time
+        const res = await usePlaceApi.getTime(placeId);
         if (res.data.code === 20000) {
           const { startTime, endTime, isToday } = res.data.data;
           setStart({
@@ -43,6 +44,7 @@ export default function PlaceDetailed() {
             m: Number(endTime.split(':')[1]),
             day: isToday ? '당일' : '다음날',
           });
+          console.log('시간 불러오기 성공');
         }
       } catch (err) {
         console.error('시간 불러오기 실패', err);
@@ -61,8 +63,7 @@ export default function PlaceDetailed() {
     try {
       const res = await usePlaceApi.updatePlaceTime(placeId, payload); // PATCH 요청
       if (res.data.code === 20000) {
-        alert('저장 성공');
-        // 상태는 이미 최신이니 화면에 즉시 반영됨
+        alert('시간 저장 성공');
       } else {
         alert(`저장 실패: ${res.data.message}`);
       }
