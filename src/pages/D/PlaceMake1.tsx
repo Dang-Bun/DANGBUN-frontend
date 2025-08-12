@@ -2,6 +2,7 @@ import React from 'react';
 import CTAButton from '../../components/button/CTAButton';
 import PlaceRollCard from '../../components/place/PlaceRollCard';
 import { useNavigate } from 'react-router-dom';
+import left_Chevron from '../../assets/chevron/left_chevronImg.svg';
 
 const PlaceMake1 = () => {
   const navigate = useNavigate();
@@ -22,6 +23,13 @@ const PlaceMake1 = () => {
 
   return (
     <div className='w-[393px] h-[853px] flex flex-col items-center justify-center'>
+      <div className='mt-[68px] pl-[12px]'>
+        <img
+          src={left_Chevron}
+          alt='뒤로가기'
+          onClick={() => navigate('/addPlace')}
+        />
+      </div>
       <div className='flex flex-col gap-[35px] mb-5'>
         <div className='flex flex-col items-start gap-4'>
           <h1 className='w-[353px] text-xl font-normal leading-7'>
@@ -47,56 +55,56 @@ const PlaceMake1 = () => {
       </div>
       <div className='grid grid-cols-3 grid-rows-3 gap-5 '>
         <PlaceRollCard
-          role='cafe'
-          selected={selectedRole === 'cafe'}
-          onClick={() => setSelectedRole('cafe')}
+          role='CAFE'
+          selected={selectedRole === 'CAFE'}
+          onClick={() => setSelectedRole('CAFE')}
         />
         <PlaceRollCard
-          role='restaurant'
-          selected={selectedRole === 'restaurant'}
-          onClick={() => setSelectedRole('restaurant')}
+          role='RESTAURANT'
+          selected={selectedRole === 'RESTAURANT'}
+          onClick={() => setSelectedRole('RESTAURANT')}
         />
         <PlaceRollCard
-          role='cinema'
-          selected={selectedRole === 'cinema'}
-          onClick={() => setSelectedRole('cinema')}
+          role='THEATER'
+          selected={selectedRole === 'THEATER'}
+          onClick={() => setSelectedRole('THEATER')}
         />
         <PlaceRollCard
-          role='dormitory'
-          selected={selectedRole === 'dormitory'}
-          onClick={() => setSelectedRole('dormitory')}
+          role='DORMITORY'
+          selected={selectedRole === 'DORMITORY'}
+          onClick={() => setSelectedRole('DORMITORY')}
         />
         <PlaceRollCard
-          role='building'
-          selected={selectedRole === 'building'}
-          onClick={() => setSelectedRole('building')}
+          role='BUILDING'
+          selected={selectedRole === 'BUILDING'}
+          onClick={() => setSelectedRole('BUILDING')}
         />
         <PlaceRollCard
-          role='office'
-          selected={selectedRole === 'office'}
-          onClick={() => setSelectedRole('office')}
+          role='OFFICE'
+          selected={selectedRole === 'OFFICE'}
+          onClick={() => setSelectedRole('OFFICE')}
         />
         <PlaceRollCard
-          role='school'
-          selected={selectedRole === 'school'}
-          onClick={() => setSelectedRole('school')}
+          role='SCHOOL'
+          selected={selectedRole === 'SCHOOL'}
+          onClick={() => setSelectedRole('SCHOOL')}
         />
         <PlaceRollCard
-          role='gym'
-          selected={selectedRole === 'gym'}
-          onClick={() => setSelectedRole('gym')}
+          role='GYM'
+          selected={selectedRole === 'GYM'}
+          onClick={() => setSelectedRole('GYM')}
         />
         <PlaceRollCard
-          role='plus'
-          selected={selectedRole === 'plus'}
-          onClick={() => setSelectedRole('plus')}
+          role='ETC'
+          selected={selectedRole === 'ETC'}
+          onClick={() => setSelectedRole('ETC')}
           setPlusRole={setPlusRole}
         />
       </div>
       <CTAButton
         variant={
-          (selectedRole !== 'plus' && text) ||
-          (selectedRole === 'plus' && plusRole !== '' && text)
+          (selectedRole !== 'ETC' && text) ||
+          (selectedRole === 'ETC' && plusRole !== '' && text)
             ? 'blue'
             : 'thickGray'
         }

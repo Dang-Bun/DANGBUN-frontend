@@ -5,17 +5,6 @@ import CTAButton from '../../components/button/CTAButton';
 import PopupCard from '../../components/PopUp/PopUpCard';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
-type RoleType =
-  | 'cafe'
-  | 'building'
-  | 'cinema'
-  | 'dormitory'
-  | 'gym'
-  | 'office'
-  | 'restaurant'
-  | 'school'
-  | 'plus';
-
 const PlaceJoin2 = () => {
   const location = useLocation();
   const { placeName, category, placeId } = location.state || {};
@@ -57,10 +46,7 @@ const PlaceJoin2 = () => {
         </div>
 
         <div>
-          <GradRollCard
-            role={/*{ category }*/ 'cinema' as unknown as RoleType}
-          />
-          <img />
+          <GradRollCard role={category} />
         </div>
 
         <p className='text-neutral-400 text-sm font-normal leading-tight items-center text-center'>
@@ -111,7 +97,12 @@ const PlaceJoin2 = () => {
         onSecondClick={handleNext}
       />
 
-      <CTAButton style={{ position: 'fixed', bottom: '103px' }}>완료</CTAButton>
+      <CTAButton
+        style={{ position: 'fixed', bottom: '103px' }}
+        onClick={() => navigate('/myPlace')}
+      >
+        완료
+      </CTAButton>
       <CTAButton
         style={{ position: 'fixed', bottom: '39px' }}
         variant='thickGray'

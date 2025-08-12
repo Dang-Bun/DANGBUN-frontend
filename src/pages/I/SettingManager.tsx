@@ -14,7 +14,7 @@ import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
 import api from '../../apis/axios';
 
-const Setting = () => {
+const SettingManager = () => {
   const navigate = useNavigate();
   //아래 주석은 플레이스 연동 완료 후 연동 예정
   // const [name, setName] = useState('');
@@ -111,7 +111,10 @@ const Setting = () => {
 
         {/* 하단 메뉴들 */}
         <div className='flex flex-col gap-[12px]'>
-          <div className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'>
+          <div
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
+            onClick={() => navigate('/placedetailed')}
+          >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
                 <div className='absolute inset-0 bg-[#D4E0FD] rounded-full z-0' />
@@ -126,7 +129,10 @@ const Setting = () => {
             <img src={blue_right_chevron} alt='>' />
           </div>
 
-          <div className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'>
+          <div
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
+            onClick={() => navigate('/alarm')}
+          >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
                 <div className='absolute inset-0 bg-[#D4E0FD] rounded-full z-0' />
@@ -164,4 +170,4 @@ const Setting = () => {
   );
 };
 
-export default Setting;
+export default SettingManager;

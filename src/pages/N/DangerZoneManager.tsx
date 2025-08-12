@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 import CTAButton from '../../components/button/CTAButton';
 import FreeButton from '../../components/button/FreeButton';
@@ -17,10 +19,32 @@ const DangerZoneManager = () => {
   const [dPlaceModalOpen2, setdPlaceModalOpen2] = React.useState(false);
   const [dMemberModalOpen1, setdMemberModalOpen1] = React.useState(false);
   const [dMemberModalOpen2, setdMemberModalOpen2] = React.useState(false);
+  const [placeName, setPlaceName] = useState('');
 
   const navigate = useNavigate();
 
   const members = ['박완', '박한나', '신효정', '전예영'];
+
+  const placeId = Number(localStorage.getItem('placeId'));
+
+  useEffect(() => {
+    const fetchPlaceInfo = async () => {
+      try {
+        const res = await usePlaceApi.placeSearch(placeId);
+        if (res.data.code === 20000) {
+          setPlaceName(res.data.data.placeName); // API 응답 구조에 맞게 수정
+        } else {
+          console.warn(`⚠️ 플레이스 정보 불러오기 실패: ${res.data.message}`);
+        }
+      } catch (error: any) {
+        console.error('❌ 플레이스 정보 API 호출 실패:', error);
+      }
+    };
+
+    if (placeId) {
+      fetchPlaceInfo();
+    }
+  }, [placeId]);
 
   const toggleList = () => {
     setIsListCollapsed(!isListCollapsed);
@@ -37,7 +61,7 @@ const DangerZoneManager = () => {
         <img
           src={left_chevron}
           alt='뒤로가기'
-          onClick={() => navigate('/setting')}
+          onClick={() => navigate('/setting/manager')}
           className='cursor-pointer mb-[19px]'
         />
       </div>
@@ -107,10 +131,22 @@ const DangerZoneManager = () => {
         placeholder='플레이스 이름 입력'
         first='취소'
         second='삭제'
+        placeName={placeName}
         onFirstClick={() => setdPlaceModalOpen1(false)}
         onSecondClick={async () => {
-          setdPlaceModalOpen1(false);
-          setdPlaceModalOpen2(true);
+          try {
+            const res = await usePlaceApi.placeDelete(placeId, placeName || '');
+            if (res.data.code === 20000) {
+              setdPlaceModalOpen1(false);
+              setdPlaceModalOpen2(true);
+            } else {
+              alert(`❌ 삭제 실패: ${res.data.message}`);
+            }
+          } catch (error: any) {
+            alert(
+              `⚠️ API 에러: ${error.response?.data?.message || error.message}`
+            );
+          }
         }}
       ></PopUpCardDanger>
       <PopUpCardDanger

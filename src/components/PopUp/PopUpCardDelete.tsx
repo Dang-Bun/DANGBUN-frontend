@@ -11,12 +11,12 @@ interface PopUpCardProps {
   placeholder?: string;
   first?: string;
   second?: string;
-  placeName?: string;
+  userEmail: string;
   onFirstClick?: () => void;
   onSecondClick?: (inputValue?: string) => void;
 }
 
-const PopUpCardDanger = ({
+const PopUpCardDelete = ({
   isOpen,
   onRequestClose,
   title,
@@ -25,7 +25,7 @@ const PopUpCardDanger = ({
   placeholder,
   first,
   second,
-  placeName,
+  userEmail,
   onFirstClick,
   onSecondClick,
 }: PopUpCardProps) => {
@@ -75,7 +75,7 @@ const PopUpCardDanger = ({
             {second && input && (
               <Button
                 style={{ cursor: inputValue ? 'pointer' : 'default' }}
-                variant={inputValue === placeName ? 'red' : 'thickGray'}
+                variant={inputValue === userEmail ? 'blue' : 'thickGray'}
                 onClick={() => {
                   onSecondClick?.(inputValue);
                   setInputValue('');
@@ -86,7 +86,7 @@ const PopUpCardDanger = ({
             )}
             {second && !input && (
               <Button
-                variant='red'
+                variant='blue'
                 onClick={() => {
                   onSecondClick?.();
                 }}
@@ -101,4 +101,4 @@ const PopUpCardDanger = ({
   );
 };
 
-export default PopUpCardDanger;
+export default PopUpCardDelete;

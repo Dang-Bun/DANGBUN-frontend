@@ -17,17 +17,18 @@ export const usePlaceApi = {
   }) => api.post('/places/join-requests', data),
   inviteCodeCheck: (data: { inviteCode: string }) =>
     api.post('/places/invite-code', data),
-  settingsTime: (
+  // 체크리스트 시간 설정
+  updatePlaceTime: (
     placeId: number,
-    data: {
-      startTime: string;
-      endTime: string;
-      isToday: boolean;
-    }
-  ) => api.patch(`/places/${placeId}/settings/time`, data),
+    body: { startTime: string; endTime: string; isToday: boolean }
+  ) => api.patch(`/places/${placeId}/settings/time`, body),
+  //체크리스트 시간 가져오기
+  getTime: (placeId: number) => api.get(`/places/${placeId}/settings/time`),
+  //플레이스 조회
   placeSearch: (placeId: number) => api.get(`/places/${placeId}`),
-  placeDelete: (placeId: number) => api.delete(`/places/${placeId}`),
+  // 플레이스 삭제
+  placeDelete: (placeId: number, placeName: string) =>
+    api.delete(`/places/${placeId}`, { data: { placeName } }),
   placeJoinCancel: (placeId: number) =>
     api.delete(`/places/${placeId}/join-requests`),
-
 };

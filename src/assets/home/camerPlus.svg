@@ -1,0 +1,9 @@
+<svg width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.082 2.28516C13.213 2.28535 14.1298 3.20197 14.1299 4.33301V11.042C14.1298 12.173 13.213 13.0896 12.082 13.0898H2.04785C0.916857 13.0896 6.33874e-05 12.173 0 11.042V4.33301C6.66644e-05 3.20198 0.916859 2.28537 2.04785 2.28516H12.082Z" fill="#DEDEDE"/>
+<circle cx="13.299" cy="11.6359" r="2.70131" fill="white"/>
+<circle cx="7.27254" cy="8.51814" r="1.90168" fill="#DEDEDE" stroke="white" stroke-width="0.768091"/>
+<rect x="2.49365" width="3.94806" height="1.66234" rx="0.512061" fill="#DEDEDE"/>
+<path d="M13.2983 10.3887V12.8822" stroke="#DEDEDE" stroke-width="0.768091" stroke-linecap="round"/>
+<path d="M12.0518 11.6357H14.5453" stroke="#DEDEDE" stroke-width="0.768091" stroke-linecap="round"/>
+<path d="M2.68848 4.35156H10.8815" stroke="white" stroke-width="0.768091" stroke-linecap="round"/>
+</svg>
