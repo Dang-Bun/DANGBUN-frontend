@@ -341,7 +341,7 @@ function isConfirmEnabled({ mode, start, end, tempH, tempM, tempDay }) {
   const startTotal = start.h * 60 + start.m;
   const endTotal = tempH * 60 + tempM;
   if (tempDay === '당일') return endTotal >= startTotal;
-  // 다음날이면 언제든 OK
+  // 다음날이면 언제든 OK 
   return true;
 }
 
