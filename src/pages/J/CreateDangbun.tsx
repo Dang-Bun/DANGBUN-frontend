@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDutyApi } from '../../hooks/useDutyApi';
 
 import Input from '../../components/input/Input';
 import CTAButton from '../../components/button/CTAButton';
@@ -26,6 +27,17 @@ const iconList = [
   toiletImg,
 ];
 
+const iconMap: Record<string, string> = {
+  [moppingImg]: 'BUCKET_PINK',
+  [trashImg]: 'TRASH_BLUE',
+  [cleanerImg]: 'CLEANER_PINK',
+  [cupWashingImg]: 'DISH_BLUE',
+  [polishImg]: 'BRUSH_PINK',
+  [sprayerImg]: 'SPRAY_BLUE',
+  [sweepImg]: 'FLOOR_BLUE',
+  [toiletImg]: 'TOILET_PINK',
+};
+
 const CreateDangbun = () => {
   const navigate = useNavigate();
   const [dangbunName, setDangbunName] = useState('');
@@ -33,6 +45,39 @@ const CreateDangbun = () => {
 
   const [createModalOpen, setCreateModalOpen] = React.useState(false);
   const isFormValid = dangbunName.trim() !== '' && selectedIcon;
+
+  const handleCreateDuty = async () => {
+    try {
+      const placeId = Number(localStorage.getItem('placeId'));
+      if (!placeId) {
+        alert('placeId가 없습니다.');
+        return;
+      }
+
+      const icon = selectedIcon ? iconMap[selectedIcon] : null;
+      if (!icon) {
+        alert('아이콘을 선택해주세요.');
+        return;
+      }
+
+      const payload = {
+        name: dangbunName,
+        icon, // 파일명으로 변환된 값
+      };
+
+      const res = await useDutyApi.create(placeId, payload);
+
+      if (res.data.code === 20000) {
+        console.log('당번이 성공적으로 생성되었습니다.');
+        navigate('/management/manager');
+      } else {
+        alert(`생성 실패: ${res.data.message}`);
+      }
+    } catch (err) {
+      console.error('당번 생성 실패', err);
+      alert('서버 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <div className='p-4'>
@@ -106,7 +151,7 @@ const CreateDangbun = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setCreateModalOpen(false)}
-        onSecondClick={() => navigate('/management/manager')}
+        onSecondClick={handleCreateDuty}
       ></PopUpCard>
     </div>
   );
