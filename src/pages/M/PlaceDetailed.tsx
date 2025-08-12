@@ -1,7 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
+//준서야 당일, 다음날도 저장할 수 있게 바꿔야돼
+
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0~23
 const minutes = Array.from({ length: 60 }, (_, i) => i); // 0~59
@@ -9,6 +12,7 @@ const pad2 = (n) => String(n).padStart(2, '0');
 
 export default function PlaceDetailed() {
   const navigate = useNavigate();
+  const placeId = Number(localStorage.getItem('placeId'));
   // 화면 표시용 상태
   const [start, setStart] = useState({ h: 0, m: 0 });
   const [end, setEnd] = useState({ h: 0, m: 0, day: '당일' });
@@ -23,6 +27,50 @@ export default function PlaceDetailed() {
   const exampleText = useMemo(() => {
     return `06/27일 00:00에 시작한 체크리스트는\n06/27일 23:59에 종료됩니다.`;
   }, []);
+
+  useEffect(() => {
+    const placeId = Number(localStorage.getItem('placeId'));
+    const fetchTimeSettings = async () => {
+      try {
+        const res = await usePlaceApi.getTime(placeId);
+        if (res.data.code === 20000) {
+          const { startTime, endTime, isToday } = res.data.data;
+          setStart({
+            h: Number(startTime.split(':')[0]),
+            m: Number(startTime.split(':')[1]),
+          });
+          setEnd({
+            h: Number(endTime.split(':')[0]),
+            m: Number(endTime.split(':')[1]),
+            day: isToday ? '당일' : '다음날',
+          });
+          console.log('시간 불러오기 성공');
+        }
+      } catch (err) {
+        console.error('시간 불러오기 실패', err);
+      }
+    };
+    fetchTimeSettings();
+  }, []);
+
+  const handleSave = async () => {
+    const placeId = Number(localStorage.getItem('placeId'));
+    const payload = {
+      startTime: `${pad2(start.h)}:${pad2(start.m)}`,
+      endTime: `${pad2(end.h)}:${pad2(end.m)}`,
+      isToday: end.day === '당일',
+    };
+    try {
+      const res = await usePlaceApi.updatePlaceTime(placeId, payload); // PATCH 요청
+      if (res.data.code === 20000) {
+        alert('시간 저장 성공');
+      } else {
+        alert(`저장 실패: ${res.data.message}`);
+      }
+    } catch (err) {
+      console.error('저장 API 실패', err);
+    }
+  };
 
   const openModal = (which) => {
     setMode(which);
@@ -270,7 +318,10 @@ export default function PlaceDetailed() {
                       tempDay,
                     })
                   }
-                  onClick={applyModal}
+                  onClick={() => {
+                    applyModal();
+                    handleSave();
+                  }}
                 >
                   확인
                 </CTAButton>
