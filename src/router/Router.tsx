@@ -39,6 +39,9 @@ import MemberList from '../pages/L/MemberList';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
+import MemberList from '../pages/L/MemberList';
+import MemberConfirm from '../pages/L/MemberConfirm';
+import ManagerInfo from '../pages/L/ManagerInfo';
 
 import Home from '../pages/F/Home';
 
