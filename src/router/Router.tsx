@@ -30,6 +30,7 @@ import CleanInfo from '../pages/K/CleanInfo';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
+
 import Home from '../pages/F/Home';
 
 const router = createBrowserRouter([
@@ -152,6 +153,18 @@ const router = createBrowserRouter([
   {
     path: '/dangerzone/member',
     element: <DangerZoneMember />,
+  },
+  {
+    path: '/memberlist',
+    element: <MemberList />,
+  },
+  {
+    path: '/memberconfirm',
+    element: <MemberConfirm />,
+  },
+  {
+    path: '/managerinfo',
+    element: <ManagerInfo />,
   },
 ]);
 
