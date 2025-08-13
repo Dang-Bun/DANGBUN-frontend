@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { usePlaceApi } from '../../hooks/usePlaceApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 import CTAButton from '../../components/button/CTAButton';
 import PopUpCardDanger from '../../components/PopUp/PopUpCardDanger';
@@ -9,8 +12,30 @@ import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 const DangerZoneMember = () => {
   const [dPlaceModalOpen1, setdPlaceModalOpen1] = React.useState(false);
   const [dPlaceModalOpen2, setdPlaceModalOpen2] = React.useState(false);
+  const [placeName, setPlaceName] = useState('');
 
   const navigate = useNavigate();
+
+  const placeId = Number(localStorage.getItem('placeId'));
+
+  useEffect(() => {
+    const fetchPlaceInfo = async () => {
+      try {
+        const res = await usePlaceApi.placeSearch(placeId);
+        if (res.data.code === 20000) {
+          setPlaceName(res.data.data.placeName); // API 응답 구조에 맞게 수정
+        } else {
+          console.warn(`⚠️ 플레이스 정보 불러오기 실패: ${res.data.message}`);
+        }
+      } catch (error: any) {
+        console.error('❌ 플레이스 정보 API 호출 실패:', error);
+      }
+    };
+
+    if (placeId) {
+      fetchPlaceInfo();
+    }
+  }, [placeId]);
 
   return (
     <div className='mt-[68px]'>
@@ -18,7 +43,7 @@ const DangerZoneMember = () => {
         <img
           src={left_chevron}
           alt='뒤로가기'
-          onClick={() => navigate('/setting')}
+          onClick={() => navigate('/setting/member')}
           className='cursor-pointer mb-[19px]'
         />
       </div>
@@ -45,10 +70,22 @@ const DangerZoneMember = () => {
         placeholder='플레이스 이름 입력'
         first='취소'
         second='나가기'
+        placeName={placeName}
         onFirstClick={() => setdPlaceModalOpen1(false)}
         onSecondClick={async () => {
-          setdPlaceModalOpen1(false);
-          setdPlaceModalOpen2(true);
+          try {
+            const res = await useMemberApi.leave(placeId, placeName || '');
+            if (res.data.code === 20000) {
+              setdPlaceModalOpen1(false);
+              setdPlaceModalOpen2(true);
+            } else {
+              alert(`❌ 나가기 실패: ${res.data.message}`);
+            }
+          } catch (error: any) {
+            alert(
+              `⚠️ API 에러: ${error.response?.data?.message || error.message}`
+            );
+          }
         }}
       ></PopUpCardDanger>
       <PopUpCardDanger
