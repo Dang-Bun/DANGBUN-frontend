@@ -18,7 +18,7 @@ import grayCheck from '../../assets/cleanUpList/GrayCheck.svg';
 import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
 import BottomSheet from './BottomSheet';
 
-import useDutyApi from '../../hooks/useDutyApi';
+import { useDutyApi } from '../../hooks/useDutyApi';
 
 interface CleanUpCardProps {
   title: string;
@@ -34,15 +34,6 @@ interface Cleaning {
   memberCount: number;
 }
 
-const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
-
-const [clickedMembers, setClickedMembers] = useState<string[]>([]);
-const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
-const [search, setSearch] = useState('');
-const [inputValue, setInputValue] = useState('');
-
-const handlePlus = () => {};
-
 const CleanUpCard: React.FC<CleanUpCardProps> = ({
   title,
   icon,
@@ -51,28 +42,38 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
 
+  const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
+  const [clickedMembers, setClickedMembers] = useState<string[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [inputValue, setInputValue] = useState('');
+
+  const dutyApi = useDutyApi();
+
+  const handlePlus = () => {
+    setOpen(true);
+  };
+
   useEffect(() => {
     const getEffect = async () => {
       try {
-        const res = await useDutyApi.getCleaningsSpec(dutyId);
-        setCleaningList(
-          Array.isArray(res.data?.data)
-            ? (await res).data.data.map((d: any) => ({
-                cleaningId: d.cleaningId,
-                cleaningName: d.cleaningName,
-                displyedNames: d.displayedNames,
-                memberCount: d.memberCount,
-              }))
-            : []
-        );
+        const res = await dutyApi.getCleaningsSpec(dutyId);
+        const list = Array.isArray(res?.data?.data)
+          ? res.data.data.map((d: any) => ({
+              cleaningId: d.cleaningId,
+              cleaningName: d.cleaningName,
+              displayedNames: d.displayedNames || [],
+              memberCount: d.memberCount,
+            }))
+          : [];
+        setCleaningList(list);
       } catch (e) {
         console.error(e);
         setCleaningList([]);
       }
     };
     getEffect();
-  });
-
+  }, [dutyId, dutyApi]);
   return (
     <div className='flex flex-col gap-4'>
       <button
@@ -89,9 +90,9 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       </button>
       {open ? (
         <div className='flex flex-col gap-3'>
-          {cleaningList.map((cleaning, index) => (
+          {cleaningList.map((cleaning) => (
             <div
-              key={index}
+              key={cleaning.cleaningId}
               className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'
             >
               <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
