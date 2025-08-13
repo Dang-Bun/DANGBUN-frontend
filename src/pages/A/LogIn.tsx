@@ -68,6 +68,7 @@ const LogIn = () => {
             onClick={() => {
               navigate('/findPassWord');
             }}
+            className='cursor-pointer'
           />
         </div>
         <CTAButton onClick={handleClick} variant='gray'>

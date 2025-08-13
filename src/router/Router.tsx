@@ -21,12 +21,21 @@ import PlaceJoin1 from '../pages/E/PlaceJoin1';
 import PlaceJoin2 from '../pages/E/PlaceJoin2';
 import SettingManager from '../pages/I/SettingManager';
 import SettingMember from '../pages/I/SettingMember';
+import ManagementManager from '../pages/J/ManagementManager';
+import ManagementMember from '../pages/J/ManagementMember';
+import CreateDangbun from '../pages/J/CreateDangbun';
+import DutyManagement from '../pages/J/DutyManagement';
+import ModifyDuty from '../pages/J/ModifyDuty';
+import AddClean from '../pages/J/AddClean';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
+import ManagerInfo from '../pages/L/ManagerInfo';
+import MemberConfirm from '../pages/L/MemberConfirm';
+import MemberList from '../pages/L/MemberList';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
@@ -117,6 +126,30 @@ const router = createBrowserRouter([
   {
     path: '/setting/member',
     element: <SettingMember />,
+  },
+  {
+    path: '/management/manager',
+    element: <ManagementManager />,
+  },
+  {
+    path: '/management/member',
+    element: <ManagementMember />,
+  },
+  {
+    path: '/management/manager/create',
+    element: <CreateDangbun />,
+  },
+  {
+    path: '/management/manager/duty',
+    element: <DutyManagement />,
+  },
+  {
+    path: '/management/manager/duty/modify',
+    element: <ModifyDuty />,
+  },
+  {
+    path: '/management/manager/duty/addclean',
+    element: <AddClean />,
   },
   {
     path: '/cleanuplist',
