@@ -41,6 +41,9 @@ import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
 
 import Home from '../pages/F/Home';
+import ManagerHome from '../pages/F/ManagerHome';
+import MemberHome from '../pages/F/MemberHome';
+import ManagerOverview from '../pages/F/ManagerOverview';
 
 const router = createBrowserRouter([
   {
@@ -86,6 +89,18 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: <Home />,
+  },
+  {
+    path: '/home/manager',
+    element: <ManagerHome  />,
+  },
+  {
+    path: '/home/manager/overview',
+    element: <ManagerOverview  />,
+  },
+  {
+    path: '/home/member',
+    element: <MemberHome  />,
   },
   {
     path: '/alarm',
