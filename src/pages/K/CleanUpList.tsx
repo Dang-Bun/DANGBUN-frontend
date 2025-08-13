@@ -20,7 +20,7 @@ import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDutyApi } from '../../hooks/useDutyApi';
-import useMemberApi from '../../hooks/useMemberApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 const CleanUpList = () => {
   const navigate = useNavigate();
@@ -174,7 +174,7 @@ const CleanUpList = () => {
 
       {dangbunList.length === 0 ? (
         <div
-          className='flex flex-col overflow-y-auto items-center justify-center gap-5'
+          className='flex flex-col overflow-y-auto items-center justify-center gap-5 h-[832px]'
           style={{ paddingTop: contentMargin }}
         >
           <img src={cleanUpImg} alt='empty' />
