@@ -9,6 +9,13 @@ import unselectedDangbun from '../../assets/checkIcon/unselectedDangbun.svg';
 import selectedDangbun from '../../assets/checkIcon/selectedDangbun.svg';
 
 type DutyMember = { memberId: number; role: string; name: string };
+type Cleaning = { cleaningId: number; name: string };
+type RoleItem = {
+  cleaningId: number;
+  cleaningName: string;
+  displayedNames: string[];
+  memberCount: number;
+};
 
 /** ---------- 바텀시트 모달 ---------- */
 type MembersPickerModalProps = {
@@ -172,9 +179,36 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
     </>
   );
 };
-/** ---------- // 바텀시트 모달 ---------- */
 
 const DutyManagement = () => {
+  //렌더링용 임시 데이터
+  const [roleItems, setRoleItems] = useState<RoleItem[]>([
+    {
+      cleaningId: 1,
+      cleaningName: '바닥 닦기',
+      displayedNames: ['박완', '박한나', '최준서'],
+      memberCount: 3,
+    },
+    {
+      cleaningId: 2,
+      cleaningName: '재고 채우기',
+      displayedNames: ['최준서'],
+      memberCount: 1,
+    },
+    {
+      cleaningId: 3,
+      cleaningName: '재활용 쓰레기',
+      displayedNames: [],
+      memberCount: 0,
+    },
+    {
+      cleaningId: 4,
+      cleaningName: '창문 닦기',
+      displayedNames: [],
+      memberCount: 0,
+    },
+  ]);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -204,12 +238,16 @@ const DutyManagement = () => {
   // 모달 오픈
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const [cleanings, setCleanings] = useState<Cleaning[]>([]);
+  const [cleaningsLoading, setCleaningsLoading] = useState(false);
+  const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
+
   // 안전장치
   useEffect(() => {
     if (!placeId || !dutyId) navigate('/management/manager');
   }, [placeId, dutyId, navigate]);
 
-  // 멤버 불러오기
+  // 멤버, 청소 불러오기
   useEffect(() => {
     if (!placeId || !dutyId) return;
 
@@ -227,6 +265,24 @@ const DutyManagement = () => {
         setErr(e?.response?.data?.message ?? e?.message ?? '불러오기 실패');
       } finally {
         setLoading(false);
+      }
+    })();
+  }, [placeId, dutyId]);
+
+  useEffect(() => {
+    if (!placeId || !dutyId) return;
+    (async () => {
+      try {
+        setCleaningsLoading(true);
+        setCleaningsErr(null);
+        const res = await useDutyApi.getCleanings(placeId, dutyId);
+        setCleanings(res.data?.data ?? []);
+      } catch (e: any) {
+        setCleaningsErr(
+          e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
+        );
+      } finally {
+        setCleaningsLoading(false);
       }
     })();
   }, [placeId, dutyId]);
@@ -338,7 +394,7 @@ const DutyManagement = () => {
               )}
             </div>
 
-            {/* 청소 섹션 (기존 그대로) */}
+            {/* 청소 섹션 */}
             <div className='mt-4'>
               <div className='flex justify-between items-center mb-2'>
                 <span className='font-semibold text-gray-700'>청소</span>
@@ -349,17 +405,111 @@ const DutyManagement = () => {
                   onClick={() => navigate('/management/manager/duty/addclean')}
                 />
               </div>
-              <div className='h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm'>
-                청소를 추가해 주세요.
-              </div>
+
+              {/* 상태별 */}
+              {cleaningsLoading && (
+                <div className='h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm'>
+                  불러오는 중…
+                </div>
+              )}
+
+              {cleaningsErr && (
+                <div className='h-16 bg-red-50 rounded-lg flex items-center justify-center text-red-500 text-sm'>
+                  {cleaningsErr}
+                </div>
+              )}
+
+              {!cleaningsLoading && !cleaningsErr && cleanings.length === 0 && (
+                <div className='h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm'>
+                  청소를 추가해 주세요.
+                </div>
+              )}
+
+              {!cleaningsLoading && !cleaningsErr && cleanings.length > 0 && (
+                <div className='grid grid-cols-2 gap-3'>
+                  {cleanings.map((c) => (
+                    <div
+                      key={c.cleaningId}
+                      className='relative rounded-[12px] bg-white border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-3 flex items-center justify-between'
+                    >
+                      <span className='text-gray-700 text-[15px]'>
+                        {c.name}
+                      </span>
+
+                      {/* 점3개 버튼(시안의 우측 점 버튼) */}
+                      <button
+                        type='button'
+                        aria-label='메뉴'
+                        className='w-8 h-8 rounded-[10px] bg-gray-100 flex items-center justify-center active:scale-95'
+                        // onClick={() => openCleaningMenu(c.cleaningId)}  // 필요시 핸들러 연결
+                      >
+                        {/* vertical dots svg */}
+                        <svg viewBox='0 0 4 18' className='w-4 h-4'>
+                          <circle cx='2' cy='2' r='2' fill='#A8B0BA' />
+                          <circle cx='2' cy='9' r='2' fill='#A8B0BA' />
+                          <circle cx='2' cy='16' r='2' fill='#A8B0BA' />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
 
         {/* 역할 분담 탭 */}
         {activeTab === 'role' && (
-          <div className='text-gray-500 text-center py-8'>
-            역할 분담 내용을 여기에 표시합니다.
+          <div className='pt-[50px]'>
+            <div className='space-y-3'>
+              {roleItems.map((item) => {
+                const hasAssignees = item.memberCount > 0;
+                return (
+                  <div
+                    key={item.cleaningId}
+                    className='rounded-[12px] bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100'
+                  >
+                    {/* 제목 */}
+                    <div className='text-[16px] font-normal text-black mb-2'>
+                      {item.cleaningName}
+                    </div>
+
+                    {/* 하단 라인 */}
+                    <div className='flex items-center gap-2'>
+                      {hasAssignees ? (
+                        <>
+                          <span className='px-2 py-[3px] text-[11px] rounded-full bg-green-1 text-green-2'>
+                            멤버 {item.memberCount}명
+                          </span>
+                          <span className='text-[12px] text-gray-500'>
+                            {item.displayedNames.slice(0, 2).join(', ')}{' '}
+                            {item.memberCount > 2 && '등'}
+                          </span>
+                          <button
+                            type='button'
+                            className='w-6 h-6 rounded-full bg-[#F1F2F4] text-gray-500 grid place-items-center active:scale-95'
+                          >
+                            +
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className='px-2 py-[3px] text-[12px] rounded-full bg-[#f0f0f0] text-gray-6'>
+                            담당 선택
+                          </span>
+                          <button
+                            type='button'
+                            className='ml-1 w-6 h-6 rounded-full bg-[#f0f0f0] text-gray-6 grid place-items-center active:scale-95'
+                          >
+                            +
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
