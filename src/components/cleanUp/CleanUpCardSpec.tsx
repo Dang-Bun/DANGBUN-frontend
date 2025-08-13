@@ -1,3 +1,5 @@
+//사용하지 않는 파일입니다. 아직 지우진 않고 복구하기 위해 임시로 남겨둠. 리팩토링 한다면 지우기.
+
 import React, { useState } from 'react';
 import plus from '../../assets/cleanUpList/GrayPlus.svg';
 

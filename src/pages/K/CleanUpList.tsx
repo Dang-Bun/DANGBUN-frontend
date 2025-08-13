@@ -17,20 +17,21 @@ import DownImg from '../../assets/chevron/bottom_chevronImg.svg';
 import refresh from '../../assets/cleanUpList/refresh.svg';
 
 import { useCleaningApi } from '../../hooks/useCleaningApi';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useDutyApi } from '../../hooks/useDutyApi';
+import useMemberApi from '../../hooks/useMemberApi';
 
 const CleanUpList = () => {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']);
-  const [members, setMembers] = useState<string[]>([
-    '박완',
-    '전예영',
-    '박한나',
-    '김도현',
-    '백상희',
-    '최준서',
-  ]);
+  const [placeId, setPlaceId] = useState(0);
+  const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']); //여기에다가 당번을 띄우고 당번을 누르면 청소목록을출력해야함.
+  const [dangbunList, setDangbunList] = useState<DutyItem[]>([]);
+  const [members, setMembers] = useState<string[]>([]);
 
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
@@ -38,18 +39,51 @@ const CleanUpList = () => {
   const headerRef = useRef<HTMLDivElement>(null);
   const [contentMargin, setContentMargin] = useState(0);
 
+  interface DutyItem {
+    dutyId: number;
+    name: string;
+    icon: string;
+  }
+
   useLayoutEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     setContentMargin(headerHeight);
   });
 
-  const memberDuty = async () => {
-    try {
-      const res = await useCleaningApi.searchDuty();
-      console.log(res.data);
-    } catch (e) {
-      console.error('fail:', e);
-    }
+  useEffect(() => {
+    const geteffect = async () => {
+      try {
+        const [dutyres, memberRes] = await Promise.all([
+          useDutyApi.dutyList(placeId),
+          useMemberApi.memberList(placeId),
+        ]);
+        console.log('dutylist: ', dutyres.data);
+        console.log('memberlist: ', memberRes.data);
+
+        setDangbunList(
+          Array.isArray(dutyres.data?.data)
+            ? dutyres.data.data.map((d: any) => ({
+                dutyId: d.dutyId,
+                name: d.name,
+                icon: d.icon,
+              }))
+            : []
+        );
+        setMembers(
+          Array.isArray(memberRes.data?.data?.members)
+            ? memberRes.data.data.members.map((m: any) => m.name)
+            : []
+        );
+      } catch (e) {
+        console.error(e);
+        setDangbunList([]);
+      }
+    };
+    geteffect();
+  }, [placeId]);
+
+  const handleAdd = () => {
+    navigate('/cleanadd', { state: { placeId: placeId } });
   };
 
   return (
@@ -59,10 +93,16 @@ const CleanUpList = () => {
           title='청소 관리'
           rightElement={<img src={grayPlus} alt='추가' />}
           showBackButton={true}
+          onRightClick={handleAdd}
         />
         <div className='flex flex-row justify-between mt-[52px] mb-3'>
-          <p className='text-black text-sm font-normal leading-tight'>총 0개</p>
-          <button className='flex flex-row gap-1 justify-center items-center'>
+          <p className='text-black text-sm font-normal leading-tight'>
+            총 {dangbunList.length}개
+          </p>
+          <button
+            className='flex flex-row gap-1 justify-center items-center cursor-pointer'
+            onClick={() => navigate('/undangbun', { state: { placeId } })}
+          >
             <p className='text-[#BDBDBD] text-sm font-normal leading-tight'>
               당번 미지정 청소
             </p>
@@ -132,7 +172,7 @@ const CleanUpList = () => {
         )}
       </div>
 
-      {clean.length === 0 ? (
+      {dangbunList.length === 0 ? (
         <div
           className='flex flex-col overflow-y-auto items-center justify-center gap-5'
           style={{ paddingTop: contentMargin }}
@@ -152,7 +192,15 @@ const CleanUpList = () => {
           className='flex flex-col overflow-y-auto items-center justify-start'
           style={{ paddingTop: contentMargin }}
         >
-          <CleanUpCard />
+          {dangbunList.map((duty, index) => (
+            <CleanUpCard
+              key={duty.dutyId ?? index}
+              title={duty.name}
+              icon={duty.icon}
+              dutyId={duty.dutyId}
+              members={members}
+            />
+          ))}
         </div>
       )}
 

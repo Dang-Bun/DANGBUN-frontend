@@ -38,6 +38,8 @@ const PlaceJoin = () => {
       const res = await usePlaceApi.placeSearch(placeId);
       const placeName = res.data.data.placeName;
       const category = res.data.data.category;
+      console.log(res.data);
+      console.log(category);
       if (code) {
         navigate('/placejoin2', {
           state: {
@@ -65,7 +67,6 @@ const PlaceJoin = () => {
         console.log(res.data.data);
         setInfoList(infoArray);
         setConfirm(true);
-
         setPlaceId(res.data.data.placeId);
         setIsModalOpen(true);
       }

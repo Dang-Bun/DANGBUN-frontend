@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
-import c1 from '../../assets/cleanIcon/sweepImg_1.svg';
+import c1 from '../../assets/cleanIcon/sweepImg_1.svg'; //당번 생성시에 저장한 아이콘 이름 여기에 바꾸기
 import c2 from '../../assets/cleanIcon/cleanerImg.svg';
 import c3 from '../../assets/cleanIcon/toiletImg.svg';
 import c4 from '../../assets/cleanIcon/cupWashingImg.svg';
@@ -11,10 +11,67 @@ import c8 from '../../assets/cleanIcon/sprayerImg.svg';
 import line from '../../assets/cleanUpList/Line.svg';
 import up from '../../assets/cleanUpList/BlackUp.svg';
 import down from '../../assets/cleanUpList/BlackDown.svg';
-import CleanUpCardSpec from './CleanUpCardSpec';
+import plus from '../../assets/cleanUpList/GrayPlus.svg';
 
-const CleanUpCard = () => {
+import searchIcon from '../../assets/cleanUpList/searchIcon.svg';
+import grayCheck from '../../assets/cleanUpList/GrayCheck.svg';
+import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
+import BottomSheet from './BottomSheet';
+
+import useDutyApi from '../../hooks/useDutyApi';
+
+interface CleanUpCardProps {
+  title: string;
+  icon: string;
+  dutyId: number;
+  members: string[];
+}
+
+interface Cleaning {
+  cleaningId: number;
+  cleaningName: string;
+  displayedNames: string[];
+  memberCount: number;
+}
+
+const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
+
+const [clickedMembers, setClickedMembers] = useState<string[]>([]);
+const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+const [search, setSearch] = useState('');
+const [inputValue, setInputValue] = useState('');
+
+const handlePlus = () => {};
+
+const CleanUpCard: React.FC<CleanUpCardProps> = ({
+  title,
+  icon,
+  dutyId,
+  members,
+}) => {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const getEffect = async () => {
+      try {
+        const res = await useDutyApi.getCleaningsSpec(dutyId);
+        setCleaningList(
+          Array.isArray(res.data?.data)
+            ? (await res).data.data.map((d: any) => ({
+                cleaningId: d.cleaningId,
+                cleaningName: d.cleaningName,
+                displyedNames: d.displayedNames,
+                memberCount: d.memberCount,
+              }))
+            : []
+        );
+      } catch (e) {
+        console.error(e);
+        setCleaningList([]);
+      }
+    };
+    getEffect();
+  });
 
   return (
     <div className='flex flex-col gap-4'>
@@ -23,45 +80,159 @@ const CleanUpCard = () => {
         onClick={() => setOpen(!open)}
       >
         <div className='flex flex-row items-center gap-1'>
-          <img src={c1} alt='icon' className='w-9 h-9' />
+          <img src={icon} alt='icon' className='w-9 h-9' />
           <p className='text-zinc-600 text-sm font-normal leading-tight'>
-            탕비실 청소 당번
+            {title}
           </p>
         </div>
         {open ? <img src={up} alt='close' /> : <img src={down} alt='open' />}
       </button>
       {open ? (
         <div className='flex flex-col gap-3'>
-          <CleanUpCardSpec />
-          <CleanUpCardSpec />
-          <CleanUpCardSpec />
+          {cleaningList.map((cleaning, index) => (
+            <div
+              key={index}
+              className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'
+            >
+              <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
+              <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
+                <div className='flex flex-col justify-center items-start gap-1.5'>
+                  <p className='text-black text-base font-normal leading-snug'>
+                    {cleaning.cleaningName}
+                  </p>
+                  <div className='flex flex-row gap-1 items-center'>
+                    {cleaning.displayedNames.length === 0 ? (
+                      <div className='flex h-5 px-2 bg-neutral-100 rounded-[300px] justify-center items-center'>
+                        <p className='text-neutral-400 text-xs font-normal'>
+                          담당 선택
+                        </p>
+                      </div>
+                    ) : cleaning.displayedNames.length > 1 ? (
+                      <div className='flex h-5 px-2 bg-[#EBFFF6] rounded-[300px] justify-center items-center'>
+                        <p className='text-[#00DC7B] text-xs font-normal'>
+                          멤버 {cleaning.displayedNames.length}명
+                        </p>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                    {cleaning.displayedNames.length === 0 ? (
+                      <></>
+                    ) : cleaning.displayedNames.length === 1 ? (
+                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                        {cleaning.displayedNames[0]}
+                      </p>
+                    ) : cleaning.displayedNames.length === 2 ? (
+                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                        {cleaning.displayedNames[0]},{' '}
+                        {cleaning.displayedNames[1]}
+                      </p>
+                    ) : (
+                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                        {cleaning.displayedNames[0]},{' '}
+                        {cleaning.displayedNames[1]} 등
+                      </p>
+                    )}
+
+                    <button
+                      className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
+                      onClick={handlePlus}
+                    >
+                      <img
+                        src={plus}
+                        alt='추가하기'
+                        className='cursor-pointer'
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>{' '}
+              <img src={line} alt='line' className='w-[352px]' />{' '}
+              {/*여기 맞는지 확인 */}
+            </div>
+          ))}{' '}
         </div>
       ) : (
         <></>
       )}
-      <img src={line} alt='line' className='w-[352px]' />
-      <button
-        className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
-        onClick={() => setOpen(!open)}
+
+      <BottomSheet
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          setFilteredMembers(clickedMembers);
+        }}
       >
-        <div className='flex flex-row items-center gap-1'>
-          <img src={c1} alt='icon' className='w-9 h-9' />
-          <p className='text-zinc-600 text-sm font-normal leading-tight'>
-            탕비실 청소 당번
-          </p>
+        <div className='w-[353px] h-[348px]'>
+          <div className='flex flex-col gap-[15px]'>
+            <div className='flex relative items-center '>
+              <img src={searchIcon} alt='SEARCH' className='absolute px-3' />
+              <input
+                value={inputValue}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setInputValue(e.target.value);
+                  if (v === '') {
+                    setSearch('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearch(inputValue);
+                  }
+                }}
+                placeholder='검색'
+                className='w-[353px] h-[41px] pl-[52px] bg-stone-50 rounded-[20.5px]'
+              />
+            </div>
+
+            <div
+              className={`${search.length == 0 ? 'flex' : 'hidden'} flex-row w-[353px] items-center justify-end gap-2 `}
+            >
+              <p className='text-zinc-500 text-base font-normal leading-snug'>
+                전체 선택
+              </p>
+              <button
+                className='w-6 h-6 cursor-pointer'
+                onClick={() => {
+                  if (members.length === clickedMembers.length)
+                    setClickedMembers([]);
+                  else setClickedMembers([...members]);
+                }}
+              >
+                <img
+                  src={
+                    members.length === clickedMembers.length
+                      ? greenCheck
+                      : grayCheck
+                  }
+                  alt='graycheck'
+                  className='w-6 h-6'
+                />
+              </button>
+            </div>
+          </div>
+          <div className='flex flex-wrap gap-2 max-w-[353px] mt-5'>
+            {members
+              .filter((name) => name.includes(search))
+              .map((name, index) => (
+                <button
+                  key={index}
+                  className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer ${clickedMembers.includes(name) ? 'bg-[#00dc7b]' : 'bg-[#e5e5e5]'}`}
+                  onClick={() => {
+                    setClickedMembers((prev) =>
+                      prev.includes(name)
+                        ? prev.filter((n) => n !== name)
+                        : [...prev, name]
+                    );
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+          </div>
         </div>
-        {open ? <img src={up} alt='close' /> : <img src={down} alt='open' />}
-      </button>
-      {open ? (
-        <div className='flex flex-col gap-3'>
-          <CleanUpCardSpec />
-          <CleanUpCardSpec />
-          <CleanUpCardSpec />
-        </div>
-      ) : (
-        <></>
-      )}
-      <img src={line} alt='line' className='w-[352px]' />
+      </BottomSheet>
     </div>
   );
 };

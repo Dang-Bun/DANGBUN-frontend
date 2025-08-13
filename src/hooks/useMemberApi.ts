@@ -1,6 +1,7 @@
 import api from '../apis/axios';
 
 export const useMemberApi = {
+
   // 멤버 수락
   accept: (placeId, memberId) =>
     api.post(`/places/${placeId}/members/${memberId}/accept`),

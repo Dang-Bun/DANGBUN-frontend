@@ -32,3 +32,5 @@ export const usePlaceApi = {
   placeJoinCancel: (placeId: number) =>
     api.delete(`/places/${placeId}/join-requests`),
 };
+
+export default usePlaceApi;

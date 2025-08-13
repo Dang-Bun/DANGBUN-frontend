@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import '../../styles/CalendarOverride.css';
 import Calendar from 'react-calendar';
@@ -22,6 +22,7 @@ import arrowBack from '../../assets/nav/arrowBack.svg';
 const CleanAdd = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const { placeId } = useLocation();
 
   //switch
   const [checked1, setChecked1] = useState(false);
