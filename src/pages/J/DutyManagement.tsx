@@ -342,6 +342,24 @@ const DutyManagement = () => {
   //   })();
   // }, [placeId, dutyId]);
 
+  useEffect(() => {
+    if (!placeId || !dutyId) return;
+    (async () => {
+      try {
+        setCleaningsLoading(true);
+        setCleaningsErr(null);
+        const res = await useDutyApi.getCleanings(placeId, dutyId);
+        setCleanings(res.data?.data ?? []);
+      } catch (e: any) {
+        setCleaningsErr(
+          e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
+        );
+      } finally {
+        setCleaningsLoading(false);
+      }
+    })();
+  }, [placeId, dutyId]);
+
   return (
     <div className='flex flex-col h-screen bg-gray-50'>
       {/* 상단 헤더 */}
