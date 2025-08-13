@@ -110,12 +110,12 @@ const MyPlace: React.FC = () => {
 
   // 상단 바
   const Header = (
-    <div className='flex w-full h-[50px] items-center mt-[72px] mb-4 px-4'>
+    <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4 px-4'>
       <div className='flex w-full text-[20px] justify-center'>내 플레이스</div>
       <img
         src={threebar}
         alt='목록'
-        className='cursor-pointer'
+        className='absolute right-0 cursor-pointer'
         onClick={() => navigate('/myInfo')}
       />
     </div>
@@ -168,7 +168,7 @@ const MyPlace: React.FC = () => {
         {places.map((p) => (
           <button
             key={p.placeId}
-            className='w-full h-[117px] bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 text-left'
+            className='w-full h-[117px] bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 text-left cursor-pointer'
             onClick={() =>
               navigate(`/home`, {
                 state: {
