@@ -19,6 +19,9 @@ import CTAButton from '../../components/button/CTAButton';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import arrowBack from '../../assets/nav/arrowBack.svg';
 
+import { useMemberApi } from '../../hooks/useMemberApi';
+import useCleaningApi from '../../hooks/useCleaningApi';
+
 const CleanAdd = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
@@ -106,24 +109,59 @@ const CleanAdd = () => {
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [search, setSearch] = useState('');
-  const [members, setMembers] = useState<string[]>([
-    '박완',
-    '전예영',
-    '박한나',
-    '김도현',
-    '백상희',
-    '최준서',
-  ]);
+  const [members, setMembers] = useState<string[]>([]);
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
+
+  useEffect(() => {
+    if (!placeId) return;
+    const run = async () => {
+      try {
+        const res = await useMemberApi.list(placeId, '');
+        const memberspay = res?.data?.data?.members ?? [];
+        const names = Array.isArray(memberspay)
+          ? memberspay
+              .map((m: any) => m?.name)
+              .filter((v: any) => typeof v === 'string')
+          : [];
+        setMembers(names);
+      } catch (e) {
+        console.error(e);
+        setMembers([]);
+      }
+    };
+    run();
+  }, [placeId, useMemberApi]);
 
   const confirmHandle = () => {
     if (dangbun.length === 0) {
       setIsModalOpen1(true);
     } else {
       setIsModalOpen2(true);
+    }
+  };
+
+  const handleNext = async () => {
+    try {
+      const data = {
+        placeId: Number(placeId),
+        cleaningName: name,
+        dutyName: dangbun || '당번 미지정',
+        members: clickedMembers,
+        needPhto: checked1,
+        repeatType: selectedCycle,
+        repeatDays: selectedDays,
+        detailDates: selectedDates.map((date) =>
+          dayjs(date).format('YYYY-MM-DD')
+        ),
+      };
+      console.log(data);
+      // const res = await useCleaningApi.makeCleaning(data);
+      // console.log(res.data.data);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -423,7 +461,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => handleNext()}
       />
 
       <PopUpCard
