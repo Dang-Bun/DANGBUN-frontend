@@ -24,6 +24,9 @@ import SettingMember from '../pages/I/SettingMember';
 import ManagementManager from '../pages/J/ManagementManager';
 import ManagementMember from '../pages/J/ManagementMember';
 import CreateDangbun from '../pages/J/CreateDangbun';
+import DutyManagement from '../pages/J/DutyManagement';
+import ModifyDuty from '../pages/J/ModifyDuty';
+import AddClean from '../pages/J/AddClean';
 import CleanUpList from '../pages/K/CleanUpList';
 import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
@@ -132,6 +135,18 @@ const router = createBrowserRouter([
   {
     path: '/management/manager/create',
     element: <CreateDangbun />,
+  },
+  {
+    path: '/management/manager/duty',
+    element: <DutyManagement />,
+  },
+  {
+    path: '/management/manager/duty/modify',
+    element: <ModifyDuty />,
+  },
+  {
+    path: '/management/manager/duty/addclean',
+    element: <AddClean />,
   },
   {
     path: '/cleanuplist',
