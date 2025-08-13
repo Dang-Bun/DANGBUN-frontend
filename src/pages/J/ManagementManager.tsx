@@ -109,7 +109,15 @@ const ManagementManager = () => {
             <div
               key={duty.dutyId}
               className='relative cursor-pointer w-[167px] h-[160px]'
-              onClick={() => navigate(`/management/manager/${duty.dutyId}`)}
+              onClick={() =>
+                navigate(`/management/manager/duty`, {
+                  state: {
+                    dutyId: duty.dutyId,
+                    iconUrl: iconMap[duty.icon],
+                    name: duty.name,
+                  },
+                })
+              }
             >
               {/* 배경 이미지 */}
               <img
@@ -124,7 +132,7 @@ const ManagementManager = () => {
                   {duty.name}
                 </span>
                 <img
-                  src={iconMap[duty.icon] || nothingDangbun}
+                  src={iconMap[duty.icon]}
                   alt={duty.name}
                   className='absolute right-2 bottom-2 w-[80px] h-[80px]'
                 />
