@@ -148,11 +148,10 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
                   <button
                     key={m.memberId}
                     onClick={() => toggleOne(m.memberId)}
-                    className={`px-3 py-2 rounded-[12px] text-[14px] font-medium transition
-                    ${selected ? 'bg-emerald-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500'}`}
+                    className={`px-4 py-2 rounded-[8px] text-[14px] font-medium transition
+                    ${selected ? 'bg-[#00dd7c] text-white shadow-sm' : 'bg-[#e5e5e5] text-white'}`}
                   >
                     {m.name}
-                    {selected && <span className='ml-1'>✓</span>}
                   </button>
                 );
               })}
@@ -181,7 +180,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 };
 
 const DutyManagement = () => {
-  //렌더링용 임시 데이터
+  //렌더링용 역할분담 임시 데이터
   const [roleItems, setRoleItems] = useState<RoleItem[]>([
     {
       cleaningId: 1,
@@ -208,6 +207,39 @@ const DutyManagement = () => {
       memberCount: 0,
     },
   ]);
+  // 전체 멤버(선택 가능한 풀)
+  const [allMembers, setAllMembers] = useState<DutyMember[]>([
+    {
+      memberId: 1,
+      role: '매니저',
+      name: '박완',
+    },
+    {
+      memberId: 2,
+      role: '맴버',
+      name: '최준서',
+    },
+    {
+      memberId: 3,
+      role: '맴버',
+      name: '김희용',
+    },
+    {
+      memberId: 4,
+      role: '매니저',
+      name: '전예영',
+    },
+    {
+      memberId: 5,
+      role: '매니저',
+      name: '백상희',
+    },
+    {
+      memberId: 6,
+      role: '매니저',
+      name: '김도현',
+    },
+  ]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -223,8 +255,6 @@ const DutyManagement = () => {
   // 탭/데이터 상태
   const [activeTab, setActiveTab] = useState<'info' | 'role'>('info');
 
-  // 전체 멤버(선택 가능한 풀)
-  const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
   // 실제 선택되어 카드에 표시될 멤버
   const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
   const selectedMembers = useMemo(
@@ -246,29 +276,32 @@ const DutyManagement = () => {
   useEffect(() => {
     if (!placeId || !dutyId) navigate('/management/manager');
   }, [placeId, dutyId, navigate]);
+  console.log(allMembers);
 
-  // 멤버, 청소 불러오기
-  useEffect(() => {
-    if (!placeId || !dutyId) return;
+  // 멤버 불러오기
+  // useEffect(() => {
+  //   if (!placeId || !dutyId) return;
 
-    (async () => {
-      try {
-        setLoading(true);
-        setErr(null);
-        const res = await useDutyApi.getMembers(placeId, dutyId);
-        const list: DutyMember[] = res.data?.data ?? [];
-        setAllMembers(list);
+  //   (async () => {
+  //     try {
+  //       setLoading(true);
+  //       setErr(null);
+  //       const res = await useDutyApi.getMembers(placeId, dutyId);
+  //       const list: DutyMember[] = res.data?.data ?? [];
+  //       setAllMembers(list);
 
-        // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
-        // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
-      } catch (e: any) {
-        setErr(e?.response?.data?.message ?? e?.message ?? '불러오기 실패');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [placeId, dutyId]);
-
+  //       // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
+  //       // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
+  //     } catch (e: any) {
+  //       setErr(
+  //         e?.response?.data?.message ?? e?.message ?? '맴버 불러오기 실패'
+  //       );
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, [placeId, dutyId]);
+  // 청소 불러오기
   useEffect(() => {
     if (!placeId || !dutyId) return;
     (async () => {
@@ -386,11 +419,11 @@ const DutyManagement = () => {
                 </div>
               )}
               {!loading && !err && selectedMembers.length > 0 && (
-                <div className='flex flex-wrap gap-2'>
+                <div className='flex flex-wrap gap-2 shadow-md px-2 py-2 rounded-[8px]'>
                   {selectedMembers.map((m) => (
                     <span
                       key={m.memberId}
-                      className='inline-flex items-center px-3 py-1 rounded-full bg-[#21D3A5] text-white text-sm'
+                      className='inline-flex items-center px-3 py-1 rounded-[6px] bg-[#00dd7c] text-white text-sm'
                       title={m.role ? `역할: ${m.role}` : undefined}
                     >
                       {m.name}
