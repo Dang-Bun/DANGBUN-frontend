@@ -199,7 +199,7 @@ const CalendarPage: React.FC = () => {
               <img src={filter} alt="필터" className="cursor-pointer" onClick={() => setIsFilterOpen(true)} />
             </div>
             <div className="relative flex items-center">
-              <span className="text-[12px] text-[#4D83FD] mr-1">{sortLabel}</span>
+              <span className="text-[12px] text-[#797C82] mr-1">{sortLabel}</span>
               <img
                 src={toggle}
                 alt="정렬 열기"
