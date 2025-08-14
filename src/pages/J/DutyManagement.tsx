@@ -302,7 +302,13 @@ const DutyManagement = () => {
           alt='수정'
           className='cursor-pointer'
           onClick={() =>
-            navigate('/management/manager/duty/modify', { state: { dutyId } })
+            navigate('/management/manager/duty/modify', {
+              state: {
+                dutyId: dutyId,
+                iconUrl: iconUrl,
+                name: name,
+              },
+            })
           }
         />
       </div>

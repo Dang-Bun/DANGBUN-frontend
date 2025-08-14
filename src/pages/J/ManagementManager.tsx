@@ -74,7 +74,7 @@ const ManagementManager = () => {
           onClick={() => navigate('/setting/manager')}
         />
       </div>
-      <div className='flex w-full text-[20px] justify-center'>내 플레이스</div>
+      <div className='flex w-full text-[20px] justify-center'>당번 관리</div>
       <div className='absolute right-0'>
         <img
           src={Plus}
