@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import cameraGray from '../../assets/home/cameraGray.svg';
 import cameraDefault from '../../assets/home/cameraBlue.svg';
 import checkDefault from '../../assets/home/checkDefault.svg';
 import checkDone from '../../assets/home/checkDone.svg';
+import checkDisabled from '../../assets/home/checkDisabled.svg';
 import toggleUp from '../../assets/home/toggleUp.svg';
 import toggleDown from '../../assets/home/toggleDown.svg';
 
@@ -13,6 +14,9 @@ interface TaskCardProps {
   isChecked: boolean;
   isCamera: boolean;
   onToggle: () => void;
+  completedAt?: string;
+  completedBy?: string;
+  disabled?: boolean;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -22,44 +26,53 @@ const TaskCard: React.FC<TaskCardProps> = ({
   isChecked,
   isCamera,
   onToggle,
+  completedAt,
+  completedBy,
+  disabled = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [checkedTime, setCheckedTime] = useState<string | null>(null);
 
-  const handleCheck = () => {
-    onToggle();
-    if (!isChecked) {
-      const currentTime = new Date();
-      const hours = currentTime.getHours();
-      const minutes = currentTime.getMinutes();
-      setCheckedTime(`${hours}:${minutes < 10 ? '0' + minutes : minutes}`);
-    } else {
-      setCheckedTime(null); 
-    }
-  };
+  const cleanedMembers = useMemo(
+    () => (members || []).map(m => (m || '').trim()).filter(Boolean),
+    [members]
+  );
+  const isAllMembers = useMemo(
+    () => cleanedMembers.some(m => m === '멤버 전체'),
+    [cleanedMembers]
+  );
+  const sortedMembers = useMemo(
+    () => cleanedMembers.filter(m => m !== '멤버 전체').sort((a, b) => a.localeCompare(b, 'ko-KR')),
+    [cleanedMembers]
+  );
+  const showExpandButton = !isAllMembers && sortedMembers.length >= 2;
 
-  const handleToggle = () => setIsExpanded((prev) => !prev);
+  const handleCheck = () => onToggle();
+  const handleToggle = () => setIsExpanded(prev => !prev);
 
+  const memberLabel = isAllMembers ? '멤버 전체' : `멤버 ${sortedMembers.length}명`;
   const memberSummary = () => {
-    if (isExpanded) return members.join(', ');
-    if (members.length <= 2) return members.join(', ');
-    return `${members.slice(0, 2).join(', ')} 등`;
+    if (isAllMembers) return '';
+    if (sortedMembers.length === 0) return '';
+    if (isExpanded) return sortedMembers.join(', ');
+    if (sortedMembers.length === 1) return sortedMembers[0];
+    return `${sortedMembers[0]}, ${sortedMembers[1]} 등`;
   };
 
   const calculateRemainingTime = () => {
-    const currentTime = new Date();
-    const dueTimeParts = dueTime.split(':');
-    const dueHours = parseInt(dueTimeParts[0], 10);
-    const dueMinutes = parseInt(dueTimeParts[1], 10);
-
-    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const dueMinutesTotal = dueHours * 60 + dueMinutes;
-
-    const remainingMinutes = dueMinutesTotal - currentMinutes;
-    const hoursRemaining = Math.floor(remainingMinutes / 60);
-
+    const now = new Date();
+    const [dh, dm] = dueTime.split(':').map(n => parseInt(n, 10));
+    const cur = now.getHours() * 60 + now.getMinutes();
+    const due = dh * 60 + dm;
+    const diff = due - cur;
+    const hoursRemaining = Math.floor(diff / 60);
     return `${hoursRemaining}시간 남았습니다`;
   };
+
+  const rightTopText =
+    isChecked && completedAt && completedBy ? `${completedAt} - ${completedBy}` : calculateRemainingTime();
+
+  const isCheckboxDisabled = disabled && !isChecked;
+  const checkboxIcon = isCheckboxDisabled ? checkDisabled : isChecked ? checkDone : checkDefault;
 
   return (
     <div
@@ -67,59 +80,53 @@ const TaskCard: React.FC<TaskCardProps> = ({
         isChecked ? 'bg-[#F1F3F6]' : 'bg-[#F9F9F9]'
       }`}
     >
-      <div
-        className={`w-[9px] h-auto rounded-l-[8px] ${isChecked ? 'bg-[#8E8E8E]' : 'bg-[#E1E4EA]'}`}
-      />
+      <div className={`w-[9px] h-auto rounded-l-[8px] ${isChecked ? 'bg-[#8E8E8E]' : 'bg-[#E1E4EA]'}`} />
       <div className="flex justify-between w-full p-3">
         <div className="flex">
           <img
-            src={isChecked ? checkDone : checkDefault}
-            alt="체크박스"
+            src={checkboxIcon}
+            alt={isChecked ? '체크 완료' : (isCheckboxDisabled ? '체크 비활성화' : '체크박스')}
             className="w-5 h-5 mr-3 mt-1 cursor-pointer"
-            onClick={handleCheck}
+            onClick={isCheckboxDisabled ? undefined : handleCheck}
+            aria-disabled={isCheckboxDisabled}
+            role="button"
           />
           <div>
             <div className="flex items-center gap-1 mb-1">
-              <p className={`text-[16px] ${isChecked ? 'text-[#5A5D62]' : 'text-[#111827]'}`}>
-                {title}
-              </p>
+              <p className={`text-[16px] ${isChecked ? 'text-[#5A5D62]' : 'text-[#111827]'}`}>{title}</p>
               {isCamera && (
                 <img
                   src={isChecked ? cameraGray : cameraDefault}
                   alt="카메라"
-                  className="w-[14px] h-[14px]"
+                  className="w-[14px] h-[14px] shrink-0"
                 />
               )}
             </div>
+
             <div className="flex items-center gap-1">
               <div
                 className={`inline-block whitespace-nowrap rounded-[300px] px-[7px] py-[2px] text-[11px] ${
                   isChecked ? 'bg-white text-[#8E8E8E]' : 'bg-[#EBFFF6] text-[#00DD7C]'
                 }`}
               >
-                멤버 {members.length}명
+                {memberLabel}
               </div>
-              <p
-                className={`text-[12px] leading-[18px] break-words ${
-                  isChecked ? 'text-[#8E8E8E]' : 'text-[#8E8E8E]'
-                }`}
-              >
-                {memberSummary()}
-              </p>
+              {!isAllMembers && (
+                <p className="text-[12px] leading-[18px] break-words text-[#8E8E8E]">{memberSummary()}</p>
+              )}
             </div>
           </div>
         </div>
+
         <div className="flex flex-col justify-between items-end">
-          <div
-            className={`text-[12px] whitespace-nowrap ${
-              isChecked ? 'text-[#8E8E8E]' : 'text-[#8E8E8E]'
-            }`}
-          >
-            {checkedTime ? checkedTime : calculateRemainingTime()}
-          </div>
-          <button className="w-5 h-5 mt-2" onClick={handleToggle}>
-            <img src={isExpanded ? toggleUp : toggleDown} alt="토글 버튼" />
-          </button>
+          <div className="text-[12px] whitespace-nowrap text-[#8E8E8E]">{rightTopText}</div>
+          {showExpandButton ? (
+            <button className="w-5 h-5 mt-2" onClick={handleToggle} aria-label="멤버 전체 보기">
+              <img src={isExpanded ? toggleUp : toggleDown} alt="토글 버튼" />
+            </button>
+          ) : (
+            <div className="w-5 h-5 mt-2" />
+          )}
         </div>
       </div>
     </div>
