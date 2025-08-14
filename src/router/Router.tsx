@@ -10,7 +10,6 @@ import JoinComplete from '../pages/B/JoinComplete';
 import MyPlace from '../pages/B/MyPlace';
 import AddPlace from '../pages/B/AddPlace';
 import MyInfo from '../pages/C/MyInfo';
-import CalendarPage from '../pages/H/CalendarPage';
 import Notification from '../pages/G/Notification';
 import NotificationDetail from '../pages/G/NotificationDetail';
 import NotificationCreate from '../pages/G/NotificationCreate';
@@ -39,11 +38,12 @@ import MemberList from '../pages/L/MemberList';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
-
+import CalendarPage from '../pages/H/CalendarPage';
 import Home from '../pages/F/Home';
 import ManagerHome from '../pages/F/ManagerHome';
 import MemberHome from '../pages/F/MemberHome';
 import ManagerOverview from '../pages/F/ManagerOverview';
+import CalendarDetail from '../pages/H/CalendarDetail';
 
 const router = createBrowserRouter([
   {
@@ -83,8 +83,12 @@ const router = createBrowserRouter([
     element: <MyInfo />,
   },
   {
-    path: '/calendar',
+    path : '/calendar',
     element: <CalendarPage />,
+  },
+  {
+    path : '/calendar/content',
+    element: <CalendarDetail />,
   },
   {
     path: '/home',
