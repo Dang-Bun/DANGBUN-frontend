@@ -16,3 +16,6 @@
     display: none;
 }
 
+.react-calendar__tile {
+  position: relative;
+}
