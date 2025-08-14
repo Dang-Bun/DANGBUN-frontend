@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import grayBar from '../../assets/grayBar.svg';
 
 type Props = {
@@ -8,6 +9,12 @@ type Props = {
 };
 
 const SelectBottom: React.FC<Props> = ({ onOpenInfo, onViewPhoto, onDelete }) => {
+  const navigate = useNavigate();
+  const handleOpenInfo = () => {
+    onOpenInfo?.();
+    navigate('/calendar/content');
+  };
+
   return (
     <div className="h-[212px] gapx-[18px] bg-white rounded-[24px] flex flex-col items-center justify-center">
       <img src={grayBar} alt="바" className="pt-[20px]" />
@@ -19,7 +26,7 @@ const SelectBottom: React.FC<Props> = ({ onOpenInfo, onViewPhoto, onDelete }) =>
           <div className="w-[339px] h-[1px] bg-[#DEDEDE] mx-auto" />
         </div>
         <div>
-          <button className="w-full p-[16px] flex justify-center" onClick={onOpenInfo}>
+          <button className="w-full p-[16px] flex justify-center" onClick={handleOpenInfo}>
             해당 청소 정보
           </button>
           <div className="w-[339px] h-[1px] bg-[#DEDEDE] mx-auto" />
