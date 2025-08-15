@@ -207,39 +207,7 @@ const DutyManagement = () => {
       memberCount: 0,
     },
   ]);
-  // 렌더링용 전체 멤버 더미 데이터
-  const [allMembers, setAllMembers] = useState<DutyMember[]>([
-    {
-      memberId: 1,
-      role: '매니저',
-      name: '박완',
-    },
-    {
-      memberId: 2,
-      role: '맴버',
-      name: '최준서',
-    },
-    {
-      memberId: 3,
-      role: '맴버',
-      name: '김희용',
-    },
-    {
-      memberId: 4,
-      role: '매니저',
-      name: '전예영',
-    },
-    {
-      memberId: 5,
-      role: '매니저',
-      name: '백상희',
-    },
-    {
-      memberId: 6,
-      role: '매니저',
-      name: '김도현',
-    },
-  ]);
+  const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
   const [cleanings, setCleanings] = useState<Cleaning[]>([
     {
       cleaningId: 1,
