@@ -7,6 +7,7 @@ import modify from '../../assets/dangbun/Modify.svg';
 import plus from '../../assets/dangbun/plus.svg';
 import unselectedDangbun from '../../assets/checkIcon/unselectedDangbun.svg';
 import selectedDangbun from '../../assets/checkIcon/selectedDangbun.svg';
+import PopUpCard from '../../components/PopUp/PopUpCard';
 
 type DutyMember = { memberId: number; role: string; name: string };
 type Cleaning = { cleaningId: number; name: string };
@@ -330,22 +331,25 @@ const DutyManagement = () => {
   //   })();
   // }, [placeId, dutyId]);
 
+  //청소 상세 정보 불러오기
   useEffect(() => {
-    if (!placeId || !dutyId) return;
+    let mounted = true;
+
     (async () => {
       try {
-        setCleaningsLoading(true);
-        setCleaningsErr(null);
-        const res = await useDutyApi.getCleanings(placeId, dutyId);
-        setCleanings(res.data?.data ?? []);
-      } catch (e: any) {
-        setCleaningsErr(
-          e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
-        );
-      } finally {
-        setCleaningsLoading(false);
+        const res = await useDutyApi.getCleaningInfo(placeId, dutyId);
+        // 응답 구조: { code, message, data: [...] }
+        const items: RoleItem[] = res.data?.data ?? [];
+
+        if (mounted) setRoleItems(items);
+      } catch (err) {
+        console.error('청소 목록 조회 실패:', err);
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, [placeId, dutyId]);
 
   return (
