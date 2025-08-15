@@ -22,6 +22,8 @@ type MembersPickerModalProps = {
   open: boolean;
   allMembers: DutyMember[];
   initialSelectedIds: number[];
+  dutyId: number;
+  placeId: number;
   onClose: () => void;
   onConfirm: (selectedIds: number[]) => void;
 };
@@ -30,6 +32,8 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   open,
   allMembers,
   initialSelectedIds,
+  dutyId,
+  placeId,
   onClose,
   onConfirm,
 }) => {
@@ -37,6 +41,19 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
     new Set(initialSelectedIds)
   );
+  const handleConfirm = async () => {
+    const memberIdsArray = Array.from(selectedIds);
+    try {
+      await useDutyApi.addMember(placeId, dutyId, {
+        memberIds: memberIdsArray,
+      });
+      onConfirm(memberIdsArray); // 부모에도 전달
+      onClose();
+    } catch (err) {
+      console.error('멤버 추가 실패:', err);
+      alert('멤버 추가에 실패했습니다.');
+    }
+  };
 
   // 모달 열릴 때마다 초기 선택 복원 & 검색 초기화
   useEffect(() => {
@@ -168,7 +185,10 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
             취소
           </button>
           <button
-            onClick={() => onConfirm(Array.from(selectedIds))}
+            onClick={() => {
+              onConfirm(Array.from(selectedIds));
+              handleConfirm();
+            }}
             className='flex-1 h-11 rounded-[10px] bg-blue text-white font-semibold'
           >
             확인
@@ -180,33 +200,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 };
 
 const DutyManagement = () => {
-  //렌더링용 임시 데이터
-  const [roleItems, setRoleItems] = useState<RoleItem[]>([
-    {
-      cleaningId: 1,
-      cleaningName: '바닥 닦기',
-      displayedNames: ['박완', '박한나', '최준서'],
-      memberCount: 3,
-    },
-    {
-      cleaningId: 2,
-      cleaningName: '재고 채우기',
-      displayedNames: ['최준서'],
-      memberCount: 1,
-    },
-    {
-      cleaningId: 3,
-      cleaningName: '재활용 쓰레기',
-      displayedNames: [],
-      memberCount: 0,
-    },
-    {
-      cleaningId: 4,
-      cleaningName: '창문 닦기',
-      displayedNames: [],
-      memberCount: 0,
-    },
-  ]);
+  const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
   const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
   const [cleanings, setCleanings] = useState<Cleaning[]>([
     {
@@ -268,28 +262,28 @@ const DutyManagement = () => {
   console.log(allMembers);
 
   // 멤버 불러오기
-  // useEffect(() => {
-  //   if (!placeId || !dutyId) return;
+  useEffect(() => {
+    if (!placeId || !dutyId) return;
 
-  //   (async () => {
-  //     try {
-  //       setLoading(true);
-  //       setErr(null);
-  //       const res = await useDutyApi.getMembers(placeId, dutyId);
-  //       const list: DutyMember[] = res.data?.data ?? [];
-  //       setAllMembers(list);
+    (async () => {
+      try {
+        setLoading(true);
+        setErr(null);
+        const res = await useDutyApi.getMembers(placeId, dutyId);
+        const list: DutyMember[] = res.data?.data ?? [];
+        setAllMembers(list);
 
-  //       // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
-  //       // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
-  //     } catch (e: any) {
-  //       setErr(
-  //         e?.response?.data?.message ?? e?.message ?? '맴버 불러오기 실패'
-  //       );
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  // }, [placeId, dutyId]);
+        // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
+        // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
+      } catch (e: any) {
+        setErr(
+          e?.response?.data?.message ?? e?.message ?? '맴버 불러오기 실패'
+        );
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [placeId, dutyId]);
 
   // 청소 불러오기
   // useEffect(() => {
@@ -431,7 +425,13 @@ const DutyManagement = () => {
                   src={plus}
                   alt='청소 추가'
                   className='cursor-pointer'
-                  onClick={() => navigate('/management/manager/duty/addclean')}
+                  onClick={() =>
+                    navigate('/management/manager/duty/addclean', {
+                      state: {
+                        dutyId: dutyId,
+                      },
+                    })
+                  }
                 />
               </div>
 
@@ -548,6 +548,8 @@ const DutyManagement = () => {
         open={pickerOpen}
         allMembers={allMembers}
         initialSelectedIds={selectedMemberIds}
+        dutyId={dutyId}
+        placeId={placeId}
         onClose={() => setPickerOpen(false)}
         onConfirm={(ids) => {
           setSelectedMemberIds(ids);
