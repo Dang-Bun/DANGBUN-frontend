@@ -32,13 +32,11 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
   const [file, setFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
-  // 작은 옵션 팝업 제어
-  const [menuOpen, setMenuOpen] = React.useState(false);
+   const [menuOpen, setMenuOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
   const menuRef = React.useRef<HTMLDivElement | null>(null);
 
-  // 입력 2개: 앨범/카메라
-  const galleryRef = React.useRef<HTMLInputElement | null>(null);
+   const galleryRef = React.useRef<HTMLInputElement | null>(null);
   const cameraRef = React.useRef<HTMLInputElement | null>(null);
 
   const openMenu = () => setMenuOpen(true);
@@ -74,15 +72,13 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
     handleClose();
   };
 
-  // 옵션 선택: 'low' = 앨범, 'high' = 카메라
-  const handleSelect = (type: 'low' | 'high') => {
+   const handleSelect = (type: 'low' | 'high') => {
     if (type === 'low') galleryRef.current?.click();
     if (type === 'high') cameraRef.current?.click();
     closeMenu();
   };
 
-  // 바깥 클릭 시 옵션 팝업 닫기
-  React.useEffect(() => {
+   React.useEffect(() => {
     if (!menuOpen) return;
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
@@ -124,7 +120,6 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
           </p>
         )}
 
-        {/* 업로드 아이콘/미리보기 + 옵션 팝업 앵커 */}
         <div ref={anchorRef} className="relative mt-6">
           <button
             type="button"
@@ -139,7 +134,6 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
             )}
           </button>
 
-          {/* 작은 옵션 팝업 (아이콘 버튼의 우측 하단에 위치) */}
           {menuOpen && (
             <div
               ref={menuRef}
@@ -149,8 +143,7 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
             </div>
           )}
         </div>
-
-        {/* 숨겨진 파일 입력들 */}
+ 
         <input
           ref={galleryRef}
           type="file"
@@ -162,12 +155,11 @@ const UpLoadPopUp: React.FC<UpLoadPopUpProps> = ({
           ref={cameraRef}
           type="file"
           accept="image/*"
-          capture="environment"   // 모바일에서 카메라 호출
+          capture="environment"   
           className="hidden"
           onChange={handleChange}
         />
-
-        {/* 버튼 영역 */}
+ 
         <div className="flex flex-row items-center w-[263px] mt-7 justify-between">
           <Button variant="gray" onClick={handleCancel}>
             취소
