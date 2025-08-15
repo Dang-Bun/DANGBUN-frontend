@@ -180,7 +180,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 };
 
 const DutyManagement = () => {
-  //렌더링용 역할분담 임시 데이터
+  //렌더링용 역할분담 더미 데이터
   const [roleItems, setRoleItems] = useState<RoleItem[]>([
     {
       cleaningId: 1,
@@ -207,7 +207,7 @@ const DutyManagement = () => {
       memberCount: 0,
     },
   ]);
-  // 전체 멤버(선택 가능한 풀)
+  // 렌더링용 전체 멤버 더미 데이터
   const [allMembers, setAllMembers] = useState<DutyMember[]>([
     {
       memberId: 1,
@@ -240,6 +240,28 @@ const DutyManagement = () => {
       name: '김도현',
     },
   ]);
+  const [cleanings, setCleanings] = useState<Cleaning[]>([
+    {
+      cleaningId: 1,
+      name: '바닥 쓸기',
+    },
+    {
+      cleaningId: 2,
+      name: '재고 채우기',
+    },
+    {
+      cleaningId: 3,
+      name: '재활용 쓰레기',
+    },
+    {
+      cleaningId: 4,
+      name: '창문 닦기',
+    },
+    {
+      cleaningId: 5,
+      name: '커피머신 세척',
+    },
+  ]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -268,7 +290,6 @@ const DutyManagement = () => {
   // 모달 오픈
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const [cleanings, setCleanings] = useState<Cleaning[]>([]);
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
 
@@ -301,24 +322,25 @@ const DutyManagement = () => {
   //     }
   //   })();
   // }, [placeId, dutyId]);
+
   // 청소 불러오기
-  useEffect(() => {
-    if (!placeId || !dutyId) return;
-    (async () => {
-      try {
-        setCleaningsLoading(true);
-        setCleaningsErr(null);
-        const res = await useDutyApi.getCleanings(placeId, dutyId);
-        setCleanings(res.data?.data ?? []);
-      } catch (e: any) {
-        setCleaningsErr(
-          e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
-        );
-      } finally {
-        setCleaningsLoading(false);
-      }
-    })();
-  }, [placeId, dutyId]);
+  // useEffect(() => {
+  //   if (!placeId || !dutyId) return;
+  //   (async () => {
+  //     try {
+  //       setCleaningsLoading(true);
+  //       setCleaningsErr(null);
+  //       const res = await useDutyApi.getCleanings(placeId, dutyId);
+  //       setCleanings(res.data?.data ?? []);
+  //     } catch (e: any) {
+  //       setCleaningsErr(
+  //         e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
+  //       );
+  //     } finally {
+  //       setCleaningsLoading(false);
+  //     }
+  //   })();
+  // }, [placeId, dutyId]);
 
   return (
     <div className='flex flex-col h-screen bg-gray-50'>
@@ -370,7 +392,7 @@ const DutyManagement = () => {
             className={`flex-1 py-2 text-center font-semibold mt-[4px] ${
               activeTab === 'info'
                 ? 'text-blue bg-[#fefefe] rounded-[8px] h-[38px] ml-[5px]'
-                : 'text-gray-400 font-medium'
+                : 'text-gray-400 font-medium cursor-pointer'
             }`}
             onClick={() => setActiveTab('info')}
           >
@@ -380,7 +402,7 @@ const DutyManagement = () => {
             className={`flex-1 py-2 text-center font-semibold mt-[4px] ${
               activeTab === 'role'
                 ? 'text-blue bg-[#fefefe] rounded-[8px] h-[38px] mr-[5px]'
-                : 'text-gray-400 font-medium'
+                : 'text-gray-400 font-medium cursor-pointer'
             }`}
             onClick={() => setActiveTab('role')}
           >
@@ -469,9 +491,9 @@ const DutyManagement = () => {
                   {cleanings.map((c) => (
                     <div
                       key={c.cleaningId}
-                      className='relative rounded-[12px] bg-white border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-3 flex items-center justify-between'
+                      className='relative rounded-[12px] bg-[#f8f8f8] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-3 flex items-center justify-between'
                     >
-                      <span className='text-gray-700 text-[15px]'>
+                      <span className='text-[#5a5d62] text-[14px]'>
                         {c.name}
                       </span>
 
@@ -479,7 +501,7 @@ const DutyManagement = () => {
                       <button
                         type='button'
                         aria-label='메뉴'
-                        className='w-8 h-8 rounded-[10px] bg-gray-100 flex items-center justify-center active:scale-95'
+                        className='w-8 h-8 rounded-[10px] bg-[#f8f8f8] flex items-center justify-center active:scale-95'
                         // onClick={() => openCleaningMenu(c.cleaningId)}  // 필요시 핸들러 연결
                       >
                         {/* vertical dots svg */}
