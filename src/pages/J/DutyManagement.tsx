@@ -180,7 +180,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 };
 
 const DutyManagement = () => {
-  //렌더링용 역할분담 더미 데이터
+  //렌더링용 임시 데이터
   const [roleItems, setRoleItems] = useState<RoleItem[]>([
     {
       cleaningId: 1,
