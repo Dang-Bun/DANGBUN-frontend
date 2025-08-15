@@ -9,15 +9,15 @@ import useCleaningApi from '../../hooks/useCleaningApi';
 const UnDangbun = () => {
   const [undangbunList, setUndangbunList] = useState<string[]>([]);
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const placeId = state as number | undefined;
+  const location = useLocation();
+  const placeId = location.state;
 
   useEffect(() => {
     if (placeId == null) return;
+    console.log(placeId.placeId);
     const fetchunassigned = async () => {
       try {
-        const res = await useCleaningApi.cleaningUnAssigned(placeId);
-        console.log(res.data);
+        const res = await useCleaningApi.cleaningUnAssigned(placeId.placeId);
         setUndangbunList(res.data?.cleaningName ?? []);
       } catch (e) {
         console.error(e);
