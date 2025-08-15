@@ -1,37 +1,62 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Select from 'react-select';
-import c1 from '../../assets/cleanIcon/sweepImg_1.svg';
-import c2 from '../../assets/cleanIcon/cleanerImg.svg';
-import c3 from '../../assets/cleanIcon/toiletImg.svg';
-import c4 from '../../assets/cleanIcon/cupWashingImg.svg';
-import c5 from '../../assets/cleanIcon/trashImg_2.svg';
-import c6 from '../../assets/cleanIcon/moppingImg_3.svg';
-import c7 from '../../assets/cleanIcon/polishImg.svg';
-import c8 from '../../assets/cleanIcon/sprayerImg.svg';
+
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_1.svg';
+import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/toiletImg.svg';
+import TOILET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
+import DISH_BLUE from '../../assets/cleanIcon/moppingImg_3.svg';
+import BRUSH_PINK from '../../assets/cleanIcon/polishImg.svg';
+import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
+
+import useDutyApi from '../../hooks/useDutyApi';
+
+const ICON_MAP: Record<string, string> = {
+  FLOOR_BLUE: FLOOR_BLUE,
+  CLEANER_PINK: CLEANER_PINK,
+  BUCKET_PINK: BUCKET_PINK,
+  TOILET_PINK: TOILET_PINK,
+  TRASH_BLUE: TRASH_BLUE,
+  DISH_BLUE: DISH_BLUE,
+  BRUSH_PINK: BRUSH_PINK,
+  SPRAY_BLUE: SPRAY_BLUE,
+};
 
 interface DangbunListProps {
+  placeId: number;
   onChange: (value: string) => void;
 }
 
-const DangbunList = ({ onChange }: DangbunListProps) => {
-  const options = [
-    {
-      value: 'sweep',
-      label: '탕비실 청소당번',
-      icon: c1,
-    },
-    {
-      value: 'machine',
-      label: '홀 청소당번',
-      icon: c2,
-    },
-    {
-      value: 'toilet',
-      label: '화장실 청소당번',
-      icon: c3,
-    },
-  ];
+interface Cleaning {
+  cleaningId: number;
+  cleaningName: string;
+  displayedNames: string[];
+  memberCount: number;
+}
+const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
+  const [dangbunList, setdangbunList] = useState<Cleaning[]>([]);
+
+  useEffect(() => {
+    const getEffect = async () => {
+      try {
+        const res = await useDutyApi.list(placeId);
+        console.log(res.data);
+        // const list = Array.isArray(res?.data?.data)
+        //   ? res.data.data.map((d: any) => ({
+        //       name: d.clname,
+        //       icon: d.icon,
+        //     }))
+        //   : [];
+        //setdangbunList(list);
+      } catch (e) {
+        console.error(e);
+        setdangbunList([]);
+      }
+    };
+    getEffect();
+  });
 
   const handleChange = (option: any) => {
     onChange(option.value);
@@ -62,7 +87,7 @@ const DangbunList = ({ onChange }: DangbunListProps) => {
     <div>
       <label>
         <Select
-          options={options}
+          options={dangbunList}
           placeholder='선택'
           components={{ SingleValue: custom, Option: customOption }}
           onChange={handleChange}
