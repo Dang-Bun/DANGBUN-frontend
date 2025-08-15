@@ -1,37 +1,37 @@
 import api from '../apis/axios';
 
 export const useCleaningApi = {
-  searchDuty: () => api.get('/cleanings/duties'),
-  editCleaning: (id: number) => api.put(`/cleanings/${id}`),
-  deleteCleaning: (id: number) => api.delete(`/cleanings/${id}`),
-  makeCleaning: (data: {
-    placeId: number;
-    cleaningName: string;
-    dutyName: string;
-    members: string[];
-    needPhto: boolean;
-    repeatType: string;
-    repeatDays: string[];
-    detailDates: string[];
-  }) => api.post('/cleanings', data),
-  duty_filter_members: (dutyId: number, memberIds: number[]) =>
-    api.get(`/duties/${dutyId}/cleanings/filter-by-members`, {
+  editCleaning: (cleaningId: number, placeId: number) =>
+    api.put(`/places/${placeId}/cleanings/${cleaningId}`),
+  deleteCleaning: (cleaningId: number, placeId: number) =>
+    api.delete(`/places/${placeId}/cleanings/${cleaningId}`),
+  makeCleaning: (
+    placeId: number,
+    data: {
+      cleaningName: string;
+      dutyName: string;
+      members: string[];
+      needPhoto: boolean;
+      repeatType: string;
+      repeatDays: string[];
+      detailDates: string[];
+    }
+  ) => api.post(`/places/${placeId}/cleanings`, data),
+  duty_filter_members: (placeId: number, dutyId: number, memberIds: number[]) =>
+    api.get(`/places/${placeId}/duties/${dutyId}/cleanings/filter-by-members`, {
       params: {
         memberIds: memberIds,
       },
     }),
   cleaningUnAssigned: (placeId: number) =>
-    api.get('/cleanings/unassigned', {
+    api.get(`/places/${placeId}/cleanings/unassigned`),
+  usersDangbunList: (placeId: number, membersIds) => {
+    api.get(`places/${placeId}/cleanings/duties`, {
       params: {
-        placeId: placeId,
+        memberIds: membersIds,
       },
-    }),
-  cleaningsDuty: (memberIds: number[]) =>
-    api.get('cleanings/duties', {
-      params: {
-        memberIds: memberIds,
-      },
-    }),
+    });
+  },
 };
 
 export default useCleaningApi;

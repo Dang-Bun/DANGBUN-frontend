@@ -96,7 +96,12 @@ const SettingManager = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 청소 관리 */}
-          <div className='flex flex-col items-center flex-1 cursor-pointer'>
+          <div
+            className='flex flex-col items-center flex-1 cursor-pointer'
+            onClick={() =>
+              navigate('/cleanuplist', { state: { data: { placeId } } })
+            }
+          >
             <img src={Sweep} alt='청소 관리' className='w-[24px] h-[32.39px]' />
             <div className='text-sm mt-1'>청소 관리</div>
           </div>

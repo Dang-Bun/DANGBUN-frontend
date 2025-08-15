@@ -24,11 +24,12 @@ import { useMemberApi } from '../../hooks/useMemberApi';
 
 const CleanUpList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const placeId = location.state?.data?.placeId;
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [placeId, setPlaceId] = useState(0);
   const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']); //여기에다가 당번을 띄우고 당번을 누르면 청소목록을출력해야함.
   const [dangbunList, setDangbunList] = useState<DutyItem[]>([]);
   const [members, setMembers] = useState<string[]>([]);
@@ -54,8 +55,8 @@ const CleanUpList = () => {
     const geteffect = async () => {
       try {
         const [dutyres, memberRes] = await Promise.all([
-          useDutyApi.dutyList(placeId),
-          useMemberApi.memberList(placeId),
+          useDutyApi.list(placeId),
+          useMemberApi.list(placeId, ''),
         ]);
         console.log('dutylist: ', dutyres.data);
         console.log('memberlist: ', memberRes.data);
@@ -197,6 +198,7 @@ const CleanUpList = () => {
               key={duty.dutyId ?? index}
               title={duty.name}
               icon={duty.icon}
+              placeId={placeId}
               dutyId={duty.dutyId}
               members={members}
             />

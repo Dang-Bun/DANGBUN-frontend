@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import c1 from '../../assets/cleanIcon/sweepImg_1.svg'; //당번 생성시에 저장한 아이콘 이름 여기에 바꾸기
-import c2 from '../../assets/cleanIcon/cleanerImg.svg';
-import c3 from '../../assets/cleanIcon/toiletImg.svg';
-import c4 from '../../assets/cleanIcon/cupWashingImg.svg';
-import c5 from '../../assets/cleanIcon/trashImg_2.svg';
-import c6 from '../../assets/cleanIcon/moppingImg_3.svg';
-import c7 from '../../assets/cleanIcon/polishImg.svg';
-import c8 from '../../assets/cleanIcon/sprayerImg.svg';
+
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_1.svg';
+import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/toiletImg.svg';
+import TOILET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
+import DISH_BLUE from '../../assets/cleanIcon/moppingImg_3.svg';
+import BRUSH_PINK from '../../assets/cleanIcon/polishImg.svg';
+import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
 import line from '../../assets/cleanUpList/Line.svg';
 import up from '../../assets/cleanUpList/BlackUp.svg';
 import down from '../../assets/cleanUpList/BlackDown.svg';
@@ -24,6 +25,7 @@ interface CleanUpCardProps {
   title: string;
   icon: string;
   dutyId: number;
+  placeId: number;
   members: string[];
 }
 
@@ -34,21 +36,33 @@ interface Cleaning {
   memberCount: number;
 }
 
+const ICON_MAP: Record<string, string> = {
+  FLOOR_BLUE: FLOOR_BLUE,
+  CLEANER_PINK: CLEANER_PINK,
+  BUCKET_PINK: BUCKET_PINK,
+  TOILET_PINK: TOILET_PINK,
+  TRASH_BLUE: TRASH_BLUE,
+  DISH_BLUE: DISH_BLUE,
+  BRUSH_PINK: BRUSH_PINK,
+  SPRAY_BLUE: SPRAY_BLUE,
+};
+
 const CleanUpCard: React.FC<CleanUpCardProps> = ({
   title,
   icon,
+  placeId,
   dutyId,
   members,
 }) => {
   const [open, setOpen] = useState(false);
+  const [specOpen, setSpecOpen] = useState(false);
 
   const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
-
-  const dutyApi = useDutyApi();
+  const iconSrc = ICON_MAP[icon] ?? icon;
 
   const handlePlus = () => {
     setOpen(true);
@@ -57,7 +71,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   useEffect(() => {
     const getEffect = async () => {
       try {
-        const res = await dutyApi.getCleaningsSpec(dutyId);
+        const res = await useDutyApi.getCleaningInfo(placeId, dutyId);
         const list = Array.isArray(res?.data?.data)
           ? res.data.data.map((d: any) => ({
               cleaningId: d.cleaningId,
@@ -73,22 +87,26 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       }
     };
     getEffect();
-  }, [dutyId, dutyApi]);
+  }, [dutyId]);
   return (
     <div className='flex flex-col gap-4'>
       <button
         className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
-        onClick={() => setOpen(!open)}
+        onClick={() => setSpecOpen(!open)}
       >
         <div className='flex flex-row items-center gap-1'>
-          <img src={icon} alt='icon' className='w-9 h-9' />
+          <img src={iconSrc} alt='icon' className='w-9 h-9' />
           <p className='text-zinc-600 text-sm font-normal leading-tight'>
             {title}
           </p>
         </div>
-        {open ? <img src={up} alt='close' /> : <img src={down} alt='open' />}
+        {specOpen ? (
+          <img src={up} alt='close' />
+        ) : (
+          <img src={down} alt='open' />
+        )}
       </button>
-      {open ? (
+      {specOpen ? (
         <div className='flex flex-col gap-3'>
           {cleaningList.map((cleaning) => (
             <div
@@ -97,7 +115,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
             >
               <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
               <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
-                <div className='flex flex-col justify-center items-start gap-1.5'>
+                <div className='flex flex-col justify-center items-start gap-3'>
                   <p className='text-black text-base font-normal leading-snug'>
                     {cleaning.cleaningName}
                   </p>

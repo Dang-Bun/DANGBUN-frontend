@@ -19,6 +19,9 @@ import CTAButton from '../../components/button/CTAButton';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import arrowBack from '../../assets/nav/arrowBack.svg';
 
+import { useMemberApi } from '../../hooks/useMemberApi';
+import useCleaningApi from '../../hooks/useCleaningApi';
+
 const CleanAdd = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
@@ -71,25 +74,43 @@ const CleanAdd = () => {
   //radio~calendar
 
   useEffect(() => {
-    const year = selectedMonth.getFullYear();
-    const month = selectedMonth.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const start = dayjs().startOf('day');
+    const end = dayjs().add(5, 'month').endOf('month');
+
     if (selectedCycle === '매일') {
-      const dates = Array.from(
-        { length: daysInMonth },
-        (_, i) => new Date(year, month, i + 1)
-      );
+      const dates: Date[] = [];
+      let cur = start.clone();
+      while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+        dates.push(cur.toDate());
+        cur = cur.add(1, 'day');
+      }
       setSelectedDates(dates);
     } else if (selectedCycle === '매주 요일마다') {
-      const dates = Array.from({ length: daysInMonth }, (_, i) => {
-        const date = new Date(year, month, i + 1);
-        return selectedDays.includes(getDayName(date.getDay())) ? date : null;
-      }).filter((d): d is Date => d !== null);
+      const dates: Date[] = [];
+      let cur = start.clone();
+      while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+        if (selectedDays.includes(getDayName(cur.day()))) {
+          dates.push(cur.toDate());
+        }
+        cur = cur.add(1, 'day');
+      }
       setSelectedDates(dates);
     } else if (selectedCycle === '매달 첫 날') {
-      setSelectedDates([new Date(year, month, 1)]);
+      const dates: Date[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = dayjs().add(i, 'month').startOf('month');
+        if (d.isBefore(start, 'day')) continue;
+        dates.push(d.toDate());
+      }
+      setSelectedDates(dates);
     } else if (selectedCycle === '매달 마지막 날') {
-      setSelectedDates([new Date(year, month, daysInMonth)]);
+      const dates: Date[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = dayjs().add(i, 'month').endOf('month');
+        if (d.isBefore(start, 'day')) continue;
+        dates.push(d.toDate());
+      }
+      setSelectedDates(dates);
     } else {
       setSelectedDates([]);
     }
@@ -106,24 +127,57 @@ const CleanAdd = () => {
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [search, setSearch] = useState('');
-  const [members, setMembers] = useState<string[]>([
-    '박완',
-    '전예영',
-    '박한나',
-    '김도현',
-    '백상희',
-    '최준서',
-  ]);
+  const [members, setMembers] = useState<string[]>([]);
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
+
+  useEffect(() => {
+    if (!placeId) return;
+    const run = async () => {
+      try {
+        const res = await useMemberApi.list(placeId, '');
+        const memberspay = res?.data?.data?.members ?? [];
+        const names = Array.isArray(memberspay)
+          ? memberspay
+              .map((m: any) => m?.name)
+              .filter((v: any) => typeof v === 'string')
+          : [];
+        setMembers(names);
+      } catch (e) {
+        console.error(e);
+        setMembers([]);
+      }
+    };
+    run();
+  }, [placeId, useMemberApi]);
 
   const confirmHandle = () => {
     if (dangbun.length === 0) {
       setIsModalOpen1(true);
     } else {
       setIsModalOpen2(true);
+    }
+  };
+
+  const handleNext = async () => {
+    try {
+      const data = {
+        cleaningName: name,
+        dutyName: dangbun || '당번 미지정',
+        members: clickedMembers,
+        needPhoto: checked1,
+        repeatType: selectedCycle,
+        repeatDays: selectedDays,
+        detailDates: selectedDates.map((date) =>
+          dayjs(date).format('YYYY-MM-DD')
+        ),
+      };
+      const res = await useCleaningApi.makeCleaning(placeId, data);
+      console.log(res.data.data);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -298,7 +352,10 @@ const CleanAdd = () => {
       </div>
       <div className='flex flex-col gap-3'>
         <p className='text-lg font-normal leading-relaxed'>당번 지정</p>
-        <DangbunList onChange={(value) => setDangbun(value)} />
+        <DangbunList
+          placeId={placeId}
+          onChange={(value) => setDangbun(value)}
+        />
       </div>
       <div
         className={`flex flex-col gap-3 ${dangbun.length === 0 ? 'hidden' : ''}`}
@@ -408,13 +465,13 @@ const CleanAdd = () => {
         onRequestClose={() => setIsModalOpen1(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               당번을 설정하지 않아 <br />
               <span className='text-blue-500'>당번 미지정 청소</span>로 임시
               저장 됩니다.
               <br />
               이대로 완료하시겠습니까?
-            </h2>
+            </p>
           </>
         }
         descript=''
@@ -423,7 +480,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => {}}
+        onSecondClick={() => handleNext()}
       />
 
       <PopUpCard
@@ -431,12 +488,12 @@ const CleanAdd = () => {
         onRequestClose={() => setIsModalOpen2(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <span className='font-normal text-center'>
               이대로 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
               <span className='text-blue-500'>생성</span>할까요?
               <br />
-            </h2>
+            </span>
           </>
         }
         descript={<>이후에도 내용 수정이 가능합니다.</>}
@@ -453,11 +510,11 @@ const CleanAdd = () => {
         onRequestClose={() => setIsModalOpen3(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               <span className='font-semibold'>청소 생성</span>이 완료되지
               않았습니다.
               <br /> 정말 나가시겠습니까?
-            </h2>
+            </p>
           </>
         }
         descript={<>작성중인 내용은 저장되지 않습니다.</>}

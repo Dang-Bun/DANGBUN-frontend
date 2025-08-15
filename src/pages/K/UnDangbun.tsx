@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useCleaningApi from '../../hooks/useCleaningApi';
 
 const UnDangbun = () => {
-  const [clean, setClean] = useState<string[]>(['qkr']);
   const [undangbunList, setUndangbunList] = useState<string[]>([]);
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -31,7 +30,7 @@ const UnDangbun = () => {
     <div>
       <HeaderBar title='당번 미지정 청소' />
 
-      {clean.length === 0 ? (
+      {undangbunList.length === 0 ? (
         <div className='flex flex-col h-[852px] overflow-y-auto items-center justify-center gap-5 pt-[52px]'>
           <img src={cleanUpImg} alt='empty' />
           <div className='flex flex-col gap-[11px] items-center'>
@@ -57,7 +56,7 @@ const UnDangbun = () => {
               <div className='flex flex-col w-[344px] h-[52px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
                 <div className='flex flex-col justify-center items-start gap-1.5'>
                   <p className='text-black text-base font-normal leading-snug'>
-                    바닥 쓸기
+                    {name}
                   </p>
                 </div>
               </div>
