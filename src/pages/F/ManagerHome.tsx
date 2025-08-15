@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 import PlaceNameCard from '../../components/home/PlaceNameCard';
@@ -10,65 +10,24 @@ import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
 import sweepIcon from '../../assets/cleanIcon/sweepImg_1.svg';
-import { usePagePRogress, type Duty } from '../../hooks/F/usePageProgress';
-import { useDutyStore } from '../../stores/useDutyStore';
-
-type DutyIconKey =
-  | 'FLOOR_BLUE'
-  | 'CLEANER_PINK'
-  | 'BUCKET_PINK'
-  | 'TOILET_PINK'
-  | 'TRASH_BLUE'
-  | 'DISH_BLUE'
-  | 'BRUSH_PINK'
-  | 'SPRAY_BLUE';
-
-type DutyWithIcon = Duty & { iconKey: DutyIconKey };
-
-const initialDuties: DutyWithIcon[] = [
-  {
-    id: 101,
-    name: '로비 청소',
-    iconKey: 'DISH_BLUE',
-    tasks: [
-      { id: 1, title: '창문 닦기', dueTime: '20:20', members: ['김효정', '박한나', '이민준', '최유리'], isCamera: false, isChecked: false },
-      { id: 2, title: '바닥 닦기', dueTime: '20:20', members: ['박한나'], isCamera: true, isChecked: false },
-      { id: 3, title: '거미줄 제거', dueTime: '21:00', members: ['김효정'], isCamera: false, isChecked: false },
-      { id: 4, title: '소파 청소', dueTime: '21:00', members: ['이민준', '최유리'], isCamera: true, isChecked: false },
-    ],
-  },
-  {
-    id: 102,
-    name: '탕비실 청소',
-    iconKey: 'BUCKET_PINK',
-    tasks: [
-      { id: 5, title: '싱크대 청소', dueTime: '20:20', members: ['멤버 전체'], isCamera: false, isChecked: false },
-      { id: 6, title: '냉장고 정리', dueTime: '20:20', members: ['박한나', '김효정'], isCamera: false, isChecked: false },
-      { id: 7, title: '전자레인지 닦기', dueTime: '20:20', members: ['이민준'], isCamera: false, isChecked: false },
-      { id: 8, title: '바닥 쓸기', dueTime: '20:20', members: ['최유리'], isCamera: false, isChecked: false },
-    ],
-  },
-  {
-    id: 103,
-    name: '창고 정리',
-    iconKey: 'BRUSH_PINK',
-    tasks: [
-      { id: 9, title: '상품 박스 정리', dueTime: '20:20', members: ['멤버 전체'], isCamera: false, isChecked: false },
-      { id: 10, title: '재고 라벨링', dueTime: '20:20', members: ['멤버 전체'], isCamera: false, isChecked: false },
-      { id: 11, title: '바닥 쓸기', dueTime: '20:20', members: ['이민준'], isCamera: false, isChecked: false },
-      { id: 12, title: '폐기물 분리', dueTime: '20:20', members: ['최유리'], isCamera: false, isChecked: false },
-    ],
-  },
-];
+import { usePagePRogress } from '../../hooks/F/usePageProgress';
+import { useDutyStore, usePlaceIconKey, usePlacePercent, useDuties } from '../../stores/useDutyStore';
+import { initialDuties } from '../../stores/Test/initialDuties';
 
 const ManagerHome: React.FC = () => {
   const navigate = useNavigate();
   const { role, placeId } = (useLocation().state || {}) as { role?: string; placeId?: number };
 
-  const [duties, setDuties] = useState<DutyWithIcon[]>(initialDuties);
+  const duties = useDuties();
+  const seedIfEmpty = useDutyStore((s) => s.seedIfEmpty);
+
   const [activePage, setActivePage] = useState(0);
   const [memberPopUp, setMemberPopUp] = useState(false);
   const [filter, setFilter] = useState<'all' | 'ing' | 'done'>('all');
+
+  useEffect(() => {
+    seedIfEmpty(initialDuties);
+  }, [seedIfEmpty]);
 
   useEffect(() => {
     if (role) localStorage.setItem('role', role);
@@ -76,40 +35,22 @@ const ManagerHome: React.FC = () => {
   }, [role, placeId]);
 
   const currentUser = localStorage.getItem('userName') || 'userName';
-  const placeIconKey = useDutyStore((s) => s.placeIconKey) ?? 'CINEMA';
-
-  const formatNowHHmm = () => {
-    const d = new Date();
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
-  };
+  const placeIconKey = usePlaceIconKey() ?? 'CINEMA';
+  const placePercent = usePlacePercent();
 
   const goToNotification = () => navigate('/alarm');
 
   const { visibleTasks, page, totalPages, placeAllTasks, canToggle } =
     usePagePRogress(activePage, duties, { mode: 'manager' });
 
-  const placePercent = useMemo(() => {
-    const total = placeAllTasks.length;
-    const done = placeAllTasks.filter((t) => t.isChecked).length;
-    return total ? Math.round((done / total) * 100) : 0;
-  }, [placeAllTasks]);
-
-  const dutyPercent = (d: Duty) => {
-    const total = d.tasks.length;
-    const done = d.tasks.filter((t) => t.isChecked).length;
-    return total ? Math.round((done / total) * 100) : 0;
-  };
-
   const dutiesForOverview = useMemo(
     () =>
-      duties.map((d) => ({
-        id: d.id,
-        name: d.name,
-        percent: dutyPercent(d),
-        iconKey: d.iconKey,
-      })),
+      duties.map((d) => {
+        const total = d.tasks.length;
+        const done = d.tasks.filter((t) => t.isChecked).length;
+        const percent = total ? Math.round((done / total) * 100) : 0;
+        return { id: d.id, name: d.name, percent, iconKey: d.iconKey };
+      }),
     [duties]
   );
 
@@ -129,17 +70,7 @@ const ManagerHome: React.FC = () => {
   }, [page.status]);
 
   const handleToggleTask = (taskId: number) => {
-    setDuties((prev) =>
-      prev.map((d) => ({
-        ...d,
-        tasks: d.tasks.map((task) => {
-          if (task.id !== taskId) return task;
-          if (!canToggle(task)) return task;
-          const next = !task.isChecked;
-          return { ...task, isChecked: next, completedAt: next ? formatNowHHmm() : undefined, completedBy: next ? currentUser : undefined };
-        }),
-      }))
-    );
+    useDutyStore.getState().toggleTask(taskId, currentUser);
   };
 
   const hasChecklist = visibleTasks.length > 0;

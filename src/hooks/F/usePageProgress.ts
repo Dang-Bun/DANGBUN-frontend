@@ -1,49 +1,30 @@
 import { useMemo } from 'react';
+import type { Duty, Task } from '../../stores/Test/duty';
 
 export type ProgressStatus = 'before' | 'in-progress' | 'done';
 export type Mode = 'manager' | 'member';
 
-export interface Task {
-  id: number;
-  title: string;
-  dueTime: string;
-  members: string[];
-  isCamera: boolean;
-  isChecked: boolean;
-  completedAt?: string;
-  completedBy?: string;
-}
-export interface Duty {
-  id: number;
-  name: string;
-  tasks: Task[];
-}
-
 export interface PageState {
-  name: string;      
-  percent: number; 
+  name: string;
+  percent: number;
   status: ProgressStatus;
   total: number;
   done: number;
 }
 
 export interface UsePageProgressOpts {
-  mode: Mode;                 
-  currentUser?: string;       
+  mode: Mode;
+  currentUser?: string;
   memberOverallUsesPlacePercent?: boolean;
 }
 
 const statusOf = (p: number): ProgressStatus =>
   p <= 0 ? 'before' : p >= 100 ? 'done' : 'in-progress';
- 
+
 export function usePagePRogress(
   activePage: number,
   duties: Duty[],
-  {
-    mode,
-    currentUser,
-    memberOverallUsesPlacePercent = true,
-  }: UsePageProgressOpts
+  { mode, currentUser, memberOverallUsesPlacePercent = true }: UsePageProgressOpts
 ) {
   const placeAllTasks = useMemo(() => duties.flatMap(d => d.tasks), [duties]);
 
@@ -52,14 +33,13 @@ export function usePagePRogress(
       ? true
       : !!currentUser && (t.members.includes(currentUser) || t.members.includes('멤버 전체'));
 
-  // 멤버는 내가 속한 당번만 노출, 매니저는 전부
   const scopedDuties = useMemo(() => {
     if (mode === 'manager') return duties;
     return duties.filter(d => d.tasks.some(isMine));
   }, [duties, mode, currentUser]);
 
-  const totalPages = scopedDuties.length + 1;  
- 
+  const totalPages = scopedDuties.length + 1;
+
   const visibleTasks = useMemo(() => {
     if (activePage === 0) {
       const tasks = scopedDuties.flatMap(d => d.tasks);
@@ -69,12 +49,11 @@ export function usePagePRogress(
     return duty ? duty.tasks : [];
   }, [activePage, scopedDuties, mode, currentUser]);
 
-  // 퍼센트 계산
   const percentBaseTasks = useMemo(() => {
     if (mode === 'member' && activePage === 0 && memberOverallUsesPlacePercent) {
-      return placeAllTasks;  
+      return placeAllTasks;
     }
-    if (activePage === 0) return scopedDuties.flatMap(d => d.tasks);  
+    if (activePage === 0) return scopedDuties.flatMap(d => d.tasks);
     const duty = scopedDuties[activePage - 1];
     return duty ? duty.tasks : [];
   }, [mode, activePage, scopedDuties, placeAllTasks, memberOverallUsesPlacePercent]);
@@ -89,12 +68,5 @@ export function usePagePRogress(
 
   const canToggle = (task: Task) => (mode === 'manager' ? true : isMine(task));
 
-  return {
-    visibleTasks,
-    page,
-    totalPages,
-    placeAllTasks,
-    canToggle,
-    isMine,
-  };
+  return { visibleTasks, page, totalPages, placeAllTasks, canToggle, isMine };
 }
