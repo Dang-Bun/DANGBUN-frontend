@@ -1,6 +1,6 @@
+// src/pages/calendar/CalendarPage.tsx
 import '../../styles/CalendarOverride.css';
 import '../../styles/CalendarPage.css';
-
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
@@ -20,11 +20,13 @@ import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import SelectBottom from '../../components/calendar/SelectBottom';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
+import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 
 dayjs.locale('ko');
 
 type TaskItem = { dutyId: number; dutyName: string; task: any };
 type FilterValue = 'all' | 'done' | 'undone';
+
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
 
 const CalendarPage: React.FC = () => {
@@ -49,6 +51,7 @@ const CalendarPage: React.FC = () => {
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
 
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
 
@@ -126,17 +129,82 @@ const CalendarPage: React.FC = () => {
     return sortedItems;
   }, [sortedItems, filterValue]);
 
+  const datesProgress = useMemo(() => {
+    const map = new Map<string, number>();
+    allTasksByDate.forEach((_items, ymd) => {
+      const tasks = getTasksForDate(ymd);
+      if (tasks.length > 0) {
+        const done = tasks.filter((x) => !!x.task?.isChecked).length;
+        map.set(ymd, Math.round((done / tasks.length) * 100));
+      }
+    });
+    return map;
+  }, [allTasksByDate, getTasksForDate]);
+
+  // 선택된 날짜는 글자만 굵게 + 파란색, 배경 없음
   const tileClassName = useCallback(
     ({ date, view, activeStartDate: asd }: any) => {
       if (view !== 'month') return '';
-      const isSameMonth = asd.getMonth() === date.getMonth() && asd.getFullYear() === date.getFullYear();
+      const isSameMonth =
+        asd.getMonth() === date.getMonth() && asd.getFullYear() === date.getFullYear();
       const isSelected = dayjs(selectedDate).isSame(dayjs(date), 'date');
       return [
-        '!w-[36px] !h-[36px] !my-[9px] flex items-center justify-center text-base text-center',
-        isSelected ? 'bg-blue-500 text-white rounded-full' : isSameMonth ? 'text-black' : 'text-[#8e8e8e]',
+        '!w-[36px] !h-[36px] !my-[9px] flex items-center justify-center text-base text-center relative',
+        isSelected
+          ? 'font-bold text-[#4D83FD]'
+          : isSameMonth
+          ? 'text-black'
+          : 'text-[#8e8e8e]',
       ].join(' ');
     },
     [selectedDate]
+  );
+ 
+  const tileContent = useCallback(
+    ({ date, view }: any) => {
+      if (view !== 'month') return null;
+      const ymd = toYMD(date);
+      const progress = datesProgress.get(ymd);
+      if (progress === undefined) return <span className="text-base">{date.getDate()}</span>;
+
+      const size = 36;
+      const center = size / 2;
+      const ringRadius = 16;
+      const strokeWidth = 4;  
+      const circumference = 2 * Math.PI * ringRadius;
+      const dashOffset = circumference * (1 - progress / 100);
+
+      return (
+        <div className="w-[36px] h-[36px] relative flex items-center justify-center">
+          <svg width={size} height={size} className="absolute top-0 left-0">
+            <g transform={`rotate(-90 ${center} ${center})`}>
+              <circle
+                cx={center}
+                cy={center}
+                r={ringRadius}
+                fill="none"
+                stroke="#E5E7EB"
+                strokeWidth={strokeWidth}
+              />
+              <circle
+                cx={center}
+                cy={center}
+                r={ringRadius}
+                fill="none"
+                stroke="#4D83FD"
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={dashOffset}
+                style={{ transition: 'stroke-dashoffset 0.2s ease' }}
+              />
+            </g>
+          </svg>
+          <span className="text-base relative z-10">{date.getDate()}</span>
+        </div>
+      );
+    },
+    [datesProgress]
   );
 
   const handleDayClick = (date: Date) => {
@@ -166,20 +234,27 @@ const CalendarPage: React.FC = () => {
             aria-label="날짜 선택 열기"
           >
             {dayjs(activeStartDate).format('YYYY년 M월')}
-            <img src={toggleUp} alt="토글" className={`w-3 h-2 transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
+            <img
+              src={toggleUp}
+              alt="토글"
+              className={`w-3 h-2 transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
-
-        <div className="relative mx-auto mt-4" style={{ width: `353px` }}>
-          <div className="absolute rounded-[24px] bg-[#4D83FD]" style={{ left: `-48px`, top: `-8px`, width: `405px`, height: `calc(100% + 16px)` }} />
+        <div className="relative mx-auto mt-4" style={{ width: '353px' }}>
+          <div
+            className="absolute rounded-[24px] bg-[#4D83FD]"
+            style={{ left: '-48px', top: '-8px', width: '405px', height: 'calc(100% + 16px)' }}
+          />
           <div className="relative bg-white rounded-[20px] p-2">
             <Calendar
               className="w-full"
               onClickDay={handleDayClick}
               onActiveStartDateChange={handleActiveStartDateChange}
               tileClassName={tileClassName}
+              tileContent={tileContent}
               activeStartDate={activeStartDate}
-              formatDay={(_, date) => date.getDate().toString()}
+              formatDay={() => ''}
               showNeighboringMonth
               prevLabel={null}
               prev2Label={null}
@@ -191,7 +266,6 @@ const CalendarPage: React.FC = () => {
             />
           </div>
         </div>
-
         <div className="flex flex-col mt-8 flex-1 min-h-0">
           <div className="flex items-center justify-between">
             <div className="flex gap-1 items-end">
@@ -218,7 +292,6 @@ const CalendarPage: React.FC = () => {
               )}
             </div>
           </div>
-
           <div className="flex flex-col py-3 gap-4 overflow-y-auto pb-24">
             {displayedItems.map(({ dutyName, task }) => (
               <SwipeableRow key={task.id} onToggle={() => toggleTask(task.id, currentUser)}>
@@ -236,11 +309,9 @@ const CalendarPage: React.FC = () => {
           </div>
         </div>
       </div>
-
       <div className="flex-shrink-0">
         <BottomBar />
       </div>
-
       {isFilterOpen && (
         <div className="fixed inset-0 z-50" onClick={() => setIsFilterOpen(false)}>
           <div className="absolute inset-0" />
@@ -255,13 +326,15 @@ const CalendarPage: React.FC = () => {
           </div>
         </div>
       )}
-
-       {isSelectOpen && (
+      {isSelectOpen && (
         <div className="fixed inset-0 z-50" onClick={() => setIsSelectOpen(false)}>
           <div className="absolute inset-0" />
           <div className="fixed left-0 right-0 bottom-0" onClick={(e) => e.stopPropagation()}>
             <SelectBottom
-              onViewPhoto={() => {}}
+              onViewPhoto={() => {
+                setIsSelectOpen(false);
+                setIsPhotoOpen(true);
+              }}
               onOpenInfo={() => {
                 setIsSelectOpen(false);
                 navigate('/clean/info');
@@ -274,11 +347,14 @@ const CalendarPage: React.FC = () => {
           </div>
         </div>
       )}
-
       <PopUpCardDelete
         isOpen={isDeleteOpen}
         onRequestClose={() => setIsDeleteOpen(false)}
-        title={<span>청소 목록을 <span className="text-[#4D83FD]">삭제</span>하시겠습니까?</span>}
+        title={
+          <span>
+            청소 목록을 <span className="text-[#4D83FD]">삭제</span>하시겠습니까?
+          </span>
+        }
         descript="해당 청소를 체크리스트에서 완전히 삭제합니다."
         first="취소"
         second="확인"
@@ -292,7 +368,7 @@ const CalendarPage: React.FC = () => {
           setIsDeleteOpen(false);
         }}
       />
-
+      <DownloadPopUp isOpen={isPhotoOpen} onRequestClose={() => setIsPhotoOpen(false)} />
       <DatePicker
         isOpen={isDatePickerOpen}
         initialYear={activeStartDate.getFullYear()}
