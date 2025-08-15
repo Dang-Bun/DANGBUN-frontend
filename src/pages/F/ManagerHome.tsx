@@ -6,13 +6,14 @@ import TaskCard from '../../components/home/TaskCard';
 import ProgressBar from '../../components/home/CircularProgressBar';
 import BottomBar from '../../components/BottomBar';
 import CategoryChip from '../../components/home/CategoryChip';
+import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
 import sweepIcon from '../../assets/cleanIcon/sweepImg_1.svg';
-import { usePagePRogress } from '../../hooks/F/usePageProgress';
 import { useDutyStore, usePlaceIconKey, usePlacePercent, useDuties } from '../../stores/useDutyStore';
 import { initialDuties } from '../../stores/Test/initialDuties';
+import { usePagePRogress } from '../../hooks/F/usePageProgress';
 
 const ManagerHome: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const ManagerHome: React.FC = () => {
   const [activePage, setActivePage] = useState(0);
   const [memberPopUp, setMemberPopUp] = useState(false);
   const [filter, setFilter] = useState<'all' | 'ing' | 'done'>('all');
+  const [isUploadOpen, setUploadOpen] = useState(false);
+  const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
 
   useEffect(() => {
     seedIfEmpty(initialDuties);
@@ -40,7 +43,7 @@ const ManagerHome: React.FC = () => {
 
   const goToNotification = () => navigate('/alarm');
 
-  const { visibleTasks, page, totalPages, placeAllTasks, canToggle } =
+  const { visibleTasks, page, totalPages, placeAllTasks } =
     usePagePRogress(activePage, duties, { mode: 'manager' });
 
   const dutiesForOverview = useMemo(
@@ -71,6 +74,21 @@ const ManagerHome: React.FC = () => {
 
   const handleToggleTask = (taskId: number) => {
     useDutyStore.getState().toggleTask(taskId, currentUser);
+  };
+
+  const openUploadFor = (taskId: number) => {
+    setUploadTaskId(taskId);
+    setUploadOpen(true);
+  };
+  const closeUpload = () => {
+    setUploadOpen(false);
+    setUploadTaskId(null);
+  };
+  const handleConfirmUpload = (file: File) => {
+    if (uploadTaskId != null) {
+      useDutyStore.getState().toggleTask(uploadTaskId, currentUser);
+    }
+    closeUpload();
   };
 
   const hasChecklist = visibleTasks.length > 0;
@@ -148,6 +166,7 @@ const ManagerHome: React.FC = () => {
                   completedAt={task.completedAt}
                   completedBy={task.completedBy}
                   onToggle={() => handleToggleTask(task.id)}
+                  onCameraClick={() => !task.isChecked && task.isCamera && openUploadFor(task.id)}
                 />
               ))}
             </div>
@@ -162,6 +181,7 @@ const ManagerHome: React.FC = () => {
       <div className="flex-shrink-0 z-10">
         <BottomBar />
       </div>
+      <UpLoadPopUp isOpen={isUploadOpen} onRequestClose={closeUpload} onConfirm={handleConfirmUpload} />
     </div>
   );
 };

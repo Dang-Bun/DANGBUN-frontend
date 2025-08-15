@@ -17,6 +17,7 @@ interface TaskCardProps {
   completedAt?: string;
   completedBy?: string;
   disabled?: boolean;
+  onCameraClick?: () => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -29,25 +30,26 @@ const TaskCard: React.FC<TaskCardProps> = ({
   completedAt,
   completedBy,
   disabled = false,
+  onCameraClick,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const cleanedMembers = useMemo(
-    () => (members || []).map(m => (m || '').trim()).filter(Boolean),
+    () => (members || []).map((m) => (m || '').trim()).filter(Boolean),
     [members]
   );
   const isAllMembers = useMemo(
-    () => cleanedMembers.some(m => m === '멤버 전체'),
+    () => cleanedMembers.some((m) => m === '멤버 전체'),
     [cleanedMembers]
   );
   const sortedMembers = useMemo(
-    () => cleanedMembers.filter(m => m !== '멤버 전체').sort((a, b) => a.localeCompare(b, 'ko-KR')),
+    () => cleanedMembers.filter((m) => m !== '멤버 전체').sort((a, b) => a.localeCompare(b, 'ko-KR')),
     [cleanedMembers]
   );
   const showExpandButton = !isAllMembers && sortedMembers.length >= 2;
 
   const handleCheck = () => onToggle();
-  const handleToggle = () => setIsExpanded(prev => !prev);
+  const handleToggle = () => setIsExpanded((prev) => !prev);
 
   const memberLabel = isAllMembers ? '멤버 전체' : `멤버 ${sortedMembers.length}명`;
   const memberSummary = () => {
@@ -60,7 +62,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const calculateRemainingTime = () => {
     const now = new Date();
-    const [dh, dm] = dueTime.split(':').map(n => parseInt(n, 10));
+    const [dh, dm] = dueTime.split(':').map((n) => parseInt(n, 10));
     const cur = now.getHours() * 60 + now.getMinutes();
     const due = dh * 60 + dm;
     const diff = due - cur;
@@ -85,7 +87,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <div className="flex">
           <img
             src={checkboxIcon}
-            alt={isChecked ? '체크 완료' : (isCheckboxDisabled ? '체크 비활성화' : '체크박스')}
+            alt={isChecked ? '체크 완료' : isCheckboxDisabled ? '체크 비활성화' : '체크박스'}
             className="w-5 h-5 mr-3 mt-1 cursor-pointer"
             onClick={isCheckboxDisabled ? undefined : handleCheck}
             aria-disabled={isCheckboxDisabled}
@@ -95,11 +97,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <div className="flex items-center gap-1 mb-1">
               <p className={`text-[16px] ${isChecked ? 'text-[#5A5D62]' : 'text-[#111827]'}`}>{title}</p>
               {isCamera && (
-                <img
-                  src={isChecked ? cameraGray : cameraDefault}
-                  alt="카메라"
-                  className="w-[14px] h-[14px] shrink-0"
-                />
+                <button
+                  type="button"
+                  onClick={onCameraClick}
+                  className="w-[14px] h-[14px] shrink-0 cursor-pointer"
+                  aria-label="사진 업로드"
+                >
+                  <img src={isChecked ? cameraGray : cameraDefault} alt="카메라" className="w-[14px] h-[14px]" />
+                </button>
               )}
             </div>
 

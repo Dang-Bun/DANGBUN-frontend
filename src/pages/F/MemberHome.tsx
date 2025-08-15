@@ -6,6 +6,7 @@ import TaskCard from '../../components/home/TaskCard';
 import ProgressBar from '../../components/home/CircularProgressBar';
 import BottomBar from '../../components/BottomBar';
 import CategoryChip from '../../components/home/CategoryChip';
+import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
@@ -24,6 +25,8 @@ const MemberHome: React.FC = () => {
   const [activePage, setActivePage] = useState(0);
   const [memberPopUp, setMemberPopUp] = useState(false);
   const [filter, setFilter] = useState<'all' | 'ing' | 'done'>('all');
+  const [isUploadOpen, setUploadOpen] = useState(false);
+  const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
 
   useEffect(() => {
     seedIfEmpty(initialDuties);
@@ -50,10 +53,7 @@ const MemberHome: React.FC = () => {
     return visibleTasks.filter((t) => !t.isChecked);
   }, [filter, visibleTasks]);
 
-  const hasUnreadNotifications = useMemo(
-    () => placeAllTasks.some((t) => !t.isChecked),
-    [placeAllTasks]
-  );
+  const hasUnreadNotifications = useMemo(() => placeAllTasks.some((t) => !t.isChecked), [placeAllTasks]);
   const notificationImage = hasUnreadNotifications ? mailDefault : mail;
 
   const backgroundImage = useMemo(() => {
@@ -63,8 +63,24 @@ const MemberHome: React.FC = () => {
   }, [page.status]);
 
   const handleToggleTask = (taskId: number) => {
-    if (!canToggle(visibleTasks.find(t => t.id === taskId)!)) return;
+    const target = visibleTasks.find((t) => t.id === taskId)!;
+    if (!canToggle(target)) return;
     useDutyStore.getState().toggleTask(taskId, currentUser);
+  };
+
+  const openUploadFor = (taskId: number) => {
+    setUploadTaskId(taskId);
+    setUploadOpen(true);
+  };
+  const closeUpload = () => {
+    setUploadOpen(false);
+    setUploadTaskId(null);
+  };
+  const handleConfirmUpload = (file: File) => {
+    if (uploadTaskId != null) {
+      useDutyStore.getState().toggleTask(uploadTaskId, currentUser);
+    }
+    closeUpload();
   };
 
   const hasChecklist = visibleTasks.length > 0;
@@ -94,27 +110,12 @@ const MemberHome: React.FC = () => {
               당번
             </span>
             <div className="flex items-center gap-[210px]">
-              <PlaceNameCard
-                place="메가박스"
-                type={page.status === 'before' ? 'default' : 'complete'}
-              />
-              <img
-                src={notificationImage}
-                alt="알림 아이콘"
-                className="w-[36px] cursor-pointer"
-                onClick={goToNotification}
-              />
+              <PlaceNameCard place="메가박스" type={page.status === 'before' ? 'default' : 'complete'} />
+              <img src={notificationImage} alt="알림 아이콘" className="w-[36px] cursor-pointer" onClick={goToNotification} />
             </div>
           </div>
           <div className="mt-[66px] mb-[18px]">
-            <ProgressBar
-              percentage={page.percent}
-              iconSrc={sweepIcon}
-              title={page.name}
-              dotCount={totalPages}
-              dotIndex={activePage}
-              onDotSelect={setActivePage}
-            />
+            <ProgressBar percentage={page.percent} iconSrc={sweepIcon} title={page.name} dotCount={totalPages} dotIndex={activePage} onDotSelect={setActivePage} />
           </div>
         </div>
       </div>
@@ -124,18 +125,9 @@ const MemberHome: React.FC = () => {
             <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <div className="relative flex justify-start items-center">
                 <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
-                  {filter === 'all'
-                    ? '전체 청소'
-                    : filter === 'ing'
-                    ? '달성 완료'
-                    : '달성 미완료'}
+                  {filter === 'all' ? '전체 청소' : filter === 'ing' ? '달성 완료' : '달성 미완료'}
                 </h2>
-                <img
-                  src={toggle}
-                  alt="달성 여부 정렬"
-                  onClick={() => setMemberPopUp(!memberPopUp)}
-                  className="w-[20px] h-[20px] cursor-pointer"
-                />
+                <img src={toggle} alt="달성 여부 정렬" onClick={() => setMemberPopUp(!memberPopUp)} className="w-[20px] h-[20px] cursor-pointer" />
                 {memberPopUp && (
                   <div className="absolute ml-[20px] top-[calc(100%+10px)] z-50">
                     <CategoryChip
@@ -151,6 +143,7 @@ const MemberHome: React.FC = () => {
             <div className="flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar">
               {filteredTasks.map((task) => {
                 const mine = isMine(task);
+                const canOpenUpload = mine && !task.isChecked && task.isCamera;
                 return (
                   <TaskCard
                     key={task.id}
@@ -163,6 +156,7 @@ const MemberHome: React.FC = () => {
                     completedBy={task.completedBy}
                     disabled={!mine}
                     onToggle={() => (mine ? handleToggleTask(task.id) : undefined)}
+                    onCameraClick={() => canOpenUpload && openUploadFor(task.id)}
                   />
                 );
               })}
@@ -178,6 +172,7 @@ const MemberHome: React.FC = () => {
       <div className="flex-shrink-0 z-10">
         <BottomBar />
       </div>
+      <UpLoadPopUp isOpen={isUploadOpen} onRequestClose={closeUpload} onConfirm={handleConfirmUpload} />
     </div>
   );
 };

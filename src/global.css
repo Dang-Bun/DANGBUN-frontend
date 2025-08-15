@@ -76,3 +76,11 @@ body {
   scrollbar-width: none;
 }
 
+.react-calendar__tile--active {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background-color: transparent !important;
+}

@@ -20,17 +20,6 @@
   text-decoration: none !important;
 }
  
-.react-calendar__tile--now {
-  border-radius: 50%;
-  color: #4D83FD;
-  font-weight: bold;
-}
- 
-.react-calendar__tile--active {
-  background: #4D83FD !important;
-  color: white !important;
-  border-radius: 50%;
-}
  
 .react-calendar__month-view__days__day--neighboringMonth {
   color: #ccc;
