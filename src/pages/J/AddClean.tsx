@@ -4,19 +4,30 @@ import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from '../../hooks/useDutyApi';
+import { useLocation } from 'react-router-dom';
 
 type Cleaning = {
+  cleaningId: number;
   cleaningName: string;
 };
 
 export default function AddClean() {
   const navigate = useNavigate();
+  const location = useLocation();
   const placeId = Number(localStorage.getItem('placeId'));
 
-  const [list, setList] = useState<Cleaning[]>([]);
+  const [list, setList] = useState<Cleaning[]>([
+    {
+      cleaningId: 1,
+      cleaningName: '바닥 닦기',
+    },
+    { cleaningId: 2, cleaningName: '창문 닦기' },
+  ]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { dutyId } = (location.state as { dutyId: number } | undefined) ?? {};
 
   // 목록 가져오기
   useEffect(() => {
@@ -53,10 +64,20 @@ export default function AddClean() {
 
   const selectedCount = useMemo(() => selected.size, [selected]);
 
-  const handleAdd = () => {
-    const addCleaningNames = Array.from(selected);
-    // 선택된 청소 이름 전달
-    navigate('/management/manager/duty', { state: { addCleaningNames } });
+  const handleAdd = async () => {
+    try {
+      const cleaningIds = list
+        .filter((item) => selected.has(item.cleaningName))
+        .map((item) => item.cleaningId);
+
+      if (cleaningIds.length === 0) return;
+
+      await useDutyApi.addCleaning(placeId, dutyId, { cleaningIds });
+      navigate('/management/manager/duty');
+    } catch (err) {
+      console.error('미지정 청소 추가 실패:', err);
+      alert('청소 추가에 실패했습니다.');
+    }
   };
 
   return (
