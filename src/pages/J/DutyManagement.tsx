@@ -201,33 +201,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 };
 
 const DutyManagement = () => {
-  //렌더링용 역할분담 더미 데이터
-  const [roleItems, setRoleItems] = useState<RoleItem[]>([
-    {
-      cleaningId: 1,
-      cleaningName: '바닥 닦기',
-      displayedNames: ['박완', '박한나', '최준서'],
-      memberCount: 3,
-    },
-    {
-      cleaningId: 2,
-      cleaningName: '재고 채우기',
-      displayedNames: ['최준서'],
-      memberCount: 1,
-    },
-    {
-      cleaningId: 3,
-      cleaningName: '재활용 쓰레기',
-      displayedNames: [],
-      memberCount: 0,
-    },
-    {
-      cleaningId: 4,
-      cleaningName: '창문 닦기',
-      displayedNames: [],
-      memberCount: 0,
-    },
-  ]);
+  const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
   const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
   const [cleanings, setCleanings] = useState<Cleaning[]>([
     {
