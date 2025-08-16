@@ -2,7 +2,6 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
-//준서야 당일, 다음날도 저장할 수 있게 바꿔야돼
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
@@ -53,23 +52,39 @@ export default function PlaceDetailed() {
     fetchTimeSettings();
   }, []);
 
-  const handleSave = async () => {
+  const saveTime = async (nextStart: typeof start, nextEnd: typeof end) => {
     const placeId = Number(localStorage.getItem('placeId'));
     const payload = {
-      startTime: `${pad2(start.h)}:${pad2(start.m)}`,
-      endTime: `${pad2(end.h)}:${pad2(end.m)}`,
-      isToday: end.day === '당일',
+      startTime: `${pad2(nextStart.h)}:${pad2(nextStart.m)}`,
+      endTime: `${pad2(nextEnd.h)}:${pad2(nextEnd.m)}`,
+      isToday: nextEnd.day === '당일',
     };
     try {
-      const res = await usePlaceApi.updatePlaceTime(placeId, payload); // PATCH 요청
-      if (res.data.code === 20000) {
-        alert('시간 저장 성공');
-      } else {
-        alert(`저장 실패: ${res.data.message}`);
-      }
+      const res = await usePlaceApi.updatePlaceTime(placeId, payload);
+      if (res.data.code === 20000) console.log('시간 저장 성공');
+      else console.log(`저장 실패: ${res.data.message}`);
     } catch (err) {
       console.error('저장 API 실패', err);
     }
+  };
+
+  const applyAndSave = async () => {
+    let nextStart = start;
+    let nextEnd = end;
+
+    if (mode === 'start') {
+      nextStart = { h: tempH, m: tempM };
+    } else {
+      nextEnd = { h: tempH, m: tempM, day: tempDay };
+    }
+
+    // UI 상태 업데이트
+    setStart(nextStart);
+    setEnd(nextEnd);
+    setOpen(false);
+
+    // 같은 값으로 바로 API 저장
+    await saveTime(nextStart, nextEnd);
   };
 
   const openModal = (which) => {
@@ -77,22 +92,12 @@ export default function PlaceDetailed() {
     if (which === 'start') {
       setTempH(start.h);
       setTempM(start.m);
-      setTempDay('당일');
     } else {
       setTempH(end.h);
       setTempM(end.m);
       setTempDay(end.day);
     }
     setOpen(true);
-  };
-
-  const applyModal = () => {
-    if (mode === 'start') {
-      setStart({ h: tempH, m: tempM });
-    } else {
-      setEnd({ h: tempH, m: tempM, day: tempDay });
-    }
-    setOpen(false);
   };
 
   return (
@@ -133,7 +138,6 @@ export default function PlaceDetailed() {
                 setMode('start');
                 setTempH(start.h);
                 setTempM(start.m);
-                setTempDay('당일');
               }}
             >
               <span className='text-blue font-normal text-[20px]'>
@@ -155,7 +159,6 @@ export default function PlaceDetailed() {
                 setMode('start');
                 setTempH(start.h);
                 setTempM(start.m);
-                setTempDay('당일');
               }}
             >
               <span className='text-blue font-normal text-[20px]'>
@@ -277,8 +280,8 @@ export default function PlaceDetailed() {
                 />
                 {/* 파란 점 콜론 */}
                 <div className='flex flex-col items-center justify-center h-[160px]'>
-                  <span className='w-[4px] h-[4px] rounded-full bg-blue-500 mb-[8px]' />
-                  <span className='w-[4px] h-[4px] rounded-full bg-blue-500' />
+                  <span className='w-[4px] h-[4px] rounded-full bg-blue mb-[8px]' />
+                  <span className='w-[4px] h-[4px] rounded-full bg-blue' />
                 </div>
                 {/* 분 */}
                 <PickerColumn
@@ -293,7 +296,6 @@ export default function PlaceDetailed() {
                 종료 시간은 시작 시간보다 빠를 수 없습니다.
               </div>
 
-              {/* 확인 버튼 (CTAButton 사용) */}
               <div className='mt-4'>
                 <CTAButton
                   variant={
@@ -308,22 +310,9 @@ export default function PlaceDetailed() {
                       ? 'blue'
                       : 'thickGray'
                   }
-                  disabled={
-                    !isConfirmEnabled({
-                      mode,
-                      start,
-                      end,
-                      tempH,
-                      tempM,
-                      tempDay,
-                    })
-                  }
-                  onClick={() => {
-                    applyModal();
-                    handleSave();
-                  }}
+                  onClick={applyAndSave}
                 >
-                  확인
+                  저장
                 </CTAButton>
               </div>
             </div>
@@ -335,13 +324,18 @@ export default function PlaceDetailed() {
 }
 
 function isConfirmEnabled({ mode, start, end, tempH, tempM, tempDay }) {
-  if (mode === 'start') return true;
-  // mode === 'end'
-  // 종료가 당일인데 시작보다 빠르면 비활성
+  if (mode === 'start' && tempDay === '당일') {
+    const startTotal = tempH * 60 + tempM;
+    const endTotal = end.h * 60 + end.m;
+
+    return endTotal > startTotal;
+  }
+
   const startTotal = start.h * 60 + start.m;
   const endTotal = tempH * 60 + tempM;
-  if (tempDay === '당일') return endTotal >= startTotal;
-  // 다음날이면 언제든 OK 
+
+  if (tempDay === '당일') return endTotal > startTotal;
+  // 다음날이면 언제든 OK
   return true;
 }
 
@@ -354,7 +348,7 @@ type PickerColumnProps = {
 /** 휠 느낌 컬럼 */
 function PickerColumn({ values, value, onChange }: PickerColumnProps) {
   return (
-    <div className='relative w-[167px] h-[160px] overflow-y-auto rounded-lg px-2 py-2'>
+    <div className='relative w-[167px] h-[160px] overflow-y-auto rounded-lg px-2 py-2 no-scrollbar'>
       <ul className='space-y-1'>
         {values.map((v) => {
           const active = v === value;
