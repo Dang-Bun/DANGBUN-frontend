@@ -19,6 +19,8 @@ type RoleItem = {
 };
 
 /** ---------- 바텀시트 모달 ---------- */
+type AssignType = 'CUSTOM' | 'COMMON' | 'RANDOM';
+
 type MembersPickerModalProps = {
   open: boolean;
   allMembers: DutyMember[];
@@ -27,6 +29,16 @@ type MembersPickerModalProps = {
   placeId: number;
   onClose: () => void;
   onConfirm: (selectedIds: number[]) => void;
+
+  // 멤버 추가 모드 vs 역할 배정 모드
+  mode?: 'add' | 'assign'; // 기본 'add'
+
+  // 역할 배정용 메타 (mode==='assign'일 때 사용)
+  assignMeta?: {
+    assignType: AssignType;
+    cleaningId?: number; // CUSTOM/COMMON에 필요
+    assignCount?: number; // RANDOM에 필요 (없으면 selectedIds.length 사용 X → 명시 필요)
+  };
 };
 
 const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
@@ -35,6 +47,8 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   initialSelectedIds,
   dutyId,
   placeId,
+  mode,
+  assignMeta,
   onClose,
   onConfirm,
 }) => {
@@ -44,15 +58,64 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   );
   const handleConfirm = async () => {
     const memberIdsArray = Array.from(selectedIds);
+
     try {
-      await useDutyApi.addMember(placeId, dutyId, {
-        memberIds: memberIdsArray,
-      });
-      onConfirm(memberIdsArray); // 부모에도 전달
+      if (mode === 'assign' && assignMeta) {
+        const { assignType, cleaningId, assignCount } = assignMeta;
+
+        // 스키마별 검증
+        if (
+          (assignType === 'CUSTOM' || assignType === 'COMMON') &&
+          !cleaningId
+        ) {
+          alert('청소 항목(cleaningId)이 필요합니다.');
+          return;
+        }
+        if (assignType === 'CUSTOM' && memberIdsArray.length === 0) {
+          alert('배정할 멤버를 1명 이상 선택하세요.');
+          return;
+        }
+        if (assignType === 'RANDOM' && (!assignCount || assignCount < 1)) {
+          alert('랜덤 배정 인원(assignCount)을 1 이상 입력하세요.');
+          return;
+        }
+
+        // 페이로드 구성 (필요한 필드만 포함)
+        let payload: any = { assignType };
+
+        if (assignType === 'CUSTOM') {
+          payload = {
+            assignType, // 'CUSTOM'
+            cleaningId, // required
+            memberIds: memberIdsArray, // required
+          };
+        } else if (assignType === 'COMMON') {
+          payload = {
+            assignType, // 'COMMON'
+            cleaningId, // required
+            // (memberIds/assignCount 없음)
+          };
+        } else if (assignType === 'RANDOM') {
+          payload = {
+            assignType, // 'RANDOM'
+            assignCount, // required
+            // (cleaningId/memberIds 없음)
+          };
+        }
+
+        await useDutyApi.assignCleaningMembers(placeId, dutyId, payload);
+      } else {
+        // 멤버 추가 모드 (기존)
+        await useDutyApi.addMember(placeId, dutyId, {
+          memberIds: memberIdsArray,
+        });
+      }
+
+      onConfirm(memberIdsArray);
       onClose();
     } catch (err) {
-      console.error('멤버 추가 실패:', err);
-      alert('멤버 추가에 실패했습니다.');
+      console.error('확인 처리 실패:', err);
+      alert('처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -203,28 +266,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
 const DutyManagement = () => {
   const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
   const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
-  const [cleanings, setCleanings] = useState<Cleaning[]>([
-    {
-      cleaningId: 1,
-      name: '바닥 쓸기',
-    },
-    {
-      cleaningId: 2,
-      name: '재고 채우기',
-    },
-    {
-      cleaningId: 3,
-      name: '재활용 쓰레기',
-    },
-    {
-      cleaningId: 4,
-      name: '창문 닦기',
-    },
-    {
-      cleaningId: 5,
-      name: '커피머신 세척',
-    },
-  ]);
+  const [cleanings, setCleanings] = useState<Cleaning[]>([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -250,8 +292,28 @@ const DutyManagement = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // 모달 오픈
+  // 맴버 선택 모달 오픈
   const [pickerOpen, setPickerOpen] = useState(false);
+  // 맴버 역할 분담 모달 오픈
+  const [rolepickerOpen, setRolePickerOpen] = useState(false);
+  //청소 제외하기 오픈
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
+  // 바깥 클릭 시 닫기
+  useEffect(() => {
+    if (menuOpenId === null) return;
+    const onDocClick = () => setMenuOpenId(null);
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
+  }, [menuOpenId]);
+  //청소제외 팝업 오픈
+  const [deletePopupOpen, setDeletePopupOpen] = React.useState(false);
+  //청소 이름 저장
+  const [selectedCleaning, setSelectedCleaning] =
+    useState<SelectedCleaning>(null);
+  //청소 아이디 저장
+  const [currentCleaningId, setCurrentCleaningId] = useState<number | null>(
+    null
+  );
 
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
@@ -260,7 +322,6 @@ const DutyManagement = () => {
   useEffect(() => {
     if (!placeId || !dutyId) navigate('/management/manager');
   }, [placeId, dutyId, navigate]);
-  console.log(allMembers);
 
   // 멤버 불러오기
   useEffect(() => {
@@ -287,23 +348,23 @@ const DutyManagement = () => {
   }, [placeId, dutyId]);
 
   // 청소 불러오기
-  // useEffect(() => {
-  //   if (!placeId || !dutyId) return;
-  //   (async () => {
-  //     try {
-  //       setCleaningsLoading(true);
-  //       setCleaningsErr(null);
-  //       const res = await useDutyApi.getCleanings(placeId, dutyId);
-  //       setCleanings(res.data?.data ?? []);
-  //     } catch (e: any) {
-  //       setCleaningsErr(
-  //         e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
-  //       );
-  //     } finally {
-  //       setCleaningsLoading(false);
-  //     }
-  //   })();
-  // }, [placeId, dutyId]);
+  useEffect(() => {
+    if (!placeId || !dutyId) return;
+    (async () => {
+      try {
+        setCleaningsLoading(true);
+        setCleaningsErr(null);
+        const res = await useDutyApi.getCleanings(placeId, dutyId);
+        setCleanings(res.data?.data ?? []);
+      } catch (e: any) {
+        setCleaningsErr(
+          e?.response?.data?.message ?? e?.message ?? '청소 불러오기 실패'
+        );
+      } finally {
+        setCleaningsLoading(false);
+      }
+    })();
+  }, [placeId, dutyId]);
 
   //청소 상세 정보 불러오기
   useEffect(() => {
@@ -325,6 +386,31 @@ const DutyManagement = () => {
       mounted = false;
     };
   }, [placeId, dutyId]);
+
+  // 청소 제외하기 실행 함수
+  const handleRemoveCleaning = async () => {
+    if (!placeId || !dutyId || !selectedCleaning) return;
+
+    try {
+      setLoading(true);
+      setErr(null);
+
+      // ✅ API 호출
+      await useDutyApi.removeCleaning(placeId, dutyId, selectedCleaning.id);
+
+      // ✅ UI에서 즉시 반영 (cleanings 상태를 최신화)
+      setCleanings((prev) =>
+        prev.filter((c) => c.cleaningId !== selectedCleaning.id)
+      );
+
+      // 팝업 닫기
+      setDeletePopupOpen(false);
+    } catch (e: any) {
+      setErr(e?.response?.data?.message ?? e?.message ?? '청소 항목 제거 실패');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className='flex flex-col h-screen bg-gray-50'>
@@ -478,31 +564,85 @@ const DutyManagement = () => {
 
               {!cleaningsLoading && !cleaningsErr && cleanings.length > 0 && (
                 <div className='grid grid-cols-2 gap-3'>
-                  {cleanings.map((c) => (
-                    <div
-                      key={c.cleaningId}
-                      className='relative rounded-[12px] bg-[#f8f8f8] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-3 flex items-center justify-between'
-                    >
-                      <span className='text-[#5a5d62] text-[14px]'>
-                        {c.name}
-                      </span>
+                  {cleanings.map((c: { cleaningId: number; name: string }) => {
+                    const isOpen = menuOpenId === c.cleaningId;
 
-                      {/* 점3개 버튼(시안의 우측 점 버튼) */}
-                      <button
-                        type='button'
-                        aria-label='메뉴'
-                        className='w-8 h-8 rounded-[10px] bg-[#f8f8f8] flex items-center justify-center active:scale-95'
-                        // onClick={() => openCleaningMenu(c.cleaningId)}  // 필요시 핸들러 연결
+                    return (
+                      <div
+                        key={c.cleaningId}
+                        className='relative rounded-[12px] bg-[#f8f8f8] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] px-4 py-3 flex items-center justify-between'
                       >
-                        {/* vertical dots svg */}
-                        <svg viewBox='0 0 4 18' className='w-4 h-4'>
-                          <circle cx='2' cy='2' r='2' fill='#A8B0BA' />
-                          <circle cx='2' cy='9' r='2' fill='#A8B0BA' />
-                          <circle cx='2' cy='16' r='2' fill='#A8B0BA' />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
+                        <span className='text-[#5a5d62] text-[14px]'>
+                          {c.name}
+                        </span>
+
+                        {/* 점 3개 버튼 */}
+                        <button
+                          type='button'
+                          aria-label='메뉴'
+                          className='w-8 h-8 rounded-[10px] bg-[#f8f8f8] flex items-center justify-center active:scale-95'
+                          onClick={(e) => {
+                            e.stopPropagation(); // 바깥 클릭 핸들러로 전파 방지
+                            setMenuOpenId(isOpen ? null : c.cleaningId);
+                          }}
+                        >
+                          <svg viewBox='0 0 4 18' className='w-4 h-4'>
+                            <circle cx='2' cy='2' r='2' fill='#A8B0BA' />
+                            <circle cx='2' cy='9' r='2' fill='#A8B0BA' />
+                            <circle cx='2' cy='16' r='2' fill='#A8B0BA' />
+                          </svg>
+                        </button>
+
+                        {/* 드롭다운 메뉴 (이 카드만) */}
+                        {isOpen && (
+                          <div
+                            className='absolute right-0 top-[110%] bg-white border border-gray-200 rounded-[8px] shadow-md z-10'
+                            onClick={(e) => e.stopPropagation()} // 메뉴 내부 클릭 시 닫히지 않도록
+                          >
+                            <button
+                              className='px-4 py-2 text-[14px] text-[#797c82] hover:bg-gray-100 w-full text-left'
+                              onClick={() => {
+                                setMenuOpenId(null);
+                                setDeletePopupOpen(true);
+                                setSelectedCleaning({
+                                  cleaningId: c.cleaningId,
+                                  name: c.name,
+                                });
+                              }}
+                            >
+                              청소 제외 하기
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {selectedCleaning && (
+                    <PopUpCard
+                      isOpen={deletePopupOpen}
+                      onRequestClose={() => setDeletePopupOpen(false)}
+                      title={
+                        <span className='font-normal text-center'>
+                          해당 당번에서{' '}
+                          <span className='font-bold'>
+                            "{selectedCleaning.name}"
+                          </span>
+                          를
+                          <br />
+                          <div className='w-full text-center'>
+                            <span className='text-blue'>제외</span>할까요?
+                          </div>
+                        </span>
+                      }
+                      descript=''
+                      first='아니오'
+                      second='네'
+                      onFirstClick={() => setDeletePopupOpen(false)}
+                      onSecondClick={async () => {
+                        handleRemoveCleaning();
+                      }}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -539,6 +679,10 @@ const DutyManagement = () => {
                           <button
                             type='button'
                             className='w-6 h-6 rounded-full bg-[#F1F2F4] text-gray-500 grid place-items-center active:scale-95'
+                            onClick={() => {
+                              setCurrentCleaningId(item.cleaningId);
+                              setRolePickerOpen(true);
+                            }}
                           >
                             +
                           </button>
@@ -551,6 +695,10 @@ const DutyManagement = () => {
                           <button
                             type='button'
                             className='ml-1 w-6 h-6 rounded-full bg-[#f0f0f0] text-gray-6 grid place-items-center active:scale-95'
+                            onClick={() => {
+                              setCurrentCleaningId(item.cleaningId);
+                              setRolePickerOpen(true);
+                            }}
                           >
                             +
                           </button>
@@ -576,6 +724,24 @@ const DutyManagement = () => {
         onConfirm={(ids) => {
           setSelectedMemberIds(ids);
           setPickerOpen(false);
+        }}
+      />
+      {/* 멤버 역할 분담 모달 */}
+      <MembersPickerModal
+        open={rolepickerOpen}
+        allMembers={allMembers}
+        initialSelectedIds={selectedMemberIds}
+        dutyId={dutyId}
+        placeId={placeId}
+        mode='assign'
+        assignMeta={{
+          assignType: 'CUSTOM',
+          cleaningId: currentCleaningId,
+        }}
+        onClose={() => setRolePickerOpen(false)}
+        onConfirm={(ids) => {
+          setSelectedMemberIds(ids);
+          setRolePickerOpen(false);
         }}
       />
     </div>

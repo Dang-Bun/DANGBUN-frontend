@@ -22,6 +22,7 @@ import SettingManager from '../pages/I/SettingManager';
 import SettingMember from '../pages/I/SettingMember';
 import ManagementManager from '../pages/J/ManagementManager';
 import ManagementMember from '../pages/J/ManagementMember';
+import DutyMember from '../pages/J/DutyMember';
 import CreateDangbun from '../pages/J/CreateDangbun';
 import DutyManagement from '../pages/J/DutyManagement';
 import ModifyDuty from '../pages/J/ModifyDuty';
@@ -83,11 +84,11 @@ const router = createBrowserRouter([
     element: <MyInfo />,
   },
   {
-    path : '/calendar',
+    path: '/calendar',
     element: <CalendarPage />,
   },
   {
-    path : '/calendar/content',
+    path: '/calendar/content',
     element: <CalendarDetail />,
   },
   {
@@ -96,15 +97,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/home/manager',
-    element: <ManagerHome  />,
+    element: <ManagerHome />,
   },
   {
     path: '/home/manager/overview',
-    element: <ManagerOverview  />,
+    element: <ManagerOverview />,
   },
   {
     path: '/home/member',
-    element: <MemberHome  />,
+    element: <MemberHome />,
   },
   {
     path: '/alarm',
@@ -153,6 +154,10 @@ const router = createBrowserRouter([
   {
     path: '/management/member',
     element: <ManagementMember />,
+  },
+  {
+    path: '/management/member/duty',
+    element: <DutyMember />,
   },
   {
     path: '/management/manager/create',
