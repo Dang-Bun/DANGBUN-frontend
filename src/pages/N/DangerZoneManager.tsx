@@ -15,7 +15,7 @@ import profile from '../../assets/setting/profile.svg';
 
 type MemberItem = {
   memberId: number;
-  role: 'MANAGER' | 'MEMBER';
+  role: '매니저' | '멤버';
   name: string;
   dutyName?: string[];
 };
@@ -130,7 +130,7 @@ const DangerZoneManager = () => {
       {!isListCollapsed && (
         <ul className='space-y-2'>
           {members
-            .filter((m) => m.role !== 'MANAGER') // 매니저 제외
+            .filter((m) => m.role !== '매니저') // 매니저 제외
             .map((member) => (
               <li
                 key={member.memberId}
