@@ -1,9 +1,11 @@
 import api from '../apis/axios';
 
 export const useDutyApi = {
+  // 당번 수정
   update: (placeId: number, dutyId: number, data: any) =>
     api.put(`/places/${placeId}/duties/${dutyId}`, data),
 
+  // 당번 삭제
   delete: (placeId: number, dutyId: number) =>
     api.delete(`/places/${placeId}/duties/${dutyId}`),
 

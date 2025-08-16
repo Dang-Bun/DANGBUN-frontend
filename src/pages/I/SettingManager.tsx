@@ -123,7 +123,7 @@ const SettingManager = () => {
         {/* 하단 메뉴들 */}
         <div className='flex flex-col gap-[12px]'>
           <div
-            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px] cursor-pointer'
             onClick={() => navigate('/placedetailed')}
           >
             <div className='flex items-center gap-3'>
@@ -141,8 +141,8 @@ const SettingManager = () => {
           </div>
 
           <div
-            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
-            onClick={() => navigate('/alarm')}
+            className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px] cursor-pointer'
+            onClick={() => navigate('/alarm/create')}
           >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
