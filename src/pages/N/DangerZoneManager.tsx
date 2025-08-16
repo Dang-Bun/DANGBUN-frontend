@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { usePlaceApi } from '../../hooks/usePlaceApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 import CTAButton from '../../components/button/CTAButton';
 import FreeButton from '../../components/button/FreeButton';
@@ -11,6 +12,13 @@ import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 import bottom_chevron from '../../assets/chevron/bottom_chevronImg.svg';
 import top_chevron from '../../assets/chevron/top_chevron.svg';
 import profile from '../../assets/setting/profile.svg';
+
+type MemberItem = {
+  memberId: number;
+  role: 'MANAGER' | 'MEMBER';
+  name: string;
+  dutyName?: string[];
+};
 
 const DangerZoneManager = () => {
   const [isListCollapsed, setIsListCollapsed] = useState(true);
@@ -23,7 +31,8 @@ const DangerZoneManager = () => {
 
   const navigate = useNavigate();
 
-  const members = ['박완', '박한나', '신효정', '전예영'];
+  const [members, setMembers] = useState<MemberItem[]>([]);
+  const [memberId, setMemberId] = useState(0);
 
   const placeId = Number(localStorage.getItem('placeId'));
 
@@ -46,13 +55,49 @@ const DangerZoneManager = () => {
     }
   }, [placeId]);
 
+  useEffect(() => {
+    if (!placeId) return;
+
+    (async () => {
+      try {
+        const res = await useMemberApi.list(placeId);
+        const apiMembers: MemberItem[] = res?.data?.data?.members ?? [];
+        setMembers(apiMembers);
+      } catch (err: any) {
+        console.error('❌ 멤버 목록 불러오기 실패:', err);
+        alert(
+          err?.response?.data?.message ??
+            err?.message ??
+            '멤버 목록 불러오기 실패'
+        );
+      }
+    })();
+  }, [placeId]);
+
   const toggleList = () => {
     setIsListCollapsed(!isListCollapsed);
   };
 
-  const handleExpel = (name: string) => {
+  const saveInfo = (name: string, memberId: number) => {
     setSelectedMember(name);
+    setMemberId(memberId);
     setdMemberModalOpen1(true);
+  };
+
+  const handleExpel = () => {
+    (async () => {
+      try {
+        const res = await useMemberApi.expel(placeId, memberId);
+        if (res.data.code === 20000) {
+          setdMemberModalOpen1(false);
+          setdMemberModalOpen2(true);
+        } else {
+          alert(`❌ 삭제 실패: ${res.data.message}`);
+        }
+      } catch (error: any) {
+        alert(`⚠️ API 에러: ${error.response?.data?.message || error.message}`);
+      }
+    })();
   };
 
   return (
@@ -84,26 +129,28 @@ const DangerZoneManager = () => {
       {/* 3. 멤버 목록 */}
       {!isListCollapsed && (
         <ul className='space-y-2'>
-          {members.map((name) => (
-            <li
-              key={name}
-              className='flex justify-between items-center pb-[16px] pr-[12px]'
-            >
-              <div className='flex items-center gap-[20px] text-[16px] font-semibold pl-[30px]'>
-                <img src={profile} alt='프로필' />
-                <span>{name}</span>
-              </div>
-              <FreeButton
-                variant='red'
-                fontSize={14}
-                maxWidth={76}
-                height={40}
-                onClick={() => handleExpel(name)}
+          {members
+            .filter((m) => m.role !== 'MANAGER') // 매니저 제외
+            .map((member) => (
+              <li
+                key={member.memberId}
+                className='flex justify-between items-center pb-[16px] pr-[12px]'
               >
-                추방
-              </FreeButton>
-            </li>
-          ))}
+                <div className='flex items-center gap-[20px] text-[16px] font-semibold pl-[30px]'>
+                  <img src={profile} alt='프로필' />
+                  <span>{member.name}</span>
+                </div>
+                <FreeButton
+                  variant='red'
+                  fontSize={14}
+                  maxWidth={76}
+                  height={40}
+                  onClick={() => saveInfo(member.name, member.memberId)}
+                >
+                  추방
+                </FreeButton>
+              </li>
+            ))}
         </ul>
       )}
 
@@ -180,11 +227,9 @@ const DangerZoneManager = () => {
         placeholder='맴버 이름 입력'
         first='취소'
         second='추방'
+        memberName={selectedMember}
         onFirstClick={() => setdMemberModalOpen1(false)}
-        onSecondClick={async () => {
-          setdMemberModalOpen1(false);
-          setdMemberModalOpen2(true);
-        }}
+        onSecondClick={handleExpel}
       ></PopUpCardDanger>
       <PopUpCardDanger
         isOpen={dMemberModalOpen2}
