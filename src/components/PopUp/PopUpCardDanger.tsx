@@ -12,6 +12,7 @@ interface PopUpCardProps {
   first?: string;
   second?: string;
   placeName?: string;
+  memberName?: string;
   onFirstClick?: () => void;
   onSecondClick?: (inputValue?: string) => void;
 }
@@ -26,6 +27,7 @@ const PopUpCardDanger = ({
   first,
   second,
   placeName,
+  memberName,
   onFirstClick,
   onSecondClick,
 }: PopUpCardProps) => {
@@ -75,7 +77,11 @@ const PopUpCardDanger = ({
             {second && input && (
               <Button
                 style={{ cursor: inputValue ? 'pointer' : 'default' }}
-                variant={inputValue === placeName ? 'red' : 'thickGray'}
+                variant={
+                  inputValue === placeName || inputValue === memberName
+                    ? 'red'
+                    : 'thickGray'
+                }
                 onClick={() => {
                   onSecondClick?.(inputValue);
                   setInputValue('');

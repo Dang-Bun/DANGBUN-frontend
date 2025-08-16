@@ -5,10 +5,10 @@ export const useMemberApi = {
   accept: (placeId, memberId) =>
     api.post(`/places/${placeId}/members/${memberId}/accept`),
 
-  // 멤버 목록 조회 (params: { page, size, q } 등 선택)
-  list: (placeId, params) => api.get(`/places/${placeId}/members`, { params }),
+  // 멤버 목록 조회
+  list: (placeId) => api.get(`/places/${placeId}/members`),
 
-  // 멤버 단건 조회
+  // 멤버 정보 조회
   get: (placeId, memberId) => api.get(`/places/${placeId}/members/${memberId}`),
 
   // 멤버 추방
