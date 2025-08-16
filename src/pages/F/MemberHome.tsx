@@ -38,7 +38,10 @@ const MemberHome: React.FC = () => {
   }, [role, placeId]);
 
   const currentUser = useCurrentUser();
-  const goToNotification = () => navigate('/alarm');
+  const goToNotification = () => {
+  if (!placeId) return;
+  navigate(`/${placeId}/alarm`);
+};
 
   const { visibleTasks, page, totalPages, placeAllTasks, canToggle, isMine } =
     usePagePRogress(activePage, duties, {

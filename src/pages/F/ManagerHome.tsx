@@ -41,8 +41,10 @@ const ManagerHome: React.FC = () => {
   const placeIconKey = usePlaceIconKey() ?? 'CINEMA';
   const placePercent = usePlacePercent();
 
-  const goToNotification = () => navigate('/alarm');
-
+const goToNotification = () => {
+  if (!placeId) return;
+  navigate(`/${placeId}/alarm`);
+};
   const { visibleTasks, page, totalPages, placeAllTasks } =
     usePagePRogress(activePage, duties, { mode: 'manager' });
 

@@ -109,7 +109,7 @@ const router = createBrowserRouter([
     element: <MemberHome />,
   },
   {
-    path: '/alarm',
+    path: '/:placeId/alarm',
     element: <Notification />,
   },
   {
@@ -117,7 +117,7 @@ const router = createBrowserRouter([
     element: <NotificationDetail />,
   },
   {
-    path: '/alarm/create',
+    path: '/:placeId/alarm/create',
     element: <NotificationCreate />,
   },
   {
