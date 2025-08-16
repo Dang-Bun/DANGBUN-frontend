@@ -19,6 +19,8 @@ type RoleItem = {
 };
 
 /** ---------- 바텀시트 모달 ---------- */
+type AssignType = 'CUSTOM' | 'COMMON' | 'RANDOM';
+
 type MembersPickerModalProps = {
   open: boolean;
   allMembers: DutyMember[];
@@ -27,6 +29,16 @@ type MembersPickerModalProps = {
   placeId: number;
   onClose: () => void;
   onConfirm: (selectedIds: number[]) => void;
+
+  // 멤버 추가 모드 vs 역할 배정 모드
+  mode?: 'add' | 'assign'; // 기본 'add'
+
+  // 역할 배정용 메타 (mode==='assign'일 때 사용)
+  assignMeta?: {
+    assignType: AssignType;
+    cleaningId?: number; // CUSTOM/COMMON에 필요
+    assignCount?: number; // RANDOM에 필요 (없으면 selectedIds.length 사용 X → 명시 필요)
+  };
 };
 
 const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
@@ -35,6 +47,8 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   initialSelectedIds,
   dutyId,
   placeId,
+  mode,
+  assignMeta,
   onClose,
   onConfirm,
 }) => {
@@ -44,15 +58,64 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
   );
   const handleConfirm = async () => {
     const memberIdsArray = Array.from(selectedIds);
+
     try {
-      await useDutyApi.addMember(placeId, dutyId, {
-        memberIds: memberIdsArray,
-      });
-      onConfirm(memberIdsArray); // 부모에도 전달
+      if (mode === 'assign' && assignMeta) {
+        const { assignType, cleaningId, assignCount } = assignMeta;
+
+        // 스키마별 검증
+        if (
+          (assignType === 'CUSTOM' || assignType === 'COMMON') &&
+          !cleaningId
+        ) {
+          alert('청소 항목(cleaningId)이 필요합니다.');
+          return;
+        }
+        if (assignType === 'CUSTOM' && memberIdsArray.length === 0) {
+          alert('배정할 멤버를 1명 이상 선택하세요.');
+          return;
+        }
+        if (assignType === 'RANDOM' && (!assignCount || assignCount < 1)) {
+          alert('랜덤 배정 인원(assignCount)을 1 이상 입력하세요.');
+          return;
+        }
+
+        // 페이로드 구성 (필요한 필드만 포함)
+        let payload: any = { assignType };
+
+        if (assignType === 'CUSTOM') {
+          payload = {
+            assignType, // 'CUSTOM'
+            cleaningId, // required
+            memberIds: memberIdsArray, // required
+          };
+        } else if (assignType === 'COMMON') {
+          payload = {
+            assignType, // 'COMMON'
+            cleaningId, // required
+            // (memberIds/assignCount 없음)
+          };
+        } else if (assignType === 'RANDOM') {
+          payload = {
+            assignType, // 'RANDOM'
+            assignCount, // required
+            // (cleaningId/memberIds 없음)
+          };
+        }
+
+        await useDutyApi.assignCleaningMembers(placeId, dutyId, payload);
+      } else {
+        // 멤버 추가 모드 (기존)
+        await useDutyApi.addMember(placeId, dutyId, {
+          memberIds: memberIdsArray,
+        });
+      }
+
+      onConfirm(memberIdsArray);
       onClose();
     } catch (err) {
-      console.error('멤버 추가 실패:', err);
-      alert('멤버 추가에 실패했습니다.');
+      console.error('확인 처리 실패:', err);
+      alert('처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -229,8 +292,10 @@ const DutyManagement = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // 모달 오픈
+  // 맴버 선택 모달 오픈
   const [pickerOpen, setPickerOpen] = useState(false);
+  // 맴버 역할 분담 모달 오픈
+  const [rolepickerOpen, setRolePickerOpen] = useState(false);
   //청소 제외하기 오픈
   const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   // 바깥 클릭 시 닫기
@@ -245,6 +310,10 @@ const DutyManagement = () => {
   //청소 이름 저장
   const [selectedCleaning, setSelectedCleaning] =
     useState<SelectedCleaning>(null);
+  //청소 아이디 저장
+  const [currentCleaningId, setCurrentCleaningId] = useState<number | null>(
+    null
+  );
 
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
@@ -253,7 +322,6 @@ const DutyManagement = () => {
   useEffect(() => {
     if (!placeId || !dutyId) navigate('/management/manager');
   }, [placeId, dutyId, navigate]);
-  console.log(allMembers);
 
   // 멤버 불러오기
   useEffect(() => {
@@ -611,6 +679,10 @@ const DutyManagement = () => {
                           <button
                             type='button'
                             className='w-6 h-6 rounded-full bg-[#F1F2F4] text-gray-500 grid place-items-center active:scale-95'
+                            onClick={() => {
+                              setCurrentCleaningId(item.cleaningId);
+                              setRolePickerOpen(true);
+                            }}
                           >
                             +
                           </button>
@@ -623,6 +695,10 @@ const DutyManagement = () => {
                           <button
                             type='button'
                             className='ml-1 w-6 h-6 rounded-full bg-[#f0f0f0] text-gray-6 grid place-items-center active:scale-95'
+                            onClick={() => {
+                              setCurrentCleaningId(item.cleaningId);
+                              setRolePickerOpen(true);
+                            }}
                           >
                             +
                           </button>
@@ -648,6 +724,24 @@ const DutyManagement = () => {
         onConfirm={(ids) => {
           setSelectedMemberIds(ids);
           setPickerOpen(false);
+        }}
+      />
+      {/* 멤버 역할 분담 모달 */}
+      <MembersPickerModal
+        open={rolepickerOpen}
+        allMembers={allMembers}
+        initialSelectedIds={selectedMemberIds}
+        dutyId={dutyId}
+        placeId={placeId}
+        mode='assign'
+        assignMeta={{
+          assignType: 'CUSTOM',
+          cleaningId: currentCleaningId,
+        }}
+        onClose={() => setRolePickerOpen(false)}
+        onConfirm={(ids) => {
+          setSelectedMemberIds(ids);
+          setRolePickerOpen(false);
         }}
       />
     </div>
