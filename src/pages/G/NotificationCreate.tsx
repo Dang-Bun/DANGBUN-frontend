@@ -160,7 +160,7 @@ const NotificationCreate: React.FC = () => {
     setTimeout(() => {
       setShowToast(false);
       // NOTE: 라우팅은 이후 단계에서 placeId 포함으로 정리 예정
-      navigate('/alarm', { state: { tab: 'transmit' } });
+      navigate('/:placeId/alarm/create', { state: { tab: 'transmit' } });
     }, 1500);
   };
 
