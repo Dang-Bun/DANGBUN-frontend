@@ -44,28 +44,8 @@ const DutyMember = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // 맴버 선택 모달 오픈
-  const [pickerOpen, setPickerOpen] = useState(false);
   // 맴버 역할 분담 모달 오픈
   const [rolepickerOpen, setRolePickerOpen] = useState(false);
-  //청소 제외하기 오픈
-  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
-  // 바깥 클릭 시 닫기
-  useEffect(() => {
-    if (menuOpenId === null) return;
-    const onDocClick = () => setMenuOpenId(null);
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
-  }, [menuOpenId]);
-  //청소제외 팝업 오픈
-  const [deletePopupOpen, setDeletePopupOpen] = React.useState(false);
-  //청소 이름 저장
-  const [selectedCleaning, setSelectedCleaning] =
-    useState<SelectedCleaning>(null);
-  //청소 아이디 저장
-  const [currentCleaningId, setCurrentCleaningId] = useState<number | null>(
-    null
-  );
 
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
@@ -138,31 +118,6 @@ const DutyMember = () => {
       mounted = false;
     };
   }, [placeId, dutyId]);
-
-  // 청소 제외하기 실행 함수
-  const handleRemoveCleaning = async () => {
-    if (!placeId || !dutyId || !selectedCleaning) return;
-
-    try {
-      setLoading(true);
-      setErr(null);
-
-      // ✅ API 호출
-      await useDutyApi.removeCleaning(placeId, dutyId, selectedCleaning.id);
-
-      // ✅ UI에서 즉시 반영 (cleanings 상태를 최신화)
-      setCleanings((prev) =>
-        prev.filter((c) => c.cleaningId !== selectedCleaning.id)
-      );
-
-      // 팝업 닫기
-      setDeletePopupOpen(false);
-    } catch (e: any) {
-      setErr(e?.response?.data?.message ?? e?.message ?? '청소 항목 제거 실패');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className='flex flex-col h-screen bg-gray-50'>
@@ -285,8 +240,6 @@ const DutyMember = () => {
               {!cleaningsLoading && !cleaningsErr && cleanings.length > 0 && (
                 <div className='grid grid-cols-2 gap-3'>
                   {cleanings.map((c: { cleaningId: number; name: string }) => {
-                    const isOpen = menuOpenId === c.cleaningId;
-
                     return (
                       <div
                         key={c.cleaningId}
@@ -295,74 +248,9 @@ const DutyMember = () => {
                         <span className='text-[#5a5d62] text-[14px]'>
                           {c.name}
                         </span>
-
-                        {/* 점 3개 버튼 */}
-                        <button
-                          type='button'
-                          aria-label='메뉴'
-                          className='w-8 h-8 rounded-[10px] bg-[#f8f8f8] flex items-center justify-center active:scale-95'
-                          onClick={(e) => {
-                            e.stopPropagation(); // 바깥 클릭 핸들러로 전파 방지
-                            setMenuOpenId(isOpen ? null : c.cleaningId);
-                          }}
-                        >
-                          <svg viewBox='0 0 4 18' className='w-4 h-4'>
-                            <circle cx='2' cy='2' r='2' fill='#A8B0BA' />
-                            <circle cx='2' cy='9' r='2' fill='#A8B0BA' />
-                            <circle cx='2' cy='16' r='2' fill='#A8B0BA' />
-                          </svg>
-                        </button>
-
-                        {/* 드롭다운 메뉴 (이 카드만) */}
-                        {isOpen && (
-                          <div
-                            className='absolute right-0 top-[110%] bg-white border border-gray-200 rounded-[8px] shadow-md z-10'
-                            onClick={(e) => e.stopPropagation()} // 메뉴 내부 클릭 시 닫히지 않도록
-                          >
-                            <button
-                              className='px-4 py-2 text-[14px] text-[#797c82] hover:bg-gray-100 w-full text-left'
-                              onClick={() => {
-                                setMenuOpenId(null);
-                                setDeletePopupOpen(true);
-                                setSelectedCleaning({
-                                  cleaningId: c.cleaningId,
-                                  name: c.name,
-                                });
-                              }}
-                            >
-                              청소 제외 하기
-                            </button>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
-                  {selectedCleaning && (
-                    <PopUpCard
-                      isOpen={deletePopupOpen}
-                      onRequestClose={() => setDeletePopupOpen(false)}
-                      title={
-                        <span className='font-normal text-center'>
-                          해당 당번에서{' '}
-                          <span className='font-bold'>
-                            "{selectedCleaning.name}"
-                          </span>
-                          를
-                          <br />
-                          <div className='w-full text-center'>
-                            <span className='text-blue'>제외</span>할까요?
-                          </div>
-                        </span>
-                      }
-                      descript=''
-                      first='아니오'
-                      second='네'
-                      onFirstClick={() => setDeletePopupOpen(false)}
-                      onSecondClick={async () => {
-                        handleRemoveCleaning();
-                      }}
-                    />
-                  )}
                 </div>
               )}
             </div>
@@ -396,32 +284,12 @@ const DutyMember = () => {
                             {item.displayedNames.slice(0, 2).join(', ')}{' '}
                             {item.memberCount > 2 && '등'}
                           </span>
-                          <button
-                            type='button'
-                            className='w-6 h-6 rounded-full bg-[#F1F2F4] text-gray-500 grid place-items-center active:scale-95'
-                            onClick={() => {
-                              setCurrentCleaningId(item.cleaningId);
-                              setRolePickerOpen(true);
-                            }}
-                          >
-                            +
-                          </button>
                         </>
                       ) : (
                         <>
                           <span className='px-2 py-[3px] text-[12px] rounded-full bg-[#f0f0f0] text-gray-6'>
                             담당 선택
                           </span>
-                          <button
-                            type='button'
-                            className='ml-1 w-6 h-6 rounded-full bg-[#f0f0f0] text-gray-6 grid place-items-center active:scale-95'
-                            onClick={() => {
-                              setCurrentCleaningId(item.cleaningId);
-                              setRolePickerOpen(true);
-                            }}
-                          >
-                            +
-                          </button>
                         </>
                       )}
                     </div>
