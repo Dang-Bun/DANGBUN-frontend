@@ -47,7 +47,7 @@ const SettingMember = () => {
           <img
             src={PlaceName}
             alt='플레이스 이름'
-            className='absolute left-0'
+            className='absolute left-0 cursor-pointer'
             onClick={() => {
               navigate('/myPlace');
             }}
