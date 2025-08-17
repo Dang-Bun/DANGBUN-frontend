@@ -106,7 +106,7 @@ const CreateDangbun = () => {
       {/* 아이콘 선택 */}
       <div>
         <div className='mb-2 text-[18px] font-normal'>아이콘</div>
-        <div className='flex gap-3 overflow-x-auto pb-2 hide-scrollbar'>
+        <div className='flex gap-3 overflow-x-auto pb-2 no-scrollbar'>
           {iconList.map((icon, idx) => (
             <div
               key={idx}

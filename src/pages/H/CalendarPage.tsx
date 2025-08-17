@@ -7,7 +7,12 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { useNavigate } from 'react-router-dom';
 import CalendarTaskCard from '../../components/calendar/CalendarTaskCard';
-import { useDutyStore, useRole, useCurrentUser, useDuties } from '../../stores/useDutyStore';
+import {
+  useDutyStore,
+  useRole,
+  useCurrentUser,
+  useDuties,
+} from '../../stores/useDutyStore';
 import { initialDuties } from '../../stores/Test/initialDuties';
 import DatePicker from '../../components/calendar/DatePicker';
 import toggleUp from '../../assets/calendar/toggleUp.svg';
@@ -42,7 +47,9 @@ const CalendarPage: React.FC = () => {
   }, [seedIfEmpty]);
 
   const today = new Date();
-  const [activeStartDate, setActiveStartDate] = useState<Date>(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [activeStartDate, setActiveStartDate] = useState<Date>(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [memberPopUp, setMemberPopUp] = useState(false);
@@ -74,7 +81,8 @@ const CalendarPage: React.FC = () => {
       duty.tasks?.forEach((t: any) => {
         const key = toYMD(t.date);
         const members: string[] = Array.isArray(t.members) ? t.members : [];
-        const mine = members.includes(currentUser) || members.includes('멤버 전체');
+        const mine =
+          members.includes(currentUser) || members.includes('멤버 전체');
         if (!mine) return;
         if (!map.has(key)) map.set(key, new Set<number>());
         map.get(key)!.add(duty.id);
@@ -94,12 +102,17 @@ const CalendarPage: React.FC = () => {
     [allTasksByDate, myDutyIdsByDate, role]
   );
 
-  const selectedDayItems = useMemo(() => getTasksForDate(selectedYMD), [getTasksForDate, selectedYMD]);
+  const selectedDayItems = useMemo(
+    () => getTasksForDate(selectedYMD),
+    [getTasksForDate, selectedYMD]
+  );
 
   const sortedItems = useMemo(() => {
     const arr = [...selectedDayItems];
     if (sortBy === 'alpha') {
-      return arr.sort((a, b) => (a.task?.title || '').localeCompare(b.task?.title || '', 'ko-KR'));
+      return arr.sort((a, b) =>
+        (a.task?.title || '').localeCompare(b.task?.title || '', 'ko-KR')
+      );
     }
     const tsFromTask = (t: any) => {
       const ca = t?.completedAt;
@@ -118,14 +131,18 @@ const CalendarPage: React.FC = () => {
       const n = Number(ca);
       return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
     };
-    const done = arr.filter((x) => !!x.task?.isChecked).sort((a, b) => tsFromTask(a.task) - tsFromTask(b.task));
+    const done = arr
+      .filter((x) => !!x.task?.isChecked)
+      .sort((a, b) => tsFromTask(a.task) - tsFromTask(b.task));
     const pending = arr.filter((x) => !x.task?.isChecked);
     return [...done, ...pending];
   }, [selectedDayItems, sortBy, selectedDate]);
 
   const displayedItems = useMemo(() => {
-    if (filterValue === 'done') return sortedItems.filter((x) => !!x.task?.isChecked);
-    if (filterValue === 'undone') return sortedItems.filter((x) => !x.task?.isChecked);
+    if (filterValue === 'done')
+      return sortedItems.filter((x) => !!x.task?.isChecked);
+    if (filterValue === 'undone')
+      return sortedItems.filter((x) => !x.task?.isChecked);
     return sortedItems;
   }, [sortedItems, filterValue]);
 
@@ -146,61 +163,63 @@ const CalendarPage: React.FC = () => {
     ({ date, view, activeStartDate: asd }: any) => {
       if (view !== 'month') return '';
       const isSameMonth =
-        asd.getMonth() === date.getMonth() && asd.getFullYear() === date.getFullYear();
+        asd.getMonth() === date.getMonth() &&
+        asd.getFullYear() === date.getFullYear();
       const isSelected = dayjs(selectedDate).isSame(dayjs(date), 'date');
       return [
         '!w-[36px] !h-[36px] !my-[9px] flex items-center justify-center text-base text-center relative',
         isSelected
           ? 'font-bold text-[#4D83FD]'
           : isSameMonth
-          ? 'text-black'
-          : 'text-[#8e8e8e]',
+            ? 'text-black'
+            : 'text-[#8e8e8e]',
       ].join(' ');
     },
     [selectedDate]
   );
- 
+
   const tileContent = useCallback(
     ({ date, view }: any) => {
       if (view !== 'month') return null;
       const ymd = toYMD(date);
       const progress = datesProgress.get(ymd);
-      if (progress === undefined) return <span className="text-base">{date.getDate()}</span>;
+      if (progress === undefined)
+        return <span className='text-base'>{date.getDate()}</span>;
 
       const size = 36;
       const center = size / 2;
       const ringRadius = 16;
-      const strokeWidth = 4;  
+      const strokeWidth = 4;
       const circumference = 2 * Math.PI * ringRadius;
       const dashOffset = circumference * (1 - progress / 100);
 
       return (
-        <div className="w-[36px] h-[36px] relative flex items-center justify-center">
-          <svg width={size} height={size} className="absolute top-0 left-0">
+        <div className='w-[36px] h-[36px] relative flex items-center justify-center'>
+          <svg width={size} height={size} className='absolute top-0 left-0'>
             <g transform={`rotate(-90 ${center} ${center})`}>
               <circle
                 cx={center}
                 cy={center}
                 r={ringRadius}
-                fill="none"
-                stroke="#E5E7EB"
+                fill='none'
+                stroke='#E5E7EB'
                 strokeWidth={strokeWidth}
               />
               <circle
                 cx={center}
                 cy={center}
                 r={ringRadius}
-                fill="none"
-                stroke="#4D83FD"
+                fill='none'
+                stroke='#4D83FD'
                 strokeWidth={strokeWidth}
-                strokeLinecap="round"
+                strokeLinecap='round'
                 strokeDasharray={circumference}
                 strokeDashoffset={dashOffset}
                 style={{ transition: 'stroke-dashoffset 0.2s ease' }}
               />
             </g>
           </svg>
-          <span className="text-base relative z-10">{date.getDate()}</span>
+          <span className='text-base relative z-10'>{date.getDate()}</span>
         </div>
       );
     },
@@ -213,7 +232,8 @@ const CalendarPage: React.FC = () => {
     const curM = activeStartDate.getMonth();
     const tgtY = date.getFullYear();
     const tgtM = date.getMonth();
-    if (curY !== tgtY || curM !== tgtM) setActiveStartDate(new Date(tgtY, tgtM, 1));
+    if (curY !== tgtY || curM !== tgtM)
+      setActiveStartDate(new Date(tgtY, tgtM, 1));
   };
 
   const handleActiveStartDateChange = ({ activeStartDate: d }: any) => {
@@ -223,32 +243,37 @@ const CalendarPage: React.FC = () => {
   const sortLabel = sortBy === 'alpha' ? '가나다 순' : '완료 시간 순';
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header title="캘린더" />
-      <div className="flex flex-col flex-1 min-h-0 mt-12 px-5 py-4">
-        <div className="flex items-center justify-between">
+    <div className='flex flex-col min-h-screen'>
+      <Header title='캘린더' />
+      <div className='flex flex-col flex-1 min-h-0 mt-12 px-5 py-4'>
+        <div className='flex items-center justify-between'>
           <button
-            type="button"
-            className="text-[16px] font-semibold cursor-pointer flex items-center gap-1"
+            type='button'
+            className='text-[16px] font-semibold cursor-pointer flex items-center gap-1'
             onClick={() => setIsDatePickerOpen(true)}
-            aria-label="날짜 선택 열기"
+            aria-label='날짜 선택 열기'
           >
             {dayjs(activeStartDate).format('YYYY년 M월')}
             <img
               src={toggleUp}
-              alt="토글"
+              alt='토글'
               className={`w-3 h-2 transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`}
             />
           </button>
         </div>
-        <div className="relative mx-auto mt-4" style={{ width: '353px' }}>
+        <div className='relative mx-auto mt-4' style={{ width: '353px' }}>
           <div
-            className="absolute rounded-[24px] bg-[#4D83FD]"
-            style={{ left: '-48px', top: '-8px', width: '405px', height: 'calc(100% + 16px)' }}
+            className='absolute rounded-[24px] bg-[#4D83FD]'
+            style={{
+              left: '-48px',
+              top: '-8px',
+              width: '405px',
+              height: 'calc(100% + 16px)',
+            }}
           />
-          <div className="relative bg-white rounded-[20px] p-2">
+          <div className='relative bg-white rounded-[20px] p-2'>
             <Calendar
-              className="w-full"
+              className='w-full'
               onClickDay={handleDayClick}
               onActiveStartDateChange={handleActiveStartDateChange}
               tileClassName={tileClassName}
@@ -261,27 +286,36 @@ const CalendarPage: React.FC = () => {
               nextLabel={null}
               next2Label={null}
               navigationLabel={() => null}
-              locale="ko-KR"
-              calendarType="gregory"
+              locale='ko-KR'
+              calendarType='gregory'
             />
           </div>
         </div>
-        <div className="flex flex-col mt-8 flex-1 min-h-0">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-1 items-end">
-              <span className="font-semibold text-[12px] text-[#4D83FD]">청소 목록</span>
-              <img src={filter} alt="필터" className="cursor-pointer" onClick={() => setIsFilterOpen(true)} />
+        <div className='flex flex-col mt-8 flex-1 min-h-0'>
+          <div className='flex items-center justify-between'>
+            <div className='flex gap-1 items-end'>
+              <span className='font-semibold text-[12px] text-[#4D83FD]'>
+                청소 목록
+              </span>
+              <img
+                src={filter}
+                alt='필터'
+                className='cursor-pointer'
+                onClick={() => setIsFilterOpen(true)}
+              />
             </div>
-            <div className="relative flex items-center">
-              <span className="text-[12px] text-[#797C82] mr-1">{sortLabel}</span>
+            <div className='relative flex items-center'>
+              <span className='text-[12px] text-[#797C82] mr-1'>
+                {sortLabel}
+              </span>
               <img
                 src={toggle}
-                alt="정렬 열기"
+                alt='정렬 열기'
                 onClick={() => setMemberPopUp((v) => !v)}
-                className="w-[20px] h-[20px] cursor-pointer"
+                className='w-[20px] h-[20px] cursor-pointer'
               />
               {memberPopUp && (
-                <div className="absolute right-0 top-[calc(100%+8px)] z-50">
+                <div className='absolute right-0 top-[calc(100%+8px)] z-50'>
                   <CalendarSort
                     onSelect={(type) => {
                       setSortBy(type);
@@ -292,9 +326,12 @@ const CalendarPage: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-col py-3 gap-4 overflow-y-auto pb-24">
+          <div className='flex flex-col py-3 gap-4 overflow-y-auto pb-24'>
             {displayedItems.map(({ dutyName, task }) => (
-              <SwipeableRow key={task.id} onToggle={() => toggleTask(task.id, currentUser)}>
+              <SwipeableRow
+                key={task.id}
+                onToggle={() => toggleTask(task.id, currentUser)}
+              >
                 <CalendarTaskCard
                   title={task.title}
                   dangbun={dutyName}
@@ -309,13 +346,19 @@ const CalendarPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="flex-shrink-0">
+      <div className='flex-shrink-0'>
         <BottomBar />
       </div>
       {isFilterOpen && (
-        <div className="fixed inset-0 z-50" onClick={() => setIsFilterOpen(false)}>
-          <div className="absolute inset-0" />
-          <div className="fixed left-0 right-0 bottom-0" onClick={(e) => e.stopPropagation()}>
+        <div
+          className='fixed inset-0 z-50'
+          onClick={() => setIsFilterOpen(false)}
+        >
+          <div className='absolute inset-0' />
+          <div
+            className='fixed left-0 right-0 bottom-0'
+            onClick={(e) => e.stopPropagation()}
+          >
             <FilterBottomSheet
               selected={filterValue}
               onSelect={(v) => {
@@ -327,9 +370,15 @@ const CalendarPage: React.FC = () => {
         </div>
       )}
       {isSelectOpen && (
-        <div className="fixed inset-0 z-50" onClick={() => setIsSelectOpen(false)}>
-          <div className="absolute inset-0" />
-          <div className="fixed left-0 right-0 bottom-0" onClick={(e) => e.stopPropagation()}>
+        <div
+          className='fixed inset-0 z-50'
+          onClick={() => setIsSelectOpen(false)}
+        >
+          <div className='absolute inset-0' />
+          <div
+            className='fixed left-0 right-0 bottom-0'
+            onClick={(e) => e.stopPropagation()}
+          >
             <SelectBottom
               onViewPhoto={() => {
                 setIsSelectOpen(false);
@@ -352,13 +401,14 @@ const CalendarPage: React.FC = () => {
         onRequestClose={() => setIsDeleteOpen(false)}
         title={
           <span>
-            청소 목록을 <span className="text-[#4D83FD]">삭제</span>하시겠습니까?
+            청소 목록을 <span className='text-[#4D83FD]'>삭제</span>
+            하시겠습니까?
           </span>
         }
-        descript="해당 청소를 체크리스트에서 완전히 삭제합니다."
-        first="취소"
-        second="확인"
-        userEmail=""
+        descript='해당 청소를 체크리스트에서 완전히 삭제합니다.'
+        first='취소'
+        second='확인'
+        userEmail=''
         onFirstClick={() => setIsDeleteOpen(false)}
         onSecondClick={() => {
           const anyStore = useDutyStore.getState() as any;
@@ -368,7 +418,10 @@ const CalendarPage: React.FC = () => {
           setIsDeleteOpen(false);
         }}
       />
-      <DownloadPopUp isOpen={isPhotoOpen} onRequestClose={() => setIsPhotoOpen(false)} />
+      <DownloadPopUp
+        isOpen={isPhotoOpen}
+        onRequestClose={() => setIsPhotoOpen(false)}
+      />
       <DatePicker
         isOpen={isDatePickerOpen}
         initialYear={activeStartDate.getFullYear()}
