@@ -7,6 +7,8 @@ import BottomBar from '../../components/BottomBar';
 import Envelop from '../../assets/member/Envelop.svg';
 import whitearrow from '../../assets/member/whitearrow.svg';
 import { useMemberApi } from '../../hooks/useMemberApi';
+import right_chevron from '../../assets/chevron/right_chevronImg.svg';
+import EnterCode from '../../assets/member/EnterCode.svg';
 
 type MemberRow = {
   memberId: number;
@@ -55,7 +57,7 @@ const MemberList: React.FC = () => {
         className='cursor-pointer'
         onClick={() => navigate('/memberconfirm')}
       >
-        <div className='flex flex-row w-96 h-24 py-4 px-[21px] bg-blue-500 rounded-lg items-center justify-between'>
+        <div className='flex flex-row w-[353px] h-24 py-[21px] px-[21px] mt-[21px] mb-[21px] bg-blue-500 rounded-lg items-center justify-between'>
           <div className='flex flex-row gap-[21px] items-center'>
             <div className='relative flex justify-center items-center bg-white w-14 h-14 rounded-full'>
               <img src={Envelop} alt='편지' />
@@ -73,6 +75,22 @@ const MemberList: React.FC = () => {
           </div>
           <img src={whitearrow} alt='이동' />
         </div>
+      </button>
+      <button
+        onClick={() => navigate('entercode')}
+        className='w-full flex flex-row items-center justify-between bg-[#f9f9f9] rounded-lg px-4 py-3 shadow-sm cursor-pointer'
+      >
+        {/* 왼쪽 아이콘 + 텍스트 */}
+        <div className='flex flex-row items-center gap-3'>
+          <img src={EnterCode} alt='참여코드' className='w-8 h-8' />
+          <p className='text-sm text-black'>
+            <span className='font-semibold'>참여코드</span>로 새 멤버를 초대해
+            보세요
+          </p>
+        </div>
+
+        {/* 오른쪽 화살표 */}
+        <img src={right_chevron} alt='더보기' className='w-4 h-4' />
       </button>
 
       {/* 목록 */}
@@ -98,7 +116,17 @@ const MemberList: React.FC = () => {
                 const firstDuty = m.dutyName?.[0] ?? '-';
 
                 return (
-                  <div key={m.memberId} className='flex flex-row gap-4.5'>
+                  <div
+                    key={m.memberId}
+                    className='flex flex-row gap-4.5 cursor-pointer'
+                    onClick={() =>
+                      navigate('/managerInfo', {
+                        state: {
+                          memberId: m.memberId,
+                        },
+                      })
+                    }
+                  >
                     {/* 역할 배지 */}
                     <div
                       className={`flex w-[61px] h-7 my-4 rounded-lg justify-center items-center text-sm font-semibold ${badgeClass}`}

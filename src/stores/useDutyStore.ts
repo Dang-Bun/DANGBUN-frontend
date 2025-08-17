@@ -3,7 +3,13 @@ import { persist } from 'zustand/middleware';
 import type { Duty } from '../stores/Test/duty';
 
 export type Mode = 'manager' | 'member';
-export type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
+export type PlaceIconKey =
+  | 'BUILDING'
+  | 'CAFE'
+  | 'CINEMA'
+  | 'DORMITORY'
+  | 'GYM'
+  | 'HOME';
 
 type State = {
   role: Mode;
@@ -53,8 +59,12 @@ export const useDutyStore = create<State>()(
                 ? {
                     ...t,
                     isChecked: !t.isChecked,
-                    completedAt: !t.isChecked ? new Date().toTimeString().slice(0, 5) : undefined,
-                    completedBy: !t.isChecked ? (by ?? s.currentUser) : undefined,
+                    completedAt: !t.isChecked
+                      ? new Date().toTimeString().slice(0, 5)
+                      : undefined,
+                    completedBy: !t.isChecked
+                      ? (by ?? s.currentUser)
+                      : undefined,
                   }
                 : t
             ),
