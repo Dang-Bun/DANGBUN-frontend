@@ -23,6 +23,16 @@ import SCHOOL_IMG from '../../assets/placeIcon/schoolImg.svg';
 import CAFE_IMG from '../../assets/placeIcon/cafeSmallImg.svg';
 import HOME_IMG from '../../assets/placeIcon/homeImg.svg';
 
+// 당번 아이콘 이미지 import 경로 수정
+import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import BRUSH_PINK from '../../assets/cleanIcon/moppingImg_3.svg';
+import DISH_BLUE from '../../assets/cleanIcon/polishImg.svg';
+import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
+import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
+import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
+
 import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
@@ -39,8 +49,22 @@ const CATEGORY_ICON_SRC: Record<string, string> = {
   ETC: HOME_IMG,
 };
 
+// 당번 아이콘 맵
+const DUTY_ICON_SRC: Record<string, string> = {
+  FLOOR_BLUE: FLOOR_BLUE,
+  CLEANER_PINK: CLEANER_PINK,
+  BUCKET_PINK: BUCKET_PINK,
+  TOILET_PINK: TOILET_PINK,
+  TRASH_BLUE: TRASH_BLUE,
+  DISH_BLUE: DISH_BLUE,
+  BRUSH_PINK: BRUSH_PINK,
+  SPRAY_BLUE: SPRAY_BLUE,
+};
 
-/* ---------- 응답에서 항상 배열만 뽑는 방어적 추출기 ---------- */
+type DutyIconKey =
+  | 'FLOOR_BLUE' | 'CLEANER_PINK' | 'BUCKET_PINK' | 'TOILET_PINK'
+  | 'TRASH_BLUE' | 'DISH_BLUE' | 'BRUSH_PINK' | 'SPRAY_BLUE';
+
 const toArray = (x: any): any[] =>
   Array.isArray(x) ? x
   : Array.isArray(x?.data?.data?.duties) ? x.data.data.duties
@@ -51,10 +75,6 @@ const toArray = (x: any): any[] =>
   : Array.isArray(x?.data) ? x.data
   : [];
 
-/* ---------- 타입 (UI에서 쓰는 최소 필드만) ---------- */
-type DutyIconKey =
-  | 'FLOOR_BLUE' | 'CLEANER_PINK' | 'BUCKET_PINK' | 'TOILET_PINK'
-  | 'TRASH_BLUE' | 'DISH_BLUE' | 'BRUSH_PINK' | 'SPRAY_BLUE';
 
 type TaskUI = {
   id: number;
@@ -81,11 +101,9 @@ const ManagerHome: React.FC = () => {
     state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
   };
   // 컨텍스트: state 우선, 없으면 localStorage
-  const pid       = Number(state?.placeId   ?? localStorage.getItem('placeId')   ?? 0);
-  const placeName =        state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
-  const placeIconKey =
-    (state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC') as keyof typeof CATEGORY_ICON_SRC;
-  // 동기화(들어올 때 한번만)
+  const pid = Number(state?.placeId);
+  const placeName = state?.placeName;
+  const placeIconKey = state?.placeIcon
   useEffect(() => {
     if (pid) localStorage.setItem('placeId', String(pid));
     if (placeName) localStorage.setItem('placeName', placeName);
@@ -102,7 +120,6 @@ const ManagerHome: React.FC = () => {
   // 업로드 팝업
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
-  const placeIcon = CATEGORY_ICON_SRC[placeIconKey] ?? HOME_IMG;
 
   /* ---------- 데이터 로드 ---------- */
   useEffect(() => {
@@ -113,7 +130,7 @@ const ManagerHome: React.FC = () => {
       try {
         if (!pid) return;
 
-        // (선택) 내 멤버십 확인 — 실패해도 치명적 X
+        // (선택) 내 멤버십 확인 - 실패해도 치명적 X
         console.log('📡 [member] GET /places/%s/members/me', pid);
         try {
           const me = await useMemberApi.me(pid);
@@ -125,7 +142,7 @@ const ManagerHome: React.FC = () => {
         console.log('📡 [duties] GET /places/%s/duties', pid);
         const dutyRes = await useDutyApi.list(pid);
         console.log('📥 [duties] 원본 응답:', dutyRes?.data);
-        const dutyList = toArray(dutyRes); // ✅ 항상 배열
+        const dutyList = toArray(dutyRes);
         console.log('✅ [duties] 개수:', dutyList.length);
 
         const result: DutyUI[] = [];
@@ -143,14 +160,14 @@ const ManagerHome: React.FC = () => {
           console.log('📡 [cleaning-info] GET /places/%s/duties/%s/cleaning-info', pid, dutyId);
           const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
           console.log('📥 [cleaning-info] 응답(%s):', dutyId, infoRes?.data);
-          const taskList = toArray(infoRes); // ✅ 항상 배열
+          const taskList = toArray(infoRes);
           console.log('✅ [tasks] 개수(%s):', dutyId, taskList.length);
 
-          const tasks: TaskUI[] = taskList.map((t: any) => ({
+          const tasks: TaskUI[] = taskList.map((t) => ({
             id: t.id,
             title: t.name ?? t.title ?? '',
             dueTime: t.dueTime ?? null,
-            members: (t.members ?? t.assignees ?? []).map((m: any) => m?.name ?? m),
+            members: (t.members ?? t.assignees ?? []).map((m) => m?.name ?? m),
             isCamera: !!t.needPhoto,
             isChecked: !!t.completed,
             completedAt: t.completedAt ?? null,
@@ -189,8 +206,17 @@ const ManagerHome: React.FC = () => {
     const done = base.filter(t => t.isChecked).length;
     const percent = total ? Math.round((done / total) * 100) : 0;
     const name = activePage === 0 ? '플레이스 전체' : (duties[activePage - 1]?.name ?? '');
-    return { name, percent, tasks: base };
-  }, [activePage, allTasks, duties]);
+    
+    // 아이콘 로직
+    const iconKeyForProgressBar = activePage === 0
+        ? placeIconKey
+        : (duties[activePage - 1]?.iconKey as string);
+    const icon = activePage === 0
+        ? (CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG)
+        : (DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG);
+
+    return { name, percent, tasks: base, icon };
+  }, [activePage, allTasks, duties, placeIconKey]);
 
   const totalPages = duties.length + 1;
 
@@ -300,15 +326,16 @@ const ManagerHome: React.FC = () => {
           </div>
 
           <div className="mt-[66px] mb-[18px]">
-            <ProgressBar
+           <ProgressBar
               percentage={page.percent}
-              iconSrc={placeIcon}
+              iconSrc={page.icon}
               title={page.name}
               onCenterClick={() => {
                 const payload = {
                   placeId: pid,
                   placeName,
                   percent: Math.min(100, Math.max(0, page.percent)),
+                  placeIconKey,              
                   duties: duties.map(d => {
                     const total = d.tasks.length;
                     const done = d.tasks.filter(t => t.isChecked).length;
@@ -320,6 +347,7 @@ const ManagerHome: React.FC = () => {
                     };
                   }),
                 };
+
                 sessionStorage.setItem('overviewPayload', JSON.stringify(payload));
                 navigate('/home/manager/overview', { state: payload });
               }}
