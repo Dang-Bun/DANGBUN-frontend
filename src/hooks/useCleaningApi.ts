@@ -40,7 +40,7 @@ export const useCleaningApi = {
     api.post(`/places/${placeId}/cleanings`, data),
 
   /** 당번별 청소 수정 */
-  updateCleaning: (placeId: Id, cleaningId: Id, data: UpdateCleaningPayload) =>
+  updateCleaning: (placeId: Id, cleaningId: Id, data) =>
     api.put(`/places/${placeId}/cleanings/${cleaningId}`, data),
 
   /** 청소 삭제 */

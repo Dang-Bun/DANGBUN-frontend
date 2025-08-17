@@ -20,6 +20,8 @@ import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
 import BottomSheet from './BottomSheet';
 
 import { useDutyApi } from '../../hooks/useDutyApi';
+import useCleaningApi from '../../hooks/useCleaningApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 interface CleanUpCardProps {
   title: string;
@@ -62,6 +64,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const [currentCleaning, setCurrentCleaning] = useState(0);
   const iconSrc = ICON_MAP[icon] ?? icon;
 
   const handlePlus = (cleaning: Cleaning) => {
@@ -73,6 +76,18 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 
     setOpen(true);
   };
+
+  useEffect(() => {
+    const getEffect = async () => {
+      try {
+        const res = await useMemberApi.me(placeId);
+        setCurrentCleaning(res.data.memberId);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    getEffect();
+  });
 
   useEffect(() => {
     const getEffect = async () => {
@@ -99,8 +114,8 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 
   const handleEditMember = async () => {
     try {
-      const data = { memberIds: [] as number[] };
-      const res = useDutyApi.addMember(placeId, dutyId, data); //editing!!!!!!!!!!!
+      const data = {};
+      const res = useCleaningApi.updateCleaning(placeId, currentCleaning, data);
       console.log(res);
     } catch (e) {
       console.log(e);
