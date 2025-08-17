@@ -6,6 +6,8 @@ import GreenUser from '../../assets/member/GreenUser.svg';
 import grayPlus from '../../assets/header/GrayPlus.svg';
 import DangbunList from '../../components/cleanUp/DangbunList';
 import { useMemberApi } from '../../hooks/useMemberApi';
+import useCleaningApi from '../../hooks/useCleaningApi';
+import useDutyApi from '../../hooks/useDutyApi';
 
 type MemberInfoResp = {
   member: {
@@ -26,8 +28,38 @@ const ManagerInfo: React.FC = () => {
   const [data, setData] = useState<MemberInfoResp | null>(null);
 
   // 당번 설정(기존 UI용)
-  const [dangbun, setDangbun] = useState('');
+  const [dangbun, setDangbun] = useState(['']);
   const [count, setCount] = useState(1);
+  const [myId, setMyId] = useState<number[]>([]);
+
+  useEffect(() => {
+    const effecthandle = async () => {
+      try {
+        const memberres = await useMemberApi.me(placeId);
+        const newId = memberres.data.data.memberId;
+
+        if (newId) {
+          setMyId((prev) => (prev.includes(newId) ? prev : [...prev, newId]));
+        }
+        console.log(myId);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    effecthandle();
+  });
+
+  useEffect(() => {
+    const effecthandle2 = async () => {
+      try {
+        const res = await useCleaningApi.getCleaningsDuties(placeId, myId);
+        console.log(res.data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    effecthandle2();
+  });
 
   useEffect(() => {
     if (!placeId || !memberId) return;
@@ -115,7 +147,17 @@ const ManagerInfo: React.FC = () => {
         <p className='text-xl font-normal'>당번 설정</p>
 
         {Array.from({ length: count }, (_, index) => (
-          <DangbunList key={index} onChange={(value) => setDangbun(value)} />
+          <DangbunList
+            key={index}
+            onChange={(value) =>
+              setDangbun((prev) => {
+                const copy = [...prev];
+                copy[index] = value;
+                return copy;
+              })
+            }
+            placeId={placeId}
+          />
         ))}
 
         <div className='relative'>

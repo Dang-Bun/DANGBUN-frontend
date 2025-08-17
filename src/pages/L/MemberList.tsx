@@ -51,31 +51,32 @@ const MemberList: React.FC = () => {
   return (
     <div className='pt-[52px] px-5'>
       <Header title='멤버 목록' showBackButton={true} />
-
-      {/* 새 멤버 대기 배너 */}
-      <button
-        className='cursor-pointer'
-        onClick={() => navigate('/memberconfirm')}
-      >
-        <div className='flex flex-row w-[353px] h-24 py-[21px] px-[21px] mt-[21px] mb-[21px] bg-blue-500 rounded-lg items-center justify-between'>
-          <div className='flex flex-row gap-[21px] items-center'>
-            <div className='relative flex justify-center items-center bg-white w-14 h-14 rounded-full'>
-              <img src={Envelop} alt='편지' />
-              {waitingCount > 0 && (
-                <div className='absolute top-3 right-2 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center text-center text-white font-semibold text-[8px] leading-3'>
-                  {waitingCount}
-                </div>
-              )}
+      {waitingCount !== 0 && ( // 새 멤버 대기 배너
+        <button
+          className='cursor-pointer'
+          onClick={() => navigate('/memberconfirm')}
+        >
+          <div className='flex flex-row w-[353px] h-24 py-[21px] px-[21px] mt-[21px] mb-[21px] bg-blue-500 rounded-lg items-center justify-between'>
+            <div className='flex flex-row gap-[21px] items-center'>
+              <div className='relative flex justify-center items-center bg-white w-14 h-14 rounded-full'>
+                <img src={Envelop} alt='편지' />
+                {waitingCount > 0 && (
+                  <div className='absolute top-3 right-2 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center text-center text-white font-semibold text-[8px] leading-3'>
+                    {waitingCount}
+                  </div>
+                )}
+              </div>
+              <p className='text-white text-start text-sm font-normal'>
+                <span className='text-sm font-semibold'>새로운 멤버</span>가{' '}
+                <br />
+                참여를 기다리고 있어요 !
+              </p>
             </div>
-            <p className='text-white text-start text-sm font-normal'>
-              <span className='text-sm font-semibold'>새로운 멤버</span>가{' '}
-              <br />
-              참여를 기다리고 있어요 !
-            </p>
+            <img src={whitearrow} alt='이동' />
           </div>
-          <img src={whitearrow} alt='이동' />
-        </div>
-      </button>
+        </button>
+      )}
+
       <button
         onClick={() => navigate('entercode')}
         className='w-full flex flex-row items-center justify-between bg-[#f9f9f9] rounded-lg px-4 py-3 shadow-sm cursor-pointer'
