@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import dayjs from "dayjs";
 import cameraGray from "../../assets/home/cameraGray.svg";
 import cameraDefault from "../../assets/home/cameraBlue.svg";
@@ -9,45 +9,11 @@ type Props = {
   dangbun: string;
   isChecked: boolean;
   isCamera?: boolean;
-  completedAt?: string | number | Date | null;
-  completedBy?: string;
+  completedAt?: string | Date | null;
+  completedBy?: string | null;
   onMenuClick?: () => void;
   className?: string;
 };
-
-function safeParseDate(value?: string | number | Date | null): Date | null {
-  if (!value && value !== 0) return null;
-  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === "number") {
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d;
-  }
-  if (typeof value === "string") {
-    const s = value.trim();
-    if (!s) return null;
-
-     const iso = s.includes("T") ? s : s.replace(" ", "T");
-    let d = new Date(iso);
-    if (!isNaN(d.getTime())) return d;
-
-     const m = s.match(
-      /^(\d{4})[./-](\d{1,2})[./-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
-    );
-    if (m) {
-      const [, Y, Mo, D, H = "0", Mi = "0", Se = "0"] = m;
-      d = new Date(
-        Number(Y),
-        Number(Mo) - 1,
-        Number(D),
-        Number(H),
-        Number(Mi),
-        Number(Se)
-      );
-      if (!isNaN(d.getTime())) return d;
-    }
-  }
-  return null;
-}
 
 const CalendarTaskCard: React.FC<Props> = ({
   title,
@@ -55,28 +21,16 @@ const CalendarTaskCard: React.FC<Props> = ({
   isChecked,
   isCamera = false,
   completedAt,
+  completedBy,
   onMenuClick,
   className = "",
 }) => {
-  const [localStamp, setLocalStamp] = useState<Date | null>(null);
-
-  useEffect(() => {
-    if (isChecked) {
-      if (!safeParseDate(completedAt) && !localStamp) {
-        setLocalStamp(new Date());
-      }
-    } else {
-      if (localStamp) setLocalStamp(null);
-    }
-  }, [isChecked, completedAt, localStamp]);
-
   const bg = isChecked ? "bg-[#DEDEDE]" : "bg-[#F9F9F9]";
   const bar = isChecked ? "bg-[#8E8E8E]" : "bg-[#E1E4EA]";
   const titleColor = isChecked ? "text-[#5A5D62]" : "text-[#111827]";
   const subColor = "text-[#8E8E8E]";
 
-  const finalDate = isChecked ? safeParseDate(completedAt) ?? localStamp : null;
-  const timeText = finalDate ? ` / ${dayjs(finalDate).format("H:mm")}` : "";
+  const timeText = completedAt ? ` / ${dayjs(completedAt).format("H:mm")}` : "";
 
   return (
     <div
@@ -102,6 +56,12 @@ const CalendarTaskCard: React.FC<Props> = ({
           <div className={`text-[12px] leading-[18px] ${subColor}`}>
             {dangbun}
             {timeText}
+            {completedBy && (
+              <>
+                <span className="mx-1">/</span>
+                <span>{completedBy}</span>
+              </>
+            )}
           </div>
         </div>
 

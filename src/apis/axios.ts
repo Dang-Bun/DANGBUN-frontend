@@ -9,7 +9,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const noAuthPaths = ['/users/signup/email-code', '/join', '/login'];
+    const noAuthPaths = [
+      '/users/signup/email-code',
+      '/users/signup',
+      '/users/login',
+    ];
     const url = config.url || '';
 
     if (!noAuthPaths.some((path) => url.includes(path))) {

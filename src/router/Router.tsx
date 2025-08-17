@@ -89,7 +89,7 @@ const router = createBrowserRouter([
     element: <CalendarPage />,
   },
   {
-    path: '/calendar/content',
+    path: '/calendar/:id',
     element: <CalendarDetail />,
   },
   {
@@ -113,7 +113,7 @@ const router = createBrowserRouter([
     element: <Notification />,
   },
   {
-    path: '/alarm/:id',
+    path: '/:placeId/alarm/:id',
     element: <NotificationDetail />,
   },
   {
