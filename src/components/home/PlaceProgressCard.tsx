@@ -1,6 +1,8 @@
+// src/components/home/PlaceProgressCard.tsx
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import BlueChip from './BlueChip';
+
 import buildingImg from '../../assets/placeIcon/buildingImg.svg';
 import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
 import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
@@ -11,7 +13,6 @@ import schoolImg from '../../assets/placeIcon/schoolImg.svg';
 import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
 import homeImg from '../../assets/placeIcon/homeImg.svg';
 
-type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
 type Category =
   | 'CAFE'
   | 'RESTAURANT'
@@ -22,8 +23,7 @@ type Category =
   | 'SCHOOL'
   | 'GYM'
   | 'ETC';
-
-// Category 매핑 (기존)
+  
 const categoryIcon: Record<Category, string> = {
   CAFE: cafeSmallImg,
   RESTAURANT: restaurantImg,
@@ -36,22 +36,12 @@ const categoryIcon: Record<Category, string> = {
   ETC: homeImg,
 };
 
-// PlaceIconKey 전용 매핑(특히 HOME 대응을 위해 필요)
-const placeIconMap: Record<PlaceIconKey, string> = {
-  BUILDING: buildingImg,
-  CAFE: cafeSmallImg,
-  CINEMA: cinemaImg,
-  DORMITORY: dormitoryImg,
-  GYM: gymImg,
-  HOME: homeImg,
-};
-
 interface Props {
   placeName?: string;
   placeId?: number | string;
   percent?: number;
-  iconSrc?: string;        
-  iconKey?: PlaceIconKey;  
+  iconSrc?: string;         //  직접 경로를 받을 수도 있고
+  iconKey?: Category;   //  키를 받을 수도 있음
 }
 
 const BASE_R = 70;
@@ -65,29 +55,26 @@ const PlaceProgressCard: React.FC<Props> = (props) => {
       placeId?: number | string;
       placeName?: string;
       percent?: number;
-      iconSrc?: string;
-      iconKey?: PlaceIconKey | Category; // ✅ state로 Category가 올 수도 있으니 허용
+      iconSrc?: string;         // state로도 들어올 수 있음
+      iconKey?: Category;
     };
   };
 
-  const placeName = props.placeName ?? state?.placeName ?? '플레이스';
+  const placeName = props.placeName ?? state?.placeName ?? '';
   const rawPercent = props.percent ?? state?.percent ?? 0;
-  const iconUrl = useMemo(() => {
+
+  //  최종 아이콘 "경로"만 만든다
+  const PlaceIconSrc = useMemo(() => {
     const direct = props.iconSrc ?? state?.iconSrc;
-    if (direct) return direct;
-
+    if (direct) return direct;                               // 우선순위 1: 직접 경로
     const key = props.iconKey ?? state?.iconKey;
-    if (!key) return '';   // 없으면 빈 문자열 반환
+    return key ? categoryIcon[key] : undefined;            // 우선순위 2: 키 → 경로 매핑
+  }, [props.iconSrc, state?.iconSrc, props.iconKey, state?.iconKey]);
 
-    if ((categoryIcon as Record<string, string>)[key]) {
-      return (categoryIcon as Record<string, string>)[key];
-    }
-    return '';             // 매핑 실패 시에도 빈 문자열
-    }, [props.iconSrc, state?.iconSrc, props.iconKey, state?.iconKey]);
-    const percent = useMemo(() => {
-      const n = Math.round(Number(rawPercent));
-      return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
-    }, [rawPercent]);
+  const percent = useMemo(() => {
+    const n = Math.round(Number(rawPercent));
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  }, [rawPercent]);
 
   const done = percent === 100;
 
@@ -98,40 +85,24 @@ const PlaceProgressCard: React.FC<Props> = (props) => {
   return (
     <section className="w-[353px] h-fit rounded-[12px] bg-[#81A9FF] p-3 flex flex-col gap-2">
       <div className="w-full flex items-center justify-between">
-        <BlueChip title={placeName} />
-        <div
-          className={`h-[28px] px-3 rounded-[21px] text-[14px] font-semibold leading-[28px] ${
-            done ? 'bg-[#EBFFF6] text-[#22C55E]' : 'bg-[#E0EAFF] text-[#4D83FD]'
-          }`}
-        >
+        <BlueChip title={placeName || ' '} />
+        <div className={`h-[28px] px-3 rounded-[21px] text-[14px] font-semibold leading-[28px] ${done ? 'bg-[#EBFFF6] text-[#22C55E]' : 'bg-[#E0EAFF] text-[#4D83FD]'}`}>
           {done ? '진행완료' : '진행중'}
         </div>
       </div>
-
       <div className="flex flex-col gap-3">
         <div className="flex-1 w-full flex items-center justify-center relative">
           <svg width={SIZE} height={SIZE}>
             <circle cx={c} cy={c} r={BASE_R} fill="#FFFFFF" />
             <g transform={`rotate(-90 ${c} ${c})`}>
               <circle cx={c} cy={c} r={TRACK_R} fill="none" stroke="#E0EAFF" strokeWidth={STROKE} strokeLinecap="round" />
-              <circle
-                cx={c}
-                cy={c}
-                r={TRACK_R}
-                fill="none"
-                stroke="#4D83FD"
-                strokeWidth={STROKE}
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
-                style={{ transition: 'stroke-dashoffset 0.3s ease' }}
-              />
+              <circle cx={c} cy={c} r={TRACK_R} fill="none" stroke="#4D83FD" strokeWidth={STROKE} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} style={{ transition: 'stroke-dashoffset 0.3s ease' }} />
             </g>
           </svg>
 
-          {iconUrl && (
+          {PlaceIconSrc && (
             <img
-              src={iconUrl}
+              src={PlaceIconSrc}
               alt="place icon"
               className="absolute z-10 object-contain select-none pointer-events-none"
               style={{ width: 70, height: 70, left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}

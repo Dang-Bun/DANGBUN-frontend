@@ -12,8 +12,6 @@ import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
 import homeImg from '../../assets/placeIcon/homeImg.svg';
 
 
-type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
-
 type Category =
   | 'CAFE'
   | 'RESTAURANT'
