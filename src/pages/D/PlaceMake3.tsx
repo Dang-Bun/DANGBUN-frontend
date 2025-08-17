@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import GradRollCard from '../../components/place/GradRollCard';
@@ -123,7 +122,10 @@ const PlaceMake3 = () => {
         placeholder=''
       />
 
-      <CTAButton style={{ position: 'fixed', bottom: '42px' }}>
+      <CTAButton
+        style={{ position: 'fixed', bottom: '42px' }}
+        onClick={() => navigate('/myplace')}
+      >
         플레이스로 이동
       </CTAButton>
     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import arrowBack from '../assets/nav/arrowBack.svg';
+import left_chevron from '../assets/chevron/left_chevronImg.svg';
 
 interface HeaderProps {
   title: string;
@@ -23,29 +23,30 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center ">
+    <header className='fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center'>
+      <div className='relative w-full max-w-[393px] h-full flex items-center justify-center mx-auto'>
+        {showBackButton && (
+          <button
+            onClick={handleBack}
+            className='absolute left-4 cursor-pointer'
+            aria-label='뒤로가기'
+          >
+            <img src={left_chevron} alt='뒤로가기' />
+          </button>
+        )}
 
-      {showBackButton && (
-        <button
-          onClick={handleBack}
-          className="absolute left-4"
-          aria-label="뒤로가기"
-        >
-          <img src={arrowBack} alt="뒤로가기" className="w-5 h-5" />
-        </button>
-      )}
+        <span className='text-[18px] font-semibold text-black'>{title}</span>
 
-      <span className="text-[18px] font-semibold text-black">{title}</span>
-
-      {rightElement && (
-        <button
-          onClick={onRightClick}
-          className="absolute right-4 w-[36px] h-[36px]"
-          aria-label="오른쪽 아이콘"
-        >
-          {rightElement}
-        </button>
-      )}
+        {rightElement && (
+          <button
+            onClick={onRightClick}
+            className='absolute right-4 w-[36px] h-[36px]'
+            aria-label='오른쪽 아이콘'
+          >
+            {rightElement}
+          </button>
+        )}
+      </div>
     </header>
   );
 };

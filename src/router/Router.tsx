@@ -36,6 +36,7 @@ import CleanInfo from '../pages/K/CleanInfo';
 import ManagerInfo from '../pages/L/ManagerInfo';
 import MemberConfirm from '../pages/L/MemberConfirm';
 import MemberList from '../pages/L/MemberList';
+import EnterCode from '../pages/L/EnterCode';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
@@ -222,6 +223,10 @@ const router = createBrowserRouter([
   {
     path: '/managerinfo',
     element: <ManagerInfo />,
+  },
+  {
+    path: '/memberlist/entercode',
+    element: <EnterCode />,
   },
 ]);
 
