@@ -10,6 +10,8 @@ export const usePlaceApi = {
   }) => api.post('/places', data),
   makeInviteCode: (placeId: number) =>
     api.post(`/places/${placeId}/invite-code`),
+  //참여코드 조회
+  getInviteCode: (placeId: number) => api.get(`/places/${placeId}/invite-code`),
   joinRequest: (data: {
     inviteCode: string;
     name: string;
