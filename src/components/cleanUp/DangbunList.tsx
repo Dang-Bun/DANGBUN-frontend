@@ -43,13 +43,13 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
       try {
         const res = await useDutyApi.list(placeId);
         console.log(res.data);
-        // const list = Array.isArray(res?.data?.data)
-        //   ? res.data.data.map((d: any) => ({
-        //       name: d.clname,
-        //       icon: d.icon,
-        //     }))
-        //   : [];
-        //setdangbunList(list);
+        const list = Array.isArray(res?.data?.data)
+          ? res.data.data.map((d: any) => ({
+              name: d.clname,
+              icon: d.icon,
+            }))
+          : [];
+        setdangbunList(list);
       } catch (e) {
         console.error(e);
         setdangbunList([]);
