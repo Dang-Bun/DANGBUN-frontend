@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import UserIcon from '../../assets/member/UserIcon.svg';
 import GreenUser from '../../assets/member/GreenUser.svg';
@@ -7,7 +7,6 @@ import grayPlus from '../../assets/header/GrayPlus.svg';
 import DangbunList from '../../components/cleanUp/DangbunList';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import useCleaningApi from '../../hooks/useCleaningApi';
-import useDutyApi from '../../hooks/useDutyApi';
 
 type MemberInfoResp = {
   member: {
@@ -144,7 +143,7 @@ const ManagerInfo: React.FC = () => {
 
       {/* 기존: 당번 설정 UI 유지 */}
       <div className='w-full max-w-[353px] flex flex-col gap-3'>
-        <p className='text-xl font-normal'>당번 설정</p>
+        <p className='text-xl font-normal'>당번 지정</p>
 
         {Array.from({ length: count }, (_, index) => (
           <DangbunList
