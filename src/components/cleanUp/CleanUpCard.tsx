@@ -64,7 +64,13 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   const [inputValue, setInputValue] = useState('');
   const iconSrc = ICON_MAP[icon] ?? icon;
 
-  const handlePlus = () => {
+  const handlePlus = (cleaning: Cleaning) => {
+    const combined = Array.from(
+      new Set([...filteredMembers, ...cleaning.displayedNames])
+    );
+    setFilteredMembers(combined);
+    console.log(combined);
+
     setOpen(true);
   };
 
@@ -87,12 +93,25 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       }
     };
     getEffect();
-  }, [dutyId]);
+  }, []);
+
+  useEffect(() => {}, [filteredMembers]);
+
+  const handleEditMember = async () => {
+    try {
+      const data = { memberIds: [] as number[] };
+      const res = useDutyApi.addMember(placeId, dutyId, data); //editing!!!!!!!!!!!
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <div className='flex flex-col gap-4'>
       <button
         className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
-        onClick={() => setSpecOpen(!open)}
+        onClick={() => setSpecOpen(!specOpen)}
       >
         <div className='flex flex-row items-center gap-1'>
           <img src={iconSrc} alt='icon' className='w-9 h-9' />
@@ -109,65 +128,63 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       {specOpen ? (
         <div className='flex flex-col gap-3'>
           {cleaningList.map((cleaning) => (
-            <div
-              key={cleaning.cleaningId}
-              className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'
-            >
-              <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
-              <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
-                <div className='flex flex-col justify-center items-start gap-3'>
-                  <p className='text-black text-base font-normal leading-snug'>
-                    {cleaning.cleaningName}
-                  </p>
-                  <div className='flex flex-row gap-1 items-center'>
-                    {cleaning.displayedNames.length === 0 ? (
-                      <div className='flex h-5 px-2 bg-neutral-100 rounded-[300px] justify-center items-center'>
-                        <p className='text-neutral-400 text-xs font-normal'>
-                          담당 선택
+            <div key={cleaning.cleaningId}>
+              <div className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'>
+                <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg'></div>
+                <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
+                  <div className='flex flex-col justify-center items-start gap-3'>
+                    <p className='text-black text-base font-normal leading-snug'>
+                      {cleaning.cleaningName}
+                    </p>
+                    <div className='flex flex-row gap-1 items-center'>
+                      {cleaning.displayedNames.length === 0 ? (
+                        <div className='flex h-5 px-2 bg-neutral-100 rounded-[300px] justify-center items-center'>
+                          <p className='text-neutral-400 text-xs font-normal'>
+                            담당 선택
+                          </p>
+                        </div>
+                      ) : cleaning.displayedNames.length > 1 ? (
+                        <div className='flex h-5 px-2 bg-[#EBFFF6] rounded-[300px] justify-center items-center'>
+                          <p className='text-[#00DC7B] text-xs font-normal'>
+                            멤버 {cleaning.displayedNames.length}명
+                          </p>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+                      {cleaning.displayedNames.length === 0 ? (
+                        <></>
+                      ) : cleaning.displayedNames.length === 1 ? (
+                        <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                          {cleaning.displayedNames[0]}
                         </p>
-                      </div>
-                    ) : cleaning.displayedNames.length > 1 ? (
-                      <div className='flex h-5 px-2 bg-[#EBFFF6] rounded-[300px] justify-center items-center'>
-                        <p className='text-[#00DC7B] text-xs font-normal'>
-                          멤버 {cleaning.displayedNames.length}명
+                      ) : cleaning.displayedNames.length === 2 ? (
+                        <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                          {cleaning.displayedNames[0]},{' '}
+                          {cleaning.displayedNames[1]}
                         </p>
-                      </div>
-                    ) : (
-                      <></>
-                    )}
-                    {cleaning.displayedNames.length === 0 ? (
-                      <></>
-                    ) : cleaning.displayedNames.length === 1 ? (
-                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
-                        {cleaning.displayedNames[0]}
-                      </p>
-                    ) : cleaning.displayedNames.length === 2 ? (
-                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
-                        {cleaning.displayedNames[0]},{' '}
-                        {cleaning.displayedNames[1]}
-                      </p>
-                    ) : (
-                      <p className='text-neutral-400 text-xs font-normal leading-tight'>
-                        {cleaning.displayedNames[0]},{' '}
-                        {cleaning.displayedNames[1]} 등
-                      </p>
-                    )}
+                      ) : (
+                        <p className='text-neutral-400 text-xs font-normal leading-tight'>
+                          {cleaning.displayedNames[0]},{' '}
+                          {cleaning.displayedNames[1]} 등
+                        </p>
+                      )}
 
-                    <button
-                      className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
-                      onClick={handlePlus}
-                    >
-                      <img
-                        src={plus}
-                        alt='추가하기'
-                        className='cursor-pointer'
-                      />
-                    </button>
+                      <button
+                        className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
+                        onClick={() => handlePlus(cleaning)}
+                      >
+                        <img
+                          src={plus}
+                          alt='추가하기'
+                          className='cursor-pointer'
+                        />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </div>{' '}
               </div>{' '}
               <img src={line} alt='line' className='w-[352px]' />{' '}
-              {/*여기 맞는지 확인 */}
             </div>
           ))}{' '}
         </div>
@@ -180,6 +197,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
         onClose={() => {
           setOpen(false);
           setFilteredMembers(clickedMembers);
+          handleEditMember();
         }}
       >
         <div className='w-[353px] h-[348px]'>
