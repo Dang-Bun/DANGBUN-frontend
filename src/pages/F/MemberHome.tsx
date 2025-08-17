@@ -12,11 +12,54 @@ import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
-import sweepIcon from '../../assets/cleanIcon/sweepImg_1.svg';
+
+ 
+import BUILDING_IMG from '../../assets/placeIcon/buildingImg.svg';
+import CINEMA_IMG from '../../assets/placeIcon/cinemaImg.svg';
+import DORMITORY_IMG from '../../assets/placeIcon/dormitoryImg.svg';
+import GYM_IMG from '../../assets/placeIcon/gymImg.svg';
+import OFFICE_IMG from '../../assets/placeIcon/officeImg.svg';
+import RESTAURANT_IMG from '../../assets/placeIcon/restaurantImg.svg';
+import SCHOOL_IMG from '../../assets/placeIcon/schoolImg.svg';
+import CAFE_IMG from '../../assets/placeIcon/cafeSmallImg.svg';
+import HOME_IMG from '../../assets/placeIcon/homeImg.svg';
+ 
+import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import BRUSH_PINK from '../../assets/cleanIcon/moppingImg_3.svg';
+import DISH_BLUE from '../../assets/cleanIcon/polishImg.svg';
+import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
+import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
+import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 
 import useDutyApi from '../../hooks/useDutyApi';
 import {useMemberApi} from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+
+ 
+const CATEGORY_ICON_SRC: Record<string, string> = {
+  CAFE: CAFE_IMG,
+  RESTAURANT: RESTAURANT_IMG,
+  THEATER: CINEMA_IMG,
+  DORMITORY: DORMITORY_IMG,
+  BUILDING: BUILDING_IMG,
+  OFFICE: OFFICE_IMG,
+  SCHOOL: SCHOOL_IMG,
+  GYM: GYM_IMG,
+  ETC: HOME_IMG,
+};
+ 
+const DUTY_ICON_SRC: Record<string, string> = {
+  FLOOR_BLUE: FLOOR_BLUE,
+  CLEANER_PINK: CLEANER_PINK,
+  BUCKET_PINK: BUCKET_PINK,
+  TOILET_PINK: TOILET_PINK,
+  TRASH_BLUE: TRASH_BLUE,
+  DISH_BLUE: DISH_BLUE,
+  BRUSH_PINK: BRUSH_PINK,
+  SPRAY_BLUE: SPRAY_BLUE,
+};
 
 const arr = (x: any): any[] =>
   Array.isArray(x) ? x
@@ -56,6 +99,7 @@ const MemberHome: React.FC = () => {
 
   /* 컨텍스트 */
   const pid = Number(placeId ?? localStorage.getItem('placeId') ?? 0);
+  const placeIconKey = (useLocation().state as any)?.placeIcon ?? localStorage.getItem('placeIcon');
   useEffect(() => { if (placeId) localStorage.setItem('placeId', String(placeId)); }, [placeId]);
 
   /* 상태 */
@@ -73,6 +117,7 @@ const MemberHome: React.FC = () => {
 
   /* ---------------------- 데이터 로드 ---------------------- */
   useEffect(() => {
+    let mounted = true;
     (async () => {
       setLoading(true);
       try {
@@ -90,10 +135,10 @@ const MemberHome: React.FC = () => {
         // 3) 당번별 태스크
         const result: DutyUI[] = [];
         for (const d of dutyList) {
-        const dutyId = (typeof d?.dutyId === 'number' ? d.dutyId : d?.id) as number;
-        if (!dutyId) continue;
-        const info = await useDutyApi.getCleaningInfo(pid, dutyId);
-        const raw: any[] = Array.isArray(info?.data?.tasks) ? info.data.tasks : arr(info?.data);
+          const dutyId = (typeof d?.dutyId === 'number' ? d.dutyId : d?.id) as number;
+          if (!dutyId) continue;
+          const info = await useDutyApi.getCleaningInfo(pid, dutyId);
+          const raw: any[] = Array.isArray(info?.data?.tasks) ? info.data.tasks : arr(info?.data);
 
           const tasks: TaskUI[] = raw.map((t) => {
             const members = (t.members ?? t.assignees ?? []).map((m: any) => m?.name ?? m);
@@ -119,28 +164,39 @@ const MemberHome: React.FC = () => {
 
           result.push({ id: d.dutyId, name: d.dutyName, iconKey, tasks });
         }
-
-        setDuties(result);
+        
+        if (mounted) setDuties(result);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+    return () => { mounted = false; };
   }, [pid]);
 
   /* ---------------------- 파생 값 ---------------------- */
   const allTasks = useMemo(() => duties.flatMap(d => d.tasks), [duties]);
+  const myTasks = useMemo(() => allTasks.filter(t => t.mine), [allTasks]);
 
   // 페이지(0=내 작업 전체, 1..=당번별)
   const page = useMemo(() => {
     const base = activePage === 0
-      ? allTasks.filter(t => t.mine)
+      ? myTasks
       : (duties[activePage - 1]?.tasks ?? []);
+    
     const total = base.length;
     const done = base.filter(t => t.isChecked).length;
     const percent = total ? Math.round((done / total) * 100) : 0;
     const name = activePage === 0 ? '내 체크리스트' : (duties[activePage - 1]?.name ?? '');
-    return { name, percent, tasks: base };
-  }, [activePage, allTasks, duties]);
+    
+    const iconKeyForProgressBar = activePage === 0
+        ? placeIconKey
+        : (duties[activePage - 1]?.iconKey as string);
+    const icon = activePage === 0
+        ? (CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG)
+        : (DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG);
+        
+    return { name, percent, tasks: base, icon };
+  }, [activePage, myTasks, duties, placeIconKey]);
 
   const totalPages = duties.length + 1;
 
@@ -237,8 +293,8 @@ const MemberHome: React.FC = () => {
             </div>
           </div>
           <div className="mt-[66px] mb-[18px]">
-            <ProgressBar percentage={page.percent} iconSrc={sweepIcon} title={page.name}
-                         dotCount={totalPages} dotIndex={activePage} onDotSelect={setActivePage} />
+            <ProgressBar percentage={page.percent} iconSrc={page.icon} title={page.name}
+                          dotCount={totalPages} dotIndex={activePage} onDotSelect={setActivePage} />
           </div>
         </div>
       </div>
