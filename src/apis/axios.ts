@@ -9,9 +9,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const noAuthPaths = ['/users/signup/email-code', '/join', '/login'];
+    const url = config.url || '';
+
+    if (!noAuthPaths.some((path) => url.includes(path))) {
+      const token = localStorage.getItem('accessToken');
+      if (token && config.headers) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
     return config;
   },

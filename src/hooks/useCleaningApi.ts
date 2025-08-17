@@ -6,8 +6,8 @@ type Id = number;
 // (백엔드 스키마에 맞춰 필드명만 맞추면 됩니다. needPhto -> needPhoto 로 교정)
 export type CreateCleaningPayload = {
   cleaningName: string;
-  dutyId: number; // 어떤 당번에 속하는 청소인지
-  members: number[]; // 참여 멤버 id 배열 (필요 시)
+  dutyName: string; // 어떤 당번에 속하는 청소인지
+  members: string[]; // 참여 멤버 id 배열 (필요 시)
   needPhoto: boolean; // 사진 필요 여부
   repeatType: 'NONE' | 'WEEKLY' | 'MONTHLY' | string;
   repeatDays?: string[]; // 반복 요일 등
@@ -36,7 +36,7 @@ export const useCleaningApi = {
     }),
 
   /** 당번별 청소 생성 */
-  createCleaning: (placeId: Id, data: CreateCleaningPayload) =>
+  createCleaning: (placeId: Id, data) =>
     api.post(`/places/${placeId}/cleanings`, data),
 
   /** 당번별 청소 수정 */

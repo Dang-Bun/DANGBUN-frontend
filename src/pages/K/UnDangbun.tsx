@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HeaderBar from '../../components/HeaderBar';
 import cleanUpImg from '../../assets/cleanUpList/cleanUp.svg';
-import CleanUpCard from '../../components/cleanUp/CleanUpCard';
 import BottomBar from '../../components/BottomBar';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useCleaningApi from '../../hooks/useCleaningApi';
@@ -14,17 +13,25 @@ const UnDangbun = () => {
 
   useEffect(() => {
     if (placeId == null) return;
-    console.log(placeId.placeId);
     const fetchunassigned = async () => {
       try {
-        const res = await useCleaningApi.cleaningUnAssigned(placeId.placeId);
-        setUndangbunList(res.data?.cleaningName ?? []);
+        const res = await useCleaningApi.getUnassignedCleanings(
+          placeId.placeId
+        );
+        const list = res.data.data;
+        const names = Array.isArray(list)
+          ? list.map(
+              (item: { cleaningId: number; cleaningName: string }) =>
+                item.cleaningName
+            )
+          : [];
+        setUndangbunList(names);
       } catch (e) {
         console.error(e);
       }
     };
     fetchunassigned();
-  }, [placeId]);
+  }, []);
 
   return (
     <div>
@@ -49,10 +56,12 @@ const UnDangbun = () => {
               key={index}
               className='flex flex-row cursor-pointer'
               onClick={() => {
-                navigate('/cleanedit', { state: { name: name } });
+                navigate('/cleanedit', {
+                  state: { name: name, placeId: placeId.placeId },
+                });
               }}
             >
-              <div className='w-[9px] h-[52px] bg-zinc-200 rounded-tl-lg rounded-bl-lg' />
+              <div className='w-[9px] h-[52px] bg-zinc-200 rounded-tl-lg rounded-bl-lg'></div>
               <div className='flex flex-col w-[344px] h-[52px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
                 <div className='flex flex-col justify-center items-start gap-1.5'>
                   <p className='text-black text-base font-normal leading-snug'>
