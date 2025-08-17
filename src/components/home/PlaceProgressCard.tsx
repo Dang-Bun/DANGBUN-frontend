@@ -1,22 +1,40 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import BlueChip from './BlueChip';
-import BUILDING from '../../assets/placeIcon/buildingImg.svg';
-import CAFE from '../../assets/placeIcon/cafeSmallImg.svg';
-import CINEMA from '../../assets/placeIcon/cinemaImg.svg';
-import DORMITORY from '../../assets/placeIcon/dormitoryImg.svg';
-import GYM from '../../assets/placeIcon/gymImg.svg';
-import HOME from '../../assets/placeIcon/homeImg.svg';
+import buildingImg from '../../assets/placeIcon/buildingImg.svg';
+import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
+import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
+import gymImg from '../../assets/placeIcon/gymImg.svg';
+import officeImg from '../../assets/placeIcon/officeImg.svg';
+import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
+import schoolImg from '../../assets/placeIcon/schoolImg.svg';
+import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
+import homeImg from '../../assets/placeIcon/homeImg.svg';
+
 
 type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
 
-const PLACE_ICON_URL: Record<PlaceIconKey, string> = {
-  BUILDING,
-  CAFE,
-  CINEMA,
-  DORMITORY,
-  GYM,
-  HOME,
+type Category =
+  | 'CAFE'
+  | 'RESTAURANT'
+  | 'THEATER'
+  | 'DORMITORY'
+  | 'BUILDING'
+  | 'OFFICE'
+  | 'SCHOOL'
+  | 'GYM'
+  | 'ETC';
+  
+const categoryIcon: Record<Category, string> = {
+  CAFE: cafeSmallImg,
+  RESTAURANT: restaurantImg,
+  THEATER: cinemaImg,
+  DORMITORY: dormitoryImg,
+  BUILDING: buildingImg,
+  OFFICE: officeImg,
+  SCHOOL: schoolImg,
+  GYM: gymImg,
+  ETC: homeImg,
 };
 
 interface Props {

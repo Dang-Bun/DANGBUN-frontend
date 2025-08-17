@@ -1,10 +1,45 @@
 import React from "react";
 import dotActive from '../../assets/home/dotIndicatorBlue.svg';
 import dotDefault from '../../assets/home/dotIndicator.svg';
+import buildingImg from '../../assets/placeIcon/buildingImg.svg';
+import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
+import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
+import gymImg from '../../assets/placeIcon/gymImg.svg';
+import officeImg from '../../assets/placeIcon/officeImg.svg';
+import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
+import schoolImg from '../../assets/placeIcon/schoolImg.svg';
+import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
+import homeImg from '../../assets/placeIcon/homeImg.svg';
+
+
+type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
+
+type Category =
+  | 'CAFE'
+  | 'RESTAURANT'
+  | 'THEATER'
+  | 'DORMITORY'
+  | 'BUILDING'
+  | 'OFFICE'
+  | 'SCHOOL'
+  | 'GYM'
+  | 'ETC';
+  
+const categoryIcon: Record<Category, string> = {
+  CAFE: cafeSmallImg,
+  RESTAURANT: restaurantImg,
+  THEATER: cinemaImg,
+  DORMITORY: dormitoryImg,
+  BUILDING: buildingImg,
+  OFFICE: officeImg,
+  SCHOOL: schoolImg,
+  GYM: gymImg,
+  ETC: homeImg,
+};
 
 interface ProgressBarProps {
   percentage: number;
-  iconSrc: string;
+  iconSrc: string;     
   title: string;
   onCenterClick?: () => void;
   dotCount?: number;
