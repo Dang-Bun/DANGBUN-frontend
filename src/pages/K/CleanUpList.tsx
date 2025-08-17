@@ -30,7 +30,6 @@ const CleanUpList = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [clean, setClean] = useState<string[]>(['바닥 쓸기', '재고 채우기']); //여기에다가 당번을 띄우고 당번을 누르면 청소목록을출력해야함.
   const [dangbunList, setDangbunList] = useState<DutyItem[]>([]);
   const [members, setMembers] = useState<string[]>([]);
 
@@ -54,9 +53,10 @@ const CleanUpList = () => {
   useEffect(() => {
     const geteffect = async () => {
       try {
+        console.log(location.state);
         const [dutyres, memberRes] = await Promise.all([
           useDutyApi.list(placeId),
-          useMemberApi.list(placeId, ''),
+          useMemberApi.list(placeId),
         ]);
         console.log('dutylist: ', dutyres.data);
         console.log('memberlist: ', memberRes.data);

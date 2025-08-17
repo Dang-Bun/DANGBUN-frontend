@@ -22,10 +22,19 @@ import arrowBack from '../../assets/nav/arrowBack.svg';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import useCleaningApi from '../../hooks/useCleaningApi';
 
+const DAILY_MAP: Record<string, string> = {
+  매일: 'DAILY',
+  '매주 요일마다': 'WEEKLY',
+  '매달 첫 날': 'MONTHLY_FIRST',
+  '매달 마지막 날': 'MONTHLY_LAST',
+  '': 'NONE',
+};
+
 const CleanAdd = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const { placeId } = useLocation();
+  const location = useLocation();
+  const placeId = (location.state as { placeId?: number })?.placeId;
 
   //switch
   const [checked1, setChecked1] = useState(false);
@@ -137,7 +146,7 @@ const CleanAdd = () => {
     if (!placeId) return;
     const run = async () => {
       try {
-        const res = await useMemberApi.list(placeId, '');
+        const res = await useMemberApi.list(placeId);
         const memberspay = res?.data?.data?.members ?? [];
         const names = Array.isArray(memberspay)
           ? memberspay
@@ -161,21 +170,43 @@ const CleanAdd = () => {
     }
   };
 
-  const handleNext = async () => {
+  const handleUnassignedChange = async () => {
     try {
       const data = {
         cleaningName: name,
-        dutyName: dangbun || '당번 미지정',
-        members: clickedMembers,
         needPhoto: checked1,
-        repeatType: selectedCycle,
+        repeatType: DAILY_MAP[selectedCycle],
         repeatDays: selectedDays,
         detailDates: selectedDates.map((date) =>
           dayjs(date).format('YYYY-MM-DD')
         ),
       };
-      const res = await useCleaningApi.makeCleaning(placeId, data);
+      console.log(data);
+      const res = await useCleaningApi.createCleaning(Number(placeId), data);
       console.log(res.data.data);
+      navigate('/cleanuplist', { state: { data: { placeId } } });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleMake = async () => {
+    try {
+      const data = {
+        cleaningName: name,
+        dutyName: dangbun,
+        members: filteredMembers,
+        needPhoto: checked1,
+        repeatType: DAILY_MAP[selectedCycle],
+        repeatDays: selectedDays,
+        detailDates: selectedDates.map((date) =>
+          dayjs(date).format('YYYY-MM-DD')
+        ),
+      };
+      console.log(data);
+      const res = await useCleaningApi.createCleaning(Number(placeId), data);
+      console.log(res.data.data);
+      navigate('/cleanuplist', { state: { data: { placeId } } });
     } catch (e) {
       console.error(e);
     }
@@ -480,7 +511,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => handleNext()}
+        onSecondClick={() => handleUnassignedChange()}
       />
 
       <PopUpCard
@@ -488,12 +519,12 @@ const CleanAdd = () => {
         onRequestClose={() => setIsModalOpen2(false)}
         title={
           <>
-            <span className='font-normal text-center'>
+            <p className='font-normal text-center'>
               이대로 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
               <span className='text-blue-500'>생성</span>할까요?
               <br />
-            </span>
+            </p>
           </>
         }
         descript={<>이후에도 내용 수정이 가능합니다.</>}
@@ -502,7 +533,7 @@ const CleanAdd = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen2(false)}
-        onSecondClick={() => {}}
+        onSecondClick={handleMake}
       />
 
       <PopUpCard

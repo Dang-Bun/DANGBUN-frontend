@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+import '../../styles/CalendarOverride.css';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
 import GrayPlus from '../../assets/header/GrayPlus.svg';
 import ReactSwitch from 'react-switch';
-import '../../styles/CalendarOverride.css';
 import DangbunList from '../../components/cleanUp/DangbunList';
 
 import BlackDown from '../../assets/cleanUpList/BlackDown.svg';
@@ -19,9 +19,25 @@ import CTAButton from '../../components/button/CTAButton';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 import arrowBack from '../../assets/nav/arrowBack.svg';
 
+import { useMemberApi } from '../../hooks/useMemberApi';
+import useCleaningApi from '../../hooks/useCleaningApi';
+
+const DAILY_MAP: Record<string, string> = {
+  매일: 'DAILY',
+  '매주 요일마다': 'WEEKLY',
+  '매달 첫 날': 'MONTHLY_FIRST',
+  '매달 마지막 날': 'MONTHLY_LAST',
+  '': 'NONE',
+};
+
 const CleanEdit = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const { name: named = '', placeId } = (location.state ?? {}) as {
+    name?: string;
+    placeId?: number;
+  };
 
   //switch
   const [checked1, setChecked1] = useState(false);
@@ -31,6 +47,7 @@ const CleanEdit = () => {
   };
   const cleanChange = (nextChecked: boolean) => {
     setChecked2(nextChecked);
+    setSelectedCycle('');
   };
 
   //radio
@@ -69,25 +86,47 @@ const CleanEdit = () => {
   //radio~calendar
 
   useEffect(() => {
-    const year = selectedMonth.getFullYear();
-    const month = selectedMonth.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const start = dayjs().startOf('day');
+    const end = dayjs().add(5, 'month').endOf('month');
+
+    setName(named);
+
     if (selectedCycle === '매일') {
-      const dates = Array.from(
-        { length: daysInMonth },
-        (_, i) => new Date(year, month, i + 1)
-      );
+      const dates: Date[] = [];
+      let cur = start.clone();
+      while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+        dates.push(cur.toDate());
+        cur = cur.add(1, 'day');
+      }
       setSelectedDates(dates);
     } else if (selectedCycle === '매주 요일마다') {
-      const dates = Array.from({ length: daysInMonth }, (_, i) => {
-        const date = new Date(year, month, i + 1);
-        return selectedDays.includes(getDayName(date.getDay())) ? date : null;
-      }).filter((d): d is Date => d !== null);
+      const dates: Date[] = [];
+      let cur = start.clone();
+      while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+        if (selectedDays.includes(getDayName(cur.day()))) {
+          dates.push(cur.toDate());
+        }
+        cur = cur.add(1, 'day');
+      }
       setSelectedDates(dates);
     } else if (selectedCycle === '매달 첫 날') {
-      setSelectedDates([new Date(year, month, 1)]);
+      const dates: Date[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = dayjs().add(i, 'month').startOf('month');
+        if (d.isBefore(start, 'day')) continue;
+        dates.push(d.toDate());
+      }
+      setSelectedDates(dates);
     } else if (selectedCycle === '매달 마지막 날') {
-      setSelectedDates([new Date(year, month, daysInMonth)]);
+      const dates: Date[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = dayjs().add(i, 'month').endOf('month');
+        if (d.isBefore(start, 'day')) continue;
+        dates.push(d.toDate());
+      }
+      setSelectedDates(dates);
+    } else {
+      setSelectedDates([]);
     }
     function getDayName(dayNumber: number): string {
       return ['일', '월', '화', '수', '목', '금', '토'][dayNumber];
@@ -102,25 +141,80 @@ const CleanEdit = () => {
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [search, setSearch] = useState('');
-  const [members, setMembers] = useState<string[]>([
-    '박완',
-    '전예영',
-    '박한나',
-    '김도현',
-    '백상희',
-    '최준서',
-  ]);
+  const [members, setMembers] = useState<string[]>([]);
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
 
+  useEffect(() => {
+    if (!placeId) return;
+    const run = async () => {
+      try {
+        const res = await useMemberApi.list(placeId);
+        const memberspay = res?.data?.data?.members ?? [];
+        const names = Array.isArray(memberspay)
+          ? memberspay
+              .map((m: any) => m?.name)
+              .filter((v: any) => typeof v === 'string')
+          : [];
+        setMembers(names);
+      } catch (e) {
+        console.error(e);
+        setMembers([]);
+      }
+    };
+    run();
+  }, [placeId, useMemberApi]);
+
   const confirmHandle = () => {
-    setIsModalOpen2(true);
+    if (dangbun.length === 0) {
+      setIsModalOpen1(true);
+    } else {
+      setIsModalOpen2(true);
+    }
   };
 
-  const deleteHandle = () => {
-    setIsModalOpen1(true);
+  const handleUnassignedChange = async () => {
+    try {
+      const data = {
+        cleaningName: name,
+        needPhoto: checked1,
+        repeatType: DAILY_MAP[selectedCycle],
+        repeatDays: selectedDays,
+        detailDates: selectedDates.map((date) =>
+          dayjs(date).format('YYYY-MM-DD')
+        ),
+      };
+      console.log(data);
+      const res = await useCleaningApi.createCleaning(Number(placeId), data);
+      console.log(res.data.data);
+      navigate('/cleanuplist', { state: { data: { placeId } } });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleMake = async () => {
+    try {
+      const data = {
+        cleaningName: name,
+        dutyName: dangbun,
+        members: filteredMembers,
+        needPhoto: checked1,
+        repeatType: DAILY_MAP[selectedCycle],
+        repeatDays: selectedDays,
+        detailDates: selectedDates.map((date) =>
+          dayjs(date).format('YYYY-MM-DD')
+        ),
+      };
+      console.log(data);
+      const res = await useCleaningApi.createCleaning(Number(placeId), data);
+      console.log(res.data.data);
+      navigate('/cleanuplist', { state: { data: { placeId } } });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -186,16 +280,19 @@ const CleanEdit = () => {
                   value={option}
                   checked={selectedCycle === option}
                   onChange={() => setSelectedCycle(option)}
+                  disabled={checked2}
                   className='hidden'
                 />
                 <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 cursor-pointer ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-5 ${checked2 ? 'cursor-default' : 'cursor-pointer'}  ${selectedCycle === option ? 'border-gray-300' : 'border-gray-300'} `}
                 >
                   {selectedCycle === option && (
                     <span className='flex items-center justify-center  w-3.5 h-3.5 bg-blue-500 rounded-full' />
                   )}
                 </span>
-                <span className='flex text-zinc-600 text-base font-normal leading-snug text-center justify-center items-center'>
+                <span
+                  className={`flex ${checked2 ? 'text-neutral-200' : 'text-zinc-600'} text-base font-normal leading-snug text-center justify-center items-center`}
+                >
                   {option}
                 </span>
               </label>
@@ -291,7 +388,10 @@ const CleanEdit = () => {
       </div>
       <div className='flex flex-col gap-3'>
         <p className='text-lg font-normal leading-relaxed'>당번 지정</p>
-        <DangbunList onChange={(value) => setDangbun(value)} />
+        <DangbunList
+          placeId={placeId}
+          onChange={(value) => setDangbun(value)}
+        />
       </div>
       <div
         className={`flex flex-col gap-3 ${dangbun.length === 0 ? 'hidden' : ''}`}
@@ -401,12 +501,13 @@ const CleanEdit = () => {
         onRequestClose={() => setIsModalOpen1(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
-              정말 <span className='font-semibold'>"{name}"</span> 청소를
+            <p className='font-normal text-center'>
+              당번을 설정하지 않아 <br />
+              <span className='text-blue-500'>당번 미지정 청소</span>로 임시
+              저장 됩니다.
               <br />
-              <span className='text-blue-500'>삭제</span>할까요?
-              <br />
-            </h2>
+              이대로 완료하시겠습니까?
+            </p>
           </>
         }
         descript=''
@@ -415,7 +516,7 @@ const CleanEdit = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen1(false)}
-        onSecondClick={() => {}} //삭제 API 연결
+        onSecondClick={() => handleUnassignedChange()}
       />
 
       <PopUpCard
@@ -423,12 +524,12 @@ const CleanEdit = () => {
         onRequestClose={() => setIsModalOpen2(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               이대로 <span className='font-semibold'>"{name}"</span> 청소를
               <br />
-              <span className='text-blue-500'>수정</span>할까요?
+              <span className='text-blue-500'>생성</span>할까요?
               <br />
-            </h2>
+            </p>
           </>
         }
         descript={<>이후에도 내용 수정이 가능합니다.</>}
@@ -437,7 +538,7 @@ const CleanEdit = () => {
         first='아니오'
         second='네'
         onFirstClick={() => setIsModalOpen2(false)}
-        onSecondClick={() => {}} //수정 API 연결
+        onSecondClick={handleMake}
       />
 
       <PopUpCard
@@ -445,11 +546,11 @@ const CleanEdit = () => {
         onRequestClose={() => setIsModalOpen3(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               <span className='font-semibold'>청소 생성</span>이 완료되지
               않았습니다.
               <br /> 정말 나가시겠습니까?
-            </h2>
+            </p>
           </>
         }
         descript={<>작성중인 내용은 저장되지 않습니다.</>}
@@ -463,23 +564,14 @@ const CleanEdit = () => {
           else navigate('/');
         }}
       />
-      <div>
-        <CTAButton
-          variant={name ? 'blue' : 'gray'}
-          style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
-          onClick={name ? confirmHandle : () => {}}
-        >
-          완료
-        </CTAButton>
 
-        <CTAButton
-          variant={'gray'}
-          style={{ marginBottom: '40px', cursor: 'pointer' }}
-          onClick={deleteHandle}
-        >
-          삭제하기
-        </CTAButton>
-      </div>
+      <CTAButton
+        variant={name ? 'blue' : 'gray'}
+        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
+        onClick={name ? confirmHandle : () => {}}
+      >
+        완료
+      </CTAButton>
     </div>
   );
 };

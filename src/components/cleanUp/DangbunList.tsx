@@ -29,47 +29,48 @@ interface DangbunListProps {
   onChange: (value: string) => void;
 }
 
-interface Cleaning {
-  cleaningId: number;
-  cleaningName: string;
-  displayedNames: string[];
-  memberCount: number;
+interface DangbunOption {
+  value: number;
+  name: string;
+  icon: string;
 }
+
 const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
-  const [dangbunList, setdangbunList] = useState<Cleaning[]>([]);
+  const [options, setOptions] = useState<DangbunOption[]>([]);
 
   useEffect(() => {
     const getEffect = async () => {
       try {
         const res = await useDutyApi.list(placeId);
-        console.log(res.data);
-        // const list = Array.isArray(res?.data?.data)
-        //   ? res.data.data.map((d: any) => ({
-        //       name: d.clname,
-        //       icon: d.icon,
-        //     }))
-        //   : [];
-        //setdangbunList(list);
+        const list: DangbunOption[] = Array.isArray(res?.data?.data)
+          ? res.data.data.map((d: any) => ({
+              value: Number(d.dutyId),
+              name: d.name,
+              icon: ICON_MAP[d.icon] ?? d.icon,
+            }))
+          : [];
+        setOptions(list);
       } catch (e) {
         console.error(e);
-        setdangbunList([]);
+        setOptions([]);
       }
     };
     getEffect();
-  });
+  }, []);
 
-  const handleChange = (option: any) => {
-    onChange(option.value);
+  const handleChange = (option: DangbunOption | null) => {
+    onChange(option?.name ?? '');
   };
 
   const custom = ({ data }: any) => (
     <div className='flex flex-row gap-3 items-center h-[34px] text-black text-base font-normal leading-snug'>
       <img src={data.icon} alt='icon' className='w-9 h-9' />
-      {data.label}
+      {data.name}
     </div>
   );
 
   const customOption = (props: any) => {
+    // eslint-disable-next-line react/prop-types
     const { data, innerRef, innerProps } = props;
     return (
       <div
@@ -78,7 +79,7 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
         className='  h-[34px] p-[10px] flex flex-row gap-3 my-4 text-center justify-start items-center cursor-pointer'
       >
         <img src={data.icon} alt='icon' className='w-9 h-9' />
-        {data.label}
+        {data.name}
       </div>
     );
   };
@@ -87,7 +88,7 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
     <div>
       <label>
         <Select
-          options={dangbunList}
+          options={options}
           placeholder='선택'
           components={{ SingleValue: custom, Option: customOption }}
           onChange={handleChange}
