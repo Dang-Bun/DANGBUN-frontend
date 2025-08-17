@@ -47,7 +47,7 @@ const SettingManager = () => {
           <img
             src={PlaceName}
             alt='플레이스 이름'
-            className='absolute left-0'
+            className='absolute left-0 cursor-pointer'
             onClick={() => {
               navigate('/myPlace');
             }}
@@ -110,7 +110,10 @@ const SettingManager = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 멤버 목록 */}
-          <div className='flex flex-col items-center flex-1 cursor-pointer'>
+          <div
+            className='flex flex-col items-center flex-1 cursor-pointer'
+            onClick={() => navigate('/memberlist')}
+          >
             <img
               src={Member}
               alt='멤버 목록'

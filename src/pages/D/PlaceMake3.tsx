@@ -122,7 +122,10 @@ const PlaceMake3 = () => {
         placeholder=''
       />
 
-      <CTAButton style={{ position: 'fixed', bottom: '42px' }}>
+      <CTAButton
+        style={{ position: 'fixed', bottom: '42px' }}
+        onClick={() => navigate('/myplace')}
+      >
         플레이스로 이동
       </CTAButton>
     </div>

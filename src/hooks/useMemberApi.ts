@@ -16,12 +16,10 @@ export const useMemberApi = {
     api.delete(`/places/${placeId}/members/${memberId}`),
 
   // 대기 멤버 목록 조회
-  listWaiting: (placeId, params) =>
-    api.get(`/places/${placeId}/members/waiting`, { params }),
+  listWaiting: (placeId) => api.get(`/places/${placeId}/members/waiting`),
 
   // 멤버 검색 (q 필수 가정)
-  search: (placeId, params) =>
-    api.get(`/places/${placeId}/members/search`, { params }),
+  search: (placeId) => api.get(`/places/${placeId}/members/search`),
 
   // 내 멤버 정보 조회(멤버)
   me: (placeId) => api.get(`/places/${placeId}/members/me`),
