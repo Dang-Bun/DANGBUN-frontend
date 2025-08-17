@@ -1,4 +1,3 @@
-// src/pages/Home.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
@@ -108,7 +107,7 @@ const Home: React.FC = () => {
     }
   }, [loading, role, placeId, placeName, placeIcon, navigate]);
 
-  // 리다이렉트 대기 화면
+
   return <div className="p-6">로딩중…</div>;
 };
 
