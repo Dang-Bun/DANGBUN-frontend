@@ -174,6 +174,8 @@ const MyPlace: React.FC = () => {
                 state: {
                   role: p.role,
                   placeId: p.placeId,
+                  placeName: p.name,
+                  placeIcon: p.category
                 },
               })
             }

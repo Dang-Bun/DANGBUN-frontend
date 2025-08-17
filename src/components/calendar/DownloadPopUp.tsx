@@ -6,9 +6,10 @@ import closeIcon from '../../assets/closeIcon.svg';
 type Props = {
   isOpen: boolean;
   onRequestClose: () => void;
+  photoUrl?: string;
 };
 
-const DownloadPopUp: React.FC<Props> = ({ isOpen, onRequestClose }) => {
+const DownloadPopUp: React.FC<Props> = ({ isOpen, onRequestClose, photoUrl }) => {
   return (
     <ReactModal
       isOpen={isOpen}

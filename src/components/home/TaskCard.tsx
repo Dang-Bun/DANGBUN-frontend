@@ -1,3 +1,4 @@
+// src/components/home/TaskCard.tsx
 import React, { useMemo, useState } from 'react';
 import cameraGray from '../../assets/home/cameraGray.svg';
 import cameraDefault from '../../assets/home/cameraBlue.svg';
@@ -9,13 +10,13 @@ import toggleDown from '../../assets/home/toggleDown.svg';
 
 interface TaskCardProps {
   title: string;
-  dueTime: string;
+  dueTime?: string;        // API의 endTime을 그대로 받음 (옵션)
   members: string[];
   isChecked: boolean;
   isCamera: boolean;
   onToggle: () => void;
-  completedAt?: string;
-  completedBy?: string;
+  completedAt?: string;    // API의 completeTime을 그대로 받음 (옵션)
+  completedBy?: string;    // (선택) 있으면 표시하지 않고 보관만
   disabled?: boolean;
   onCameraClick?: () => void;
 }
@@ -28,6 +29,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   isCamera,
   onToggle,
   completedAt,
+  // completedBy는 표시하지 않음 (API가 시간만 주므로 디자인 상 숨김)
   completedBy,
   disabled = false,
   onCameraClick,
@@ -61,17 +63,23 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   const calculateRemainingTime = () => {
+    if (!dueTime) return ''; // endTime이 없으면 표시 생략
     const now = new Date();
     const [dh, dm] = dueTime.split(':').map((n) => parseInt(n, 10));
+    if (Number.isNaN(dh) || Number.isNaN(dm)) return '';
     const cur = now.getHours() * 60 + now.getMinutes();
     const due = dh * 60 + dm;
     const diff = due - cur;
-    const hoursRemaining = Math.floor(diff / 60);
-    return `${hoursRemaining}시간 남았습니다`;
+    const hours = Math.floor(diff / 60);
+    const mins = Math.abs(diff % 60);
+    // 과거 시간이면 "지남" 표기 (선택)
+    if (diff < 0) return `${Math.abs(hours)}시간 ${mins}분 지났습니다`;
+    if (hours === 0) return `${mins}분 남았습니다`;
+    return `${hours}시간 ${mins}분 남았습니다`;
   };
 
-  const rightTopText =
-    isChecked && completedAt && completedBy ? `${completedAt} - ${completedBy}` : calculateRemainingTime();
+  //  완료면 API의 completeTime 그대로, 아니면 endTime 기준 남은 시간
+  const rightTopText = isChecked && completedAt ? completedAt : calculateRemainingTime();
 
   const isCheckboxDisabled = disabled && !isChecked;
   const checkboxIcon = isCheckboxDisabled ? checkDisabled : isChecked ? checkDone : checkDefault;
@@ -124,6 +132,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
 
         <div className="flex flex-col justify-between items-end">
+          {/*  완료시 completeTime, 미완료시 endTime 남은시간 */}
           <div className="text-[12px] whitespace-nowrap text-[#8E8E8E]">{rightTopText}</div>
           {showExpandButton ? (
             <button className="w-5 h-5 mt-2" onClick={handleToggle} aria-label="멤버 전체 보기">
