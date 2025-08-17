@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import CreateNotificationIcon from '../../assets/notificationIcon/CreateNotificationIcon.svg';
@@ -22,8 +22,8 @@ const toArray = (raw: any): any[] => {
   if (Array.isArray(raw?.content)) return raw.content;
   if (Array.isArray(raw?.list)) return raw.list;
   if (Array.isArray(raw?.items)) return raw.items;
-  if (Array.isArray(raw?.data)) return raw.data;          
-  return [];  
+  if (Array.isArray(raw?.data)) return raw.data;
+  return [];
 };
 
 const Notification: React.FC = () => {
@@ -101,9 +101,21 @@ const Notification: React.FC = () => {
     navigate(`/${placeId}/alarm/create`);
   };
 
-  const handleCardClick = (id: string) => {
+  const handleCardClick = async (id: string) => {
     if (!placeId) return;
-    navigate(`/${placeId}/alarm/${id}`);
+    
+    try {
+      await useNotificationApi.markAsRead(placeId, id);
+      setList(prevList =>
+        prevList.map(item =>
+          item.id === id ? { ...item, read: true } : item
+        )
+      );
+    } catch (e) {
+      console.error("알림 읽음 처리 실패", e);
+    } finally {
+      navigate(`/${placeId}/alarm/${id}`);
+    }
   };
 
   if (!placeId) {
@@ -169,7 +181,7 @@ const Notification: React.FC = () => {
       </div>
 
       <p className="text-xs text-[#848484]">
-        모든 알림은 최대 <b>30일</b> 동안 저장됩니다.
+        모든 알림은 최대 <span className="font-semibold"> 30일 </span> 동안 저장됩니다.
       </p>
       <BottomBar />
     </div>

@@ -88,31 +88,18 @@ const NotificationCreate: React.FC = () => {
       return;
     }
 
-    const variants = [
-      { content, recipients: recipientIds.map((id) => ({ memberId: id })) }, // A
-      { content, recipientIds },                                             // B
-      { message: content, recipientIds },                                    // C
-    ];
-
     try {
-      let ok = false; let lastErr: any = null;
-      for (const body of variants) {
-        try {
-          await useNotificationApi.create(placeId, body);
-          ok = true; break;
-        } catch (e: any) {
-          lastErr = e;
-          const st = e?.response?.status;
-          if (st && st !== 400) break; // 비-400은 즉시 중단
-        }
-      }
-      if (!ok) throw lastErr;
+      // API 호출 로직
+      await useNotificationApi.create(placeId, {
+        message: content,
+        recipientIds,
+      });
 
       setToastMsg('알림이 성공적으로 전송되었습니다.');
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
-        navigate('/alarm', { state: { tab: 'transmit' } });
+        navigate(`/${placeId}/alarm`, { state: { tab: 'transmit' } });
       }, 1100);
     } catch (e: any) {
       const st = e?.response?.status;
@@ -239,6 +226,14 @@ const NotificationCreate: React.FC = () => {
                     }
                     setSelectedDangbunId(duty.id);
                     await ensureDutyMembers(duty.id);
+                    
+                    // 새로운 로직: 당번 선택 시 해당 멤버 모두 선택
+                    const members = dutyMembers[duty.id] || [];
+                    const memberIds = members.map(m => m.id);
+                    setDangbunSelections((prev) => ({
+                      ...prev,
+                      [duty.id]: memberIds
+                    }));
                   }}
                 >
                   <WritingChip
