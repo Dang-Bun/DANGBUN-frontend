@@ -1,23 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import GradRollCard from '../../components/place/GradRollCard';
+import type { RoleType } from '../../components/place/GradRollCard';
 import CTAButton from '../../components/button/CTAButton';
 import PopupCard from '../../components/PopUp/PopUpCard';
 import PopupCode from '../../components/PopUp/PopUpCode';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
+import GradRollCard from '../../components/place/GradRollCard';
 
-type RoleType =
-  | 'cafe'
-  | 'building'
-  | 'cinema'
-  | 'dormitory'
-  | 'gym'
-  | 'office'
-  | 'restaurant'
-  | 'school'
-  | 'plus';
+const toRoleType = (value: unknown): RoleType => {
+  const upper = String(value ?? '').toUpperCase();
+  const allowed = [
+    'CAFE',
+    'BUILDING',
+    'CINEMA',
+    'DORMITORY',
+    'GYM',
+    'OFFICE',
+    'RESTAURANT',
+    'SCHOOL',
+    'PLUS',
+  ] as const;
+  return (allowed.includes(upper as any) ? upper : 'PLUS') as RoleType;
+};
 
 const PlaceMake3 = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -59,8 +65,7 @@ const PlaceMake3 = () => {
         </div>
 
         <div>
-          <GradRollCard role={role as RoleType} />
-          <img />
+          <GradRollCard role={toRoleType(role)} />
         </div>
         <button
           className='w-40 h-9 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)] text-center text-neutral-400 text-base font-semibold leading-snug cursor-pointer'

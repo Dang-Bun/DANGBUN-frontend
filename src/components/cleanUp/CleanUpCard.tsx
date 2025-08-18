@@ -22,6 +22,7 @@ import BottomSheet from './BottomSheet';
 import { useDutyApi } from '../../hooks/useDutyApi';
 import useCleaningApi from '../../hooks/useCleaningApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
+import { filter } from 'framer-motion/client';
 
 interface CleanUpCardProps {
   title: string;
@@ -62,16 +63,20 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+  const [nameToId, setNameToId] = useState<Record<string, number>>({});
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [currentCleaning, setCurrentCleaning] = useState(0);
+  const [clickedCleaning, setClickedCleaning] = useState(0);
   const iconSrc = ICON_MAP[icon] ?? icon;
+
+  const [alreadyMember, setAlreadyMember] = useState([]);
 
   const handlePlus = (cleaning: Cleaning) => {
     const combined = Array.from(
       new Set([...filteredMembers, ...cleaning.displayedNames])
     );
-    setFilteredMembers(combined);
+    setClickedMembers(combined);
     console.log(combined);
 
     setOpen(true);
@@ -110,12 +115,37 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
     getEffect();
   }, []);
 
-  useEffect(() => {}, [filteredMembers]);
+  useEffect(() => {
+    const fetchMemberMap = async () => {
+      try {
+        const res = await useMemberApi.list(placeId);
+        const arr = res.data.data.members;
 
-  const handleEditMember = async () => {
+        const map: Record<string, number> = {};
+        for (const it of arr) {
+          const id = it.memberId;
+          const nm = it.name;
+          if (typeof id === 'number' && typeof nm === 'string') {
+            map[nm] = id;
+          }
+        }
+        setNameToId(map);
+      } catch (e) {
+        console.error(e);
+        setNameToId({});
+      }
+    };
+    fetchMemberMap();
+  }, [placeId]);
+
+  const handleEditMember = async (cleaningId: number, memberIds: number[]) => {
     try {
-      const data = {};
-      const res = useCleaningApi.updateCleaning(placeId, currentCleaning, data);
+      const data = {
+        assignType: 'CUSTOM',
+        cleaningId: cleaningId,
+        memberIds: memberIds,
+      };
+      const res = useDutyApi.assignCleaningMembers(placeId, dutyId, data);
       console.log(res);
     } catch (e) {
       console.log(e);
@@ -187,7 +217,10 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 
                       <button
                         className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
-                        onClick={() => handlePlus(cleaning)}
+                        onClick={() => {
+                          handlePlus(cleaning);
+                          setClickedCleaning(cleaning.cleaningId);
+                        }}
                       >
                         <img
                           src={plus}
@@ -211,8 +244,11 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
         isOpen={open}
         onClose={() => {
           setOpen(false);
-          setFilteredMembers(clickedMembers);
-          handleEditMember();
+          const memberIds = clickedMembers
+            .map((nm) => nameToId[nm])
+            .filter((v): v is number => typeof v === 'number');
+
+          handleEditMember(clickedCleaning, memberIds);
         }}
       >
         <div className='w-[353px] h-[348px]'>
