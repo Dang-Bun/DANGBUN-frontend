@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import Header from '../../components/HeaderBar';
 import PlaceProgressCard from '../../components/home/PlaceProgressCard';
+import type { Category as PlaceCategory } from '../../components/home/PlaceProgressCard';
 import DangbunProgressCard from '../../components/home/DangbunProgressCard';
 import SortPopUp from '../../components/home/SortPopUp';
 import toggle from '../../assets/home/toggleDown.svg';
@@ -28,7 +29,7 @@ type Payload = {
   placeId?: number;
   placeName?: string;
   percent?: number; // 전체 진행률
-  placeIconKey?: PlaceProgressCard.Category;
+  placeIconKey?: PlaceCategory;
   duties?: DutySummary[];
 };
 

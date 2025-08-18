@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import Picker from "react-mobile-picker";
-import closeIcon from "../../assets/closeIcon.svg";
+import React, { useEffect, useState } from 'react';
+import Picker from 'react-mobile-picker';
+import closeIcon from '../../assets/closeIcon.svg';
 
 interface ISelections {
   year: number[];
@@ -46,22 +46,32 @@ export default function DatePicker({
 
   return (
     <>
-       <div
-        role="dialog"
-        aria-modal="true"
-        className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[24px] shadow-[0_-8px_24px_rgba(0,0,0,0.15)]"
+      <div
+        role='dialog'
+        aria-modal='true'
+        className='fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[24px] shadow-[0_-8px_24px_rgba(0,0,0,0.15)]'
       >
-        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
-          <p className="text-base font-medium text-gray-800">날짜 설정</p>
-          <img src={closeIcon} alt="닫기" className="w-6 h-6 cursor-pointer" onClick={onClose} />
+        <div className='px-5 pt-5 pb-4 flex items-center justify-between'>
+          <p className='text-base font-medium text-gray-800'>날짜 설정</p>
+          <img
+            src={closeIcon}
+            alt='닫기'
+            className='w-6 h-6 cursor-pointer'
+            onClick={onClose}
+          />
         </div>
 
-        <div className="px-5 pb-5">
+        <div className='px-5 pb-5'>
           <Picker
             value={value}
-            onChange={setValue}
-            wheelMode="normal"
-            className="custom-picker flex justify-between gap-2 pb-2"
+            onChange={(val, key) =>
+              setValue((prev) => ({
+                ...prev,
+                [key]: val, // year 또는 month 중 하나만 업데이트
+              }))
+            }
+            wheelMode='normal'
+            className='custom-picker flex justify-between gap-2 pb-2'
           >
             {Object.keys(selections).map((key) => (
               <Picker.Column key={key} name={key}>
@@ -70,12 +80,20 @@ export default function DatePicker({
                     {({ selected }) => (
                       <div
                         className={[
-                          "text-center px-4 py-2 my-1 rounded-[8px] text-sm transition-colors",
-                          selected ? "text-black font-semibold bg-[#F6F6F6]" : "font-normal text-[#797C82]",
-                        ].join(" ")}
-                        style={{ whiteSpace: "nowrap", display: "inline-block", lineHeight: "normal" }}
+                          'text-center px-4 py-2 my-1 rounded-[8px] text-sm transition-colors',
+                          selected
+                            ? 'text-black font-semibold bg-[#F6F6F6]'
+                            : 'font-normal text-[#797C82]',
+                        ].join(' ')}
+                        style={{
+                          whiteSpace: 'nowrap',
+                          display: 'inline-block',
+                          lineHeight: 'normal',
+                        }}
                       >
-                        {key === "year" ? `${option}년` : `${String(option).padStart(2, "0")}월`}
+                        {key === 'year'
+                          ? `${option}년`
+                          : `${String(option).padStart(2, '0')}월`}
                       </div>
                     )}
                   </Picker.Item>
@@ -85,7 +103,7 @@ export default function DatePicker({
           </Picker>
 
           <button
-            className="w-full h-11 rounded-[12px] bg-blue-600 text-white font-semibold mt-2 mb-[calc(env(safe-area-inset-bottom,0))]"
+            className='w-full h-11 rounded-[12px] bg-blue-600 text-white font-semibold mt-2 mb-[calc(env(safe-area-inset-bottom,0))]'
             onClick={() => onApply?.(value.year, value.month)}
           >
             완료
