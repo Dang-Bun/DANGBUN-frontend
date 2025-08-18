@@ -77,7 +77,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
           return;
         }
         if (assignType === 'CUSTOM' && memberIdsArray.length === 0) {
-          alert('배정할 멤버를 1명 이상 선택하세요.');
+          alert('배정할 멤버를 1명 이상 선택해주세요.');
           return;
         }
         if (assignType === 'RANDOM' && (!assignCount || assignCount < 1)) {
@@ -254,10 +254,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
             취소
           </button>
           <button
-            onClick={() => {
-              onConfirm(Array.from(selectedIds));
-              handleConfirm();
-            }}
+            onClick={handleConfirm}
             className='flex-1 h-11 rounded-[10px] bg-blue text-white font-semibold'
           >
             확인
@@ -287,11 +284,17 @@ const DutyManagement = () => {
   // 탭/데이터 상태
   const [activeTab, setActiveTab] = useState<'info' | 'role'>('info');
 
-  // 실제 선택되어 카드에 표시될 멤버
+  // 실제 선택되어 맴버 선택카드에 표시될 멤버
   const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
   const selectedMembers = useMemo(
     () => allMembers.filter((m) => selectedMemberIds.includes(m.memberId)),
     [allMembers, selectedMemberIds]
+  );
+  // 이름 -> id 매핑
+  const nameToId = useMemo(
+    () =>
+      Object.fromEntries(allMembers.map((m) => [m.name, m.memberId] as const)),
+    [allMembers]
   );
 
   const [loading, setLoading] = useState(false);
@@ -319,6 +322,16 @@ const DutyManagement = () => {
   const [currentCleaningId, setCurrentCleaningId] = useState<number | null>(
     null
   );
+
+  // 현재 역할 배정하려는 cleaningId의 초기 선택 id들
+  const roleInitialIds = useMemo(() => {
+    if (!currentCleaningId) return [];
+    const item = roleItems.find((i) => i.cleaningId === currentCleaningId);
+    if (!item) return [];
+    return item.displayedNames
+      .map((nm) => nameToId[nm])
+      .filter((v): v is number => typeof v === 'number');
+  }, [roleItems, currentCleaningId, nameToId]);
 
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
@@ -764,7 +777,7 @@ const DutyManagement = () => {
       <MembersPickerModal
         open={rolepickerOpen}
         allMembers={allMembers}
-        initialSelectedIds={selectedMemberIds}
+        initialSelectedIds={roleInitialIds} // ✅ 역할 모달은 역할 기준으로!
         dutyId={dutyId}
         placeId={placeId}
         mode='assign'
@@ -774,7 +787,20 @@ const DutyManagement = () => {
         }}
         onClose={() => setRolePickerOpen(false)}
         onConfirm={(ids) => {
-          setSelectedMemberIds(ids);
+          // (선택) 낙관적 업데이트: roleItems에 반영해서 화면 즉시 갱신
+          setRoleItems((prev) =>
+            prev.map((item) => {
+              if (item.cleaningId !== currentCleaningId) return item;
+              const selected = allMembers.filter((m) =>
+                ids.includes(m.memberId)
+              );
+              return {
+                ...item,
+                memberCount: selected.length,
+                displayedNames: selected.map((m) => m.name),
+              };
+            })
+          );
           setRolePickerOpen(false);
         }}
       />

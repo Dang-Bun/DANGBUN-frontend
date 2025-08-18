@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 
-import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_1.svg';
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
 import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
-import BUCKET_PINK from '../../assets/cleanIcon/toiletImg.svg';
-import TOILET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/moppingImg_3.svg';
+import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
 import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
-import DISH_BLUE from '../../assets/cleanIcon/moppingImg_3.svg';
+import DISH_BLUE from '../../assets/cleanIcon/cupWashingImg.svg';
 import BRUSH_PINK from '../../assets/cleanIcon/polishImg.svg';
 import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
 import line from '../../assets/cleanUpList/Line.svg';
