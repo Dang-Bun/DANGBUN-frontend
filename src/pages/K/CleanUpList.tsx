@@ -16,7 +16,6 @@ import grayX from '../../assets/cleanUpList/GrayX.svg';
 import DownImg from '../../assets/chevron/bottom_chevronImg.svg';
 import refresh from '../../assets/cleanUpList/refresh.svg';
 
-import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDutyApi } from '../../hooks/useDutyApi';
@@ -30,8 +29,10 @@ const CleanUpList = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(true);
   const [dangbunList, setDangbunList] = useState<DutyItem[]>([]);
   const [members, setMembers] = useState<string[]>([]);
+  const [filteredMemberIds, setFilteredMemberIds] = useState<number[]>([]);
 
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
@@ -39,53 +40,91 @@ const CleanUpList = () => {
   const headerRef = useRef<HTMLDivElement>(null);
   const [contentMargin, setContentMargin] = useState(0);
 
+  const [nameToIdMap, setNameToIdMap] = useState<Map<string, number>>(
+    new Map()
+  );
+
   interface DutyItem {
     dutyId: number;
     name: string;
     icon: string;
+    assignedMemberIds: number[];
   }
 
   useLayoutEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     setContentMargin(headerHeight);
   });
-
   useEffect(() => {
-    const geteffect = async () => {
-      try {
-        console.log(location.state);
-        const [dutyres, memberRes] = await Promise.all([
-          useDutyApi.list(placeId),
-          useMemberApi.list(placeId),
-        ]);
-        console.log('dutylist: ', dutyres.data);
-        console.log('memberlist: ', memberRes.data);
+    if (!placeId) return;
 
-        setDangbunList(
-          Array.isArray(dutyres.data?.data)
-            ? dutyres.data.data.map((d: any) => ({
-                dutyId: d.dutyId,
-                name: d.name,
-                icon: d.icon,
-              }))
-            : []
+    const fetchAllData = async () => {
+      try {
+        setLoading(true);
+
+        const memberRes = await useMemberApi.list(placeId);
+        const memberList = memberRes.data?.data?.members || [];
+        const newMembers = memberList.map((m: any) => m.name);
+        const newMap = new Map<string, number>();
+        memberList.forEach((m: any) => newMap.set(m.name, m.memberId));
+        setMembers(newMembers);
+        setNameToIdMap(newMap);
+
+        const dutyRes = await useDutyApi.list(placeId);
+        const initialDutyList = dutyRes.data?.data || [];
+        if (initialDutyList.length === 0) {
+          setDangbunList([]);
+          setLoading(false);
+          return;
+        }
+
+        const detailPromises = initialDutyList.map((duty: any) =>
+          useDutyApi.getCleaningInfo(placeId, duty.dutyId)
         );
-        setMembers(
-          Array.isArray(memberRes.data?.data?.members)
-            ? memberRes.data.data.members.map((m: any) => m.name)
-            : []
+        const detailResults = await Promise.all(detailPromises);
+
+        const combinedDutyList: DutyItem[] = initialDutyList.map(
+          (duty: any, index: number) => {
+            const detailData = detailResults[index].data?.data || [];
+            const dutyMemberNames = new Set<string>();
+            detailData.forEach((cleaning: any) => {
+              (cleaning.displayedNames || []).forEach((name: string) =>
+                dutyMemberNames.add(name)
+              );
+            });
+            const assignedMemberIds = Array.from(dutyMemberNames)
+              .map((name) => newMap.get(name))
+              .filter((id): id is number => id !== undefined);
+            return {
+              dutyId: duty.dutyId,
+              name: duty.name,
+              icon: duty.icon,
+              assignedMemberIds,
+            };
+          }
         );
+        setDangbunList(combinedDutyList);
       } catch (e) {
-        console.error(e);
+        console.error('데이터를 가져오는 중 오류 발생:', e);
         setDangbunList([]);
+      } finally {
+        setLoading(false);
       }
     };
-    geteffect();
+
+    fetchAllData();
   }, [placeId]);
 
   const handleAdd = () => {
     navigate('/cleanadd', { state: { placeId: placeId } });
   };
+
+  const filteredDangbunList =
+    filteredMemberIds.length === 0
+      ? dangbunList
+      : dangbunList.filter((duty) =>
+          duty.assignedMemberIds.some((id) => filteredMemberIds.includes(id))
+        );
 
   return (
     <div className='flex flex-col w-[393px] px-5 '>
@@ -98,7 +137,7 @@ const CleanUpList = () => {
         />
         <div className='flex flex-row justify-between mt-[52px] mb-3'>
           <p className='text-black text-sm font-normal leading-tight'>
-            총 {dangbunList.length}개
+            총 {filteredDangbunList.length}개
           </p>
           <button
             className='flex flex-row gap-1 justify-center items-center cursor-pointer'
@@ -141,7 +180,7 @@ const CleanUpList = () => {
                     className='cursor-pointer'
                     onClick={() => {
                       setClickedMembers(
-                        filteredMembers.filter((m) => m !== name)
+                        clickedMembers.filter((m) => m !== name)
                       );
                       setFilteredMembers(
                         filteredMembers.filter((m) => m !== name)
@@ -163,6 +202,7 @@ const CleanUpList = () => {
                   onClick={() => {
                     setClickedMembers([]);
                     setFilteredMembers([]);
+                    setFilteredMemberIds([]);
                   }}
                 />
               </button>
@@ -193,16 +233,21 @@ const CleanUpList = () => {
           className='flex flex-col overflow-y-auto items-center justify-start gap-4'
           style={{ paddingTop: contentMargin }}
         >
-          {dangbunList.map((duty, index) => (
-            <CleanUpCard
-              key={duty.dutyId ?? index}
-              title={duty.name}
-              icon={duty.icon}
-              placeId={placeId}
-              dutyId={duty.dutyId}
-              members={members}
-            />
-          ))}
+          {loading ? (
+            <p>로딩 중...</p>
+          ) : (
+            filteredDangbunList.map((duty) => (
+              <CleanUpCard
+                key={duty.dutyId}
+                title={duty.name}
+                icon={duty.icon}
+                placeId={placeId}
+                dutyId={duty.dutyId}
+                members={members}
+                fMembers={filteredMemberIds}
+              />
+            ))
+          )}
         </div>
       )}
 
@@ -211,6 +256,11 @@ const CleanUpList = () => {
         onClose={() => {
           setOpen(false);
           setFilteredMembers(clickedMembers);
+
+          const selectedIds = clickedMembers
+            .map((name) => nameToIdMap.get(name))
+            .filter((id): id is number => id !== undefined);
+          setFilteredMemberIds(selectedIds);
         }}
       >
         <div className='w-[353px] h-[348px]'>
