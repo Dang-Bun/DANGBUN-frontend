@@ -35,7 +35,9 @@ import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import useNotificationApi from '../../hooks/useNotificationApi';
 
+ 
 const CATEGORY_ICON_SRC: Record<string, string> = {
   CAFE: CAFE_IMG,
   RESTAURANT: RESTAURANT_IMG,
@@ -59,20 +61,20 @@ const DUTY_ICON_SRC: Record<string, string> = {
   SPRAY_BLUE: SPRAY_BLUE,
 };
 
-const arr = (x: any): any[] =>
+const arr = (x: unknown): unknown[] =>
   Array.isArray(x)
     ? x
-    : Array.isArray(x?.data)
-      ? x.data
-      : Array.isArray(x?.data?.data)
-        ? x.data.data
-        : Array.isArray(x?.content)
-          ? x.content
-          : Array.isArray(x?.items)
-            ? x.items
+    : Array.isArray((x as any)?.data)
+      ? (x as any).data
+      : Array.isArray((x as any)?.data?.data)
+        ? (x as any).data.data
+        : Array.isArray((x as any)?.content)
+          ? (x as any).content
+          : Array.isArray((x as any)?.items)
+            ? (x as any).items
             : [];
 
-const obj = (x: any): any => x?.data?.data ?? x?.data ?? x ?? {};
+const obj = (x: unknown): unknown => (x as any)?.data?.data ?? (x as any)?.data ?? x ?? {};
 
 /* ---------------------- 화면 타입 ---------------------- */
 type DutyIconKey =
@@ -136,6 +138,7 @@ const MemberHome: React.FC = () => {
   // 업로드 팝업
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   /* ---------------------- 데이터 로드 ---------------------- */
   useEffect(() => {
@@ -171,9 +174,9 @@ const MemberHome: React.FC = () => {
             : arr(info?.data);
 
           const tasks: TaskUI[] = raw.map((t) => {
-            const members = (t.members ?? t.assignees ?? []).map(
-              (m: any) => m?.name ?? m
-            );
+                         const members = (t.members ?? t.assignees ?? []).map(
+               (m: unknown) => (m as any)?.name ?? m
+             );
             const mine =
               !!myName &&
               (members.includes(myName) || members.includes('멤버 전체'));
@@ -220,6 +223,66 @@ const MemberHome: React.FC = () => {
     };
   }, [pid]);
 
+    // 받은 알림 읽음 여부 확인
+  useEffect(() => {
+    if (!pid) return;
+    
+    const checkUnreadNotifications = async () => {
+      try {
+        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const notifications = res?.data?.data || [];
+                 // isRead가 false인 알림이 있으면 mailDefault 표시
+         const hasUnread = notifications.some((notification: unknown) => !(notification as any).isRead);
+        setHasUnreadNotifications(hasUnread);
+      } catch (error) {
+        console.error('알림 읽음 여부 확인 실패:', error);
+        setHasUnreadNotifications(true); // 에러 시에도 mailDefault 표시
+      }
+    };
+
+    checkUnreadNotifications();
+
+    // 페이지 포커스 시 알림 상태 다시 확인
+    const handleFocus = () => {
+      checkUnreadNotifications();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [pid]);
+
+    // 받은 알림 읽음 여부 확인
+  useEffect(() => {
+    if (!pid) return;
+    
+    const checkUnreadNotifications = async () => {
+      try {
+        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const notifications = res?.data?.data || [];
+        // isRead가 false인 알림이 있으면 mailDefault 표시
+        const hasUnread = notifications.some((notification: any) => !notification.isRead);
+        setHasUnreadNotifications(hasUnread);
+      } catch (error) {
+        console.error('알림 읽음 여부 확인 실패:', error);
+        setHasUnreadNotifications(true); // 에러 시에도 mailDefault 표시
+      }
+    };
+
+    checkUnreadNotifications();
+
+    // 페이지 포커스 시 알림 상태 다시 확인
+    const handleFocus = () => {
+      checkUnreadNotifications();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [pid]);
+
   /* ---------------------- 파생 값 ---------------------- */
   const allTasks = useMemo(() => duties.flatMap((d) => d.tasks), [duties]);
   const myTasks = useMemo(() => allTasks.filter((t) => t.mine), [allTasks]);
@@ -256,11 +319,7 @@ const MemberHome: React.FC = () => {
     return base;
   }, [page.tasks, filter]);
 
-  const hasUnread = useMemo(
-    () => allTasks.some((t) => !t.isChecked),
-    [allTasks]
-  );
-  const notificationImage = hasUnread ? mailDefault : mail;
+  const notificationImage = hasUnreadNotifications ? mailDefault : mail;
 
   const backgroundImage = useMemo(() => {
     if (page.percent <= 0) return '/bg/bg0.svg';
@@ -311,10 +370,6 @@ const MemberHome: React.FC = () => {
   };
 
   // 업로드
-  const openUploadFor = (id: number) => {
-    setUploadTaskId(id);
-    setUploadOpen(true);
-  };
   const closeUpload = () => {
     setUploadOpen(false);
     setUploadTaskId(null);
@@ -383,7 +438,11 @@ const MemberHome: React.FC = () => {
           <div className="flex items-center relative">
             <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">당번</span>
             <div className="flex items-center gap-[210px]">
-              <PlaceNameCard place={placeName} type={page.percent >= 100 ? 'complete' : 'default'} />
+              <PlaceNameCard 
+                place={placeName} 
+                type={page.percent >= 100 ? 'complete' : 'default'} 
+                onClick={() => navigate('/myplace')}
+              />
               <img src={notificationImage} alt="알림" className="w-[36px] cursor-pointer" onClick={goToNotification} />
             </div>
           </div>
