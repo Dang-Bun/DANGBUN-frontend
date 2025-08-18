@@ -43,7 +43,7 @@ const LogIn = () => {
   };
 
   return (
-    <div className='w-full min-h-screen'>
+    <div className='w-full'>
       <div className='flex justify-center pb-[104px] pt-[120px]'>
         <img src={icon} alt='아이콘' />
       </div>
