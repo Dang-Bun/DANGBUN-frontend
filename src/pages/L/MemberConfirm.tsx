@@ -7,10 +7,7 @@ import BottomBar from '../../components/BottomBar';
 type WaitingMember = {
   memberId: number;
   name: string;
-  information?: {
-    이메일?: string;
-    전화번호?: string;
-  };
+  information?: { [key: string]: string };
   createdAt?: string; // "2025-08-17" 같은 형식
 };
 
@@ -72,8 +69,7 @@ const MemberConfirm: React.FC = () => {
                 <MemberInfo
                   key={m.memberId}
                   name={m.name}
-                  email={m.information?.['이메일']}
-                  phone={m.information?.['전화번호']}
+                  information={m.information}
                   onAccept={async () => {
                     // TODO: 수락 API 연결
                     await useMemberApi.accept(placeId, m.memberId);

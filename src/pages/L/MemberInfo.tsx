@@ -3,16 +3,14 @@ import line from '../../assets/member/LongGrayLine.svg';
 
 type MemberInfoProps = {
   name: string;
-  email?: string;
-  phone?: string;
+  information: { [key: string]: string };
   onAccept?: () => Promise<void> | void; // 비동기 가능
   onReject?: () => Promise<void> | void;
 };
 
 const MemberInfo: React.FC<MemberInfoProps> = ({
   name,
-  email,
-  phone,
+  information,
   onAccept,
   onReject,
 }) => {
@@ -67,16 +65,13 @@ const MemberInfo: React.FC<MemberInfoProps> = ({
       </div>
 
       <img src={line} alt='구분선' className='my-[18px]' />
-
       <div className='flex flex-col gap-3'>
-        <div className='flex flex-row items-center justify-between'>
-          <p className='text-zinc-500 text-sm font-semibold'>이메일</p>
-          <p className='text-sm font-normal'>{email ?? '-'}</p>
-        </div>
-        <div className='flex flex-row items-center justify-between'>
-          <p className='text-zinc-500 text-sm font-semibold'>전화번호</p>
-          <p className='text-sm font-normal'>{phone ?? '-'}</p>
-        </div>
+        {Object.entries(information).map(([key, value]) => (
+          <div key={key} className='flex flex-row items-center justify-between'>
+            <p className='text-zinc-500 text-sm font-semibold'>{key}</p>
+            <p className='text-sm font-normal'>{value ?? '-'}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

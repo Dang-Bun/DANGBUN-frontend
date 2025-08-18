@@ -70,6 +70,7 @@ const RequestPopUp = ({
         placeholder=''
         second='확인'
         onSecondClick={() => navigate('/login')}
+        userEmail={''}
       ></PopupCardDelete>
     </div>
   );

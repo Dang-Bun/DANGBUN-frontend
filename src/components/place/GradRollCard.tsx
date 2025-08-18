@@ -10,7 +10,7 @@ import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
 import homeImg from '../../assets/placeIcon/homeImg.svg';
 import gradCircle from '../../assets/placeMake/GradCircle.svg';
 
-type RoleType =
+export type RoleType =
   | 'CAFE'
   | 'RESTAURANT'
   | 'THEATER'
