@@ -261,8 +261,8 @@ const MemberHome: React.FC = () => {
       try {
         const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
         const notifications = res?.data?.data || [];
-        // isRead가 false인 알림이 있으면 mailDefault 표시
-        const hasUnread = notifications.some((notification: any) => !notification.isRead);
+                 // 알림이 없거나 isRead가 false인 알림이 있으면 mailDefault 표시
+         const hasUnread = notifications.length === 0 || notifications.some((notification: any) => !notification.isRead);
         setHasUnreadNotifications(hasUnread);
       } catch (error) {
         console.error('알림 읽음 여부 확인 실패:', error);
