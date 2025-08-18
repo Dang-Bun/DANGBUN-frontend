@@ -22,7 +22,7 @@ export const useDutyApi = {
 
   // 당번 정보 - 멤버 추가
   addMember: (placeId: number, dutyId: number, data: any) =>
-    api.post(`/places/${placeId}/duties/${dutyId}/members`, data),
+    api.put(`/places/${placeId}/duties/${dutyId}/members`, data),
 
   // 당번 정보 - 청소 이름 목록 조회
   getCleanings: (placeId: number, dutyId: number) =>
