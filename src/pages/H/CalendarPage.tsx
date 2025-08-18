@@ -84,7 +84,6 @@ const CalendarPage: React.FC = () => {
       console.log('🔍 [Calendar] API 요청 준비');
       console.log('   📍 placeId:', PLACE_ID);
       console.log('   🔑 accessToken 존재:', !!accessToken);
-      console.log('   👤 사용자 역할:', isManager ? '매니저' : '멤버');
 
       if (!PLACE_ID || !accessToken) {
         setError('로그인이 필요합니다.');
