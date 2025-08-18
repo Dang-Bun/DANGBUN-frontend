@@ -45,7 +45,7 @@ const MyInfoPage = () => {
 
   return (
     <>
-      <div className='relative w-full bg-white flex flex-col py-6 px-4'>
+      <div className='relative w-full bg-white flex flex-col py-3 px-4'>
         {/* 상단 헤더 */}
         <div className='mb-[500px]'>
           <div className='flex items-center justify-center pt-3 mb-[34px]'>
