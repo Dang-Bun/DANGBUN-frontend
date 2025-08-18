@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Location } from 'react-router-dom';
 
 import '../../styles/CalendarOverride.css';
 import Calendar from 'react-calendar';
@@ -33,8 +34,8 @@ const DAILY_MAP: Record<string, string> = {
 const CleanAdd = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-  const placeId = (location.state as { placeId?: number })?.placeId;
+  const location = useLocation() as Location & { state: { placeId?: number } };
+  const placeId = location.state?.placeId;
 
   //switch
   const [checked1, setChecked1] = useState(false);
