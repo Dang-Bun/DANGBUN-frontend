@@ -4,7 +4,7 @@ import Header from '../../components/HeaderBar';
 import UserIcon from '../../assets/member/UserIcon.svg';
 import GreenUser from '../../assets/member/GreenUser.svg';
 import grayPlus from '../../assets/header/GrayPlus.svg';
-import DangbunList from '../../components/cleanUp/DangbunList';
+import DangbunList from '../../components/cleanUp/DangbunList2';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from './../../hooks/useDutyApi';
