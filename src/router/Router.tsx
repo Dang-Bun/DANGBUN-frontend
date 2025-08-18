@@ -181,10 +181,6 @@ const router = createBrowserRouter([
     element: <CleanUpList />,
   },
   {
-    path: '/cleanupcard',
-    element: <CleanUpCard />,
-  },
-  {
     path: '/cleanadd',
     element: <CleanAdd />,
   },
