@@ -29,18 +29,37 @@ const SearchModal = forwardRef<SearchHandler, Props>(({ placeId, onSelectMember 
     if (!Number.isFinite(placeId)) { setMsg('오류'); setRows([]); return; }
     if (q.length < 2 || hasJamo(q)) { setRows([]); return; }
 
+    console.log('🔍 [SearchModal] 검색 시작:', { placeId, query: q });
+
     try {
       setLoading(true);
       const res = await useNotificationApi.searchRecipients(placeId, { q, size: 20 });
-      const data = res?.data?.data ?? res?.data ?? [];
-      const list: Person[] = Array.isArray(data)
-        ? data
+      console.log('📥 [SearchModal] API 응답:', res);
+      
+      const responseData = res?.data?.data ?? res?.data ?? {};
+      console.log('📊 [SearchModal] 파싱된 데이터:', responseData);
+      
+      // API 응답이 {members: Array, hasNext: boolean} 형태로 오는 경우 처리
+      const membersArray = responseData?.members ?? responseData;
+      console.log('👥 [SearchModal] 멤버 배열:', membersArray);
+      
+      const list: Person[] = Array.isArray(membersArray)
+        ? membersArray
             .map((r: any) => ({ id: Number(r.id ?? r.memberId), name: String(r.name ?? r.memberName ?? '') }))
             .filter((p) => Number.isFinite(p.id) && p.name)
         : [];
+      
+      console.log('👥 [SearchModal] 멤버 목록:', list);
       setRows(list);
       if (list.length === 0) setMsg('검색 결과가 없습니다.');
     } catch (e: any) {
+      console.error('❌ [SearchModal] 검색 실패:', e);
+      console.error('🔍 [SearchModal] 오류 상세:', {
+        status: e?.response?.status,
+        data: e?.response?.data,
+        message: e?.message
+      });
+      
       const st = e?.response?.status;
       setRows([]);
       setMsg(st ? `검색 실패(${st})` : '검색 실패');
