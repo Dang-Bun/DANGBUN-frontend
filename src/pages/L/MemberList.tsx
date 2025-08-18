@@ -5,7 +5,7 @@ import rightArrow from '../../assets/member/GrayRight.svg';
 import GrayLine from '../../assets/member/GrayLine.svg';
 import BottomBar from '../../components/BottomBar';
 import Envelop from '../../assets/member/Envelop.svg';
-import whitearrow from '../../assets/member/whitearrow.svg';
+import whitearrow from '../../assets/member/WhiteArrow.svg';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import right_chevron from '../../assets/chevron/right_chevronImg.svg';
 import EnterCode from '../../assets/member/EnterCode.svg';
