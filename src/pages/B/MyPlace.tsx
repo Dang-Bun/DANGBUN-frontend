@@ -151,7 +151,7 @@ const MyPlace: React.FC = () => {
   }
 
   return (
-    <div className='px-4'>
+    <div className='px-4 pt-3'>
       {Header}
 
       {/* 남은 청소 안내 배지 */}

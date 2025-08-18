@@ -39,9 +39,9 @@ const SettingMember = () => {
   }, [placeId]);
 
   return (
-    <div className='w-full min-h-screen flex flex-col justify-between'>
+    <div className='flex flex-col justify-between pt-3 py-4'>
       {/* 상단 */}
-      <div className='px-4 pt-6'>
+      <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
           <img
