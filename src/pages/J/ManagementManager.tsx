@@ -65,7 +65,7 @@ const ManagementManager = () => {
   }, [placeId]);
 
   const Header = (
-    <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4 px-4'>
+    <div className='relative flex w-full h-[50px] items-center mb-4 px-4'>
       <div className='absolute'>
         <img
           src={left_chevron}
@@ -75,7 +75,7 @@ const ManagementManager = () => {
         />
       </div>
       <div className='flex w-full text-[20px] justify-center'>당번 관리</div>
-      <div className='absolute right-0'>
+      <div className='absolute right-2'>
         <img
           src={Plus}
           alt='당번 생성'

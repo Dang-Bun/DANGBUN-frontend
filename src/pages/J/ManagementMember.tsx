@@ -64,7 +64,7 @@ const ManagementMember = () => {
   }, [placeId]);
 
   const Header = (
-    <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4 px-4'>
+    <div className='relative flex w-full h-[50px] items-center mb-4 px-4'>
       <div className='absolute'>
         <img
           src={left_chevron}

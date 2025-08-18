@@ -101,8 +101,8 @@ const DangerZoneManager = () => {
   };
 
   return (
-    <div className='mt-[68px]'>
-      <div className='pl-[12px]'>
+    <div className='px-4 pt-3'>
+      <div>
         <img
           src={left_chevron}
           alt='뒤로가기'

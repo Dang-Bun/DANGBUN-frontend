@@ -45,10 +45,10 @@ const MyInfoPage = () => {
 
   return (
     <>
-      <div className='relative w-full max-w-[393px] min-h-screen bg-white flex flex-col py-6 px-4'>
+      <div className='relative w-full bg-white flex flex-col py-6 px-4'>
         {/* 상단 헤더 */}
         <div className='mb-[500px]'>
-          <div className='flex items-center justify-center mt-[72px] mb-[34px]'>
+          <div className='flex items-center justify-center pt-3 mb-[34px]'>
             <img
               src={leftChevron}
               alt='뒤로가기'
