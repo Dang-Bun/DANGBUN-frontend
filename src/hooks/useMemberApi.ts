@@ -6,7 +6,7 @@ export const useMemberApi = {
     api.post(`/places/${placeId}/members/${memberId}/accept`),
 
   // 멤버 목록 조회
-  list: (placeId) => api.get(`/places/${placeId}/members`),
+  list: (placeId: number) => api.get(`/places/${placeId}/members`),
 
   // 멤버 정보 조회
   get: (placeId, memberId) => api.get(`/places/${placeId}/members/${memberId}`),
