@@ -9,6 +9,7 @@ import BottomBar from '../../components/BottomBar';
 import CategoryChip from '../../components/home/CategoryChip';
 import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
 
+
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
@@ -205,6 +206,16 @@ const ManagerHome: React.FC = () => {
           const rawChecklist = Number(t.checklistId);
           const checklistId = Number.isFinite(rawChecklist) ? rawChecklist : null;
 
+          // 디버깅용 로그 추가
+          console.log('🔍 [ManagerHome] Task 데이터:', {
+            cleaningId,
+            title: t.cleaningName ?? t.dutyName ?? t.name,
+            membersName: t.membersName,
+            displayedNames: t.displayedNames,
+            endTime: t.endTime,
+            needPhoto: t.needPhoto,
+          });
+
           return {
             cleaningId,
             checklistId,
@@ -212,11 +223,15 @@ const ManagerHome: React.FC = () => {
             dueTime: t.endTime ?? null,
             members: Array.isArray(t.displayedNames) 
               ? t.displayedNames.filter(Boolean).map(String)
-              : [],
+              : (typeof t.membersName === 'string' 
+                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean)
+                  : []),
             memberCount: Array.isArray(t.displayedNames) 
               ? t.displayedNames.filter(Boolean).length
-              : 0,
-            isCamera: false,
+              : (typeof t.membersName === 'string' 
+                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean).length
+                  : 0),
+            isCamera: !!t.needPhoto,
             isChecked: !!(t.completed ?? t.isChecked),
             completedAt: t.completedAt ?? null,
             completedBy: t.completedBy ?? null,
@@ -418,6 +433,8 @@ const ManagerHome: React.FC = () => {
   const goToNotification = useCallback(() => {
     if (pid) navigate(`/${pid}/alarm`);
   }, [navigate, pid]);
+
+
   
   /* ---------- 렌더링 ---------- */
   if (loading) return <div className="p-6">로딩중…</div>;
@@ -492,29 +509,30 @@ const ManagerHome: React.FC = () => {
 
       {/* 목록 */}
       <main className="relative z-10 px-5 flex flex-col flex-grow min-h-0">
-        {/* 필터 섹션 - 항상 표시 */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="relative flex items-center">
-            <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
-              {filter === 'all'
-                ? '전체 청소'
-                : filter === 'ing'
-                ? '달성 미완료'
-                : '달성 완료'}
-            </h2>
-            <img
-              src={toggle}
-              alt="정렬"
-              onClick={() => setMemberPopUp(!memberPopUp)}
-              className="w-5 h-5 cursor-pointer"
-            />
-            {memberPopUp && (
-              <div className="absolute ml-5 top-[calc(100%+10px)] z-50">
-                <CategoryChip onSelect={handleFilterSelect} />
-              </div>
-            )}
-          </div>
-        </div>
+                 {/* 필터 섹션 - 항상 표시 */}
+         <div className="flex justify-between items-center mb-4">
+           <div className="relative flex items-center">
+             <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
+               {filter === 'all'
+                 ? '전체 청소'
+                 : filter === 'ing'
+                 ? '달성 미완료'
+                 : '달성 완료'}
+             </h2>
+             <img
+               src={toggle}
+               alt="정렬"
+               onClick={() => setMemberPopUp(!memberPopUp)}
+               className="w-5 h-5 cursor-pointer"
+             />
+             {memberPopUp && (
+               <div className="absolute ml-5 top-[calc(100%+10px)] z-50">
+                 <CategoryChip onSelect={handleFilterSelect} />
+               </div>
+             )}
+           </div>
+           
+         </div>
 
         {/* 체크리스트 카드 섹션 */}
         {hasChecklist ? (
@@ -547,13 +565,14 @@ const ManagerHome: React.FC = () => {
       <div className="flex-shrink-0 z-10">
         <BottomBar />
       </div>
-      <UpLoadPopUp
-        isOpen={isUploadOpen}
-        onRequestClose={closeUpload}
-        onConfirm={confirmUpload}
-      />
-    </div>
-  );
-};
+             <UpLoadPopUp
+         isOpen={isUploadOpen}
+         onRequestClose={closeUpload}
+         onConfirm={confirmUpload}
+       />
+       
+     </div>
+   );
+ };
 
 export default ManagerHome;

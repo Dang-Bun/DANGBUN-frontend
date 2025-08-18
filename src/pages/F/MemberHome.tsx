@@ -220,17 +220,29 @@ const MemberHome: React.FC = () => {
           const rawChecklist = Number((t as Record<string, unknown>)?.checklistId);
           const checklistId = Number.isFinite(rawChecklist) ? rawChecklist : null;
 
-          // 멤버 목록 파싱
-          const names: string[] = Array.isArray((t as Record<string, unknown>)?.members ?? (t as Record<string, unknown>)?.assignees)
-            ? ((t as Record<string, unknown>)?.members ?? (t as Record<string, unknown>)?.assignees as unknown[]).map((m: unknown) => 
-                (m as Record<string, unknown>)?.name ?? (m as unknown as string)
-              ).filter(Boolean)
-            : typeof (t as Record<string, unknown>)?.membersName === 'string'
-              ? String((t as Record<string, unknown>).membersName)
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : [];
+                  // 멤버 목록 파싱
+        const names: string[] = Array.isArray((t as Record<string, unknown>)?.members ?? (t as Record<string, unknown>)?.assignees)
+          ? ((t as Record<string, unknown>)?.members ?? (t as Record<string, unknown>)?.assignees as unknown[]).map((m: unknown) => 
+              (m as Record<string, unknown>)?.name ?? (m as unknown as string)
+            ).filter(Boolean)
+          : typeof (t as Record<string, unknown>)?.membersName === 'string'
+            ? String((t as Record<string, unknown>).membersName)
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [];
+
+        // 디버깅용 로그 추가
+        console.log('🔍 [MemberHome] Task 데이터:', {
+          cleaningId,
+          title: (t as Record<string, unknown>)?.cleaningName ?? (t as Record<string, unknown>)?.dutyName ?? (t as Record<string, unknown>)?.name,
+          membersName: (t as Record<string, unknown>)?.membersName,
+          members: (t as Record<string, unknown>)?.members,
+          assignees: (t as Record<string, unknown>)?.assignees,
+          parsedNames: names,
+          endTime: (t as Record<string, unknown>)?.endTime,
+          needPhoto: (t as Record<string, unknown>)?.needPhoto,
+        });
 
           // 멤버홈 전용: 내가 담당자인지 확인
           const mine = !!myName && (names.includes(myName) || names.includes('멤버 전체'));
