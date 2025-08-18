@@ -426,11 +426,15 @@ const DutyManagement = () => {
       setErr(null);
 
       // ✅ API 호출
-      await useDutyApi.removeCleaning(placeId, dutyId, selectedCleaning.id);
+      await useDutyApi.removeCleaning(
+        placeId,
+        dutyId,
+        selectedCleaning.cleaningId
+      );
 
       // ✅ UI에서 즉시 반영 (cleanings 상태를 최신화)
       setCleanings((prev) =>
-        prev.filter((c) => c.cleaningId !== selectedCleaning.id)
+        prev.filter((c) => c.cleaningId !== selectedCleaning.cleaningId)
       );
 
       // 팝업 닫기
