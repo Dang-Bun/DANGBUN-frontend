@@ -38,11 +38,11 @@ export const useCleaningApi = {
     }),
 
   /** 당번별 청소 생성 */
-  createCleaning: (placeId: Id, data) =>
+  createCleaning: (placeId: Id, data: UpdateCleaningPayload) =>
     api.post(`/places/${placeId}/cleanings`, data),
 
   /** 당번별 청소 수정 */
-  updateCleaning: (placeId: Id, cleaningId: Id, data) =>
+  updateCleaning: (placeId: Id, cleaningId: Id, data: UpdateCleaningPayload) =>
     api.put(`/places/${placeId}/cleanings/${cleaningId}`, data),
 
   /** 청소 삭제 */
