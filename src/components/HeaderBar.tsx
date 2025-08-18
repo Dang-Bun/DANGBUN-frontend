@@ -7,6 +7,7 @@ interface HeaderProps {
   rightElement?: React.ReactNode;
   onRightClick?: () => void;
   showBackButton?: boolean;
+  onBackClick?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -14,12 +15,17 @@ const Header: React.FC<HeaderProps> = ({
   rightElement,
   onRightClick,
   showBackButton = true,
+  onBackClick,
 }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate('/');
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      if (window.history.length > 1) navigate(-1);
+      else navigate('/');
+    }
   };
 
   return (

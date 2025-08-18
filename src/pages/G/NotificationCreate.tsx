@@ -10,6 +10,7 @@ import MemberPopUp from '../../components/notification/MemberPopUp';
 import WritingChip from '../../components/notification/WritingChip';
 import CTAButton from '../../components/button/CTAButton';
 import Toast from '../../components/PopUp/TostPopUp';
+import PopUpCardExit from '../../components/PopUp/PopUpCardExit';
 import useDutyApi from '../../hooks/useDutyApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 
@@ -48,6 +49,7 @@ const NotificationCreate: React.FC = () => {
 	const [dutyMembers, setDutyMembers] = useState<Record<number, Person[]>>({});
 	const [loadingMembers, setLoadingMembers] = useState(false);
 	const searchModalRef = useRef<SearchHandler>(null);
+	const [showExitConfirm, setShowExitConfirm] = useState(false);
 
 	const handleMemberSelect = (type: 'dangbun' | 'member') => {
 		setMemberPopUp(false);
@@ -57,6 +59,27 @@ const NotificationCreate: React.FC = () => {
 
 	const handleAddManualMember = (person: Person) => {
 		setManualMembers((prev) => (prev.find((p) => p.id === person.id) ? prev : [...prev, person]));
+	};
+
+	// 나가기 확인 관련 핸들러들
+	const handleBackClick = () => {
+		// 내용이 입력되어 있으면 확인 팝업 표시
+		if (customContent.trim() !== '' || 
+			Object.values(dangbunSelections).some(arr => arr.length > 0) || 
+			manualMembers.length > 0) {
+			setShowExitConfirm(true);
+		} else {
+			navigate(`/${placeId}/alarm`);
+		}
+	};
+
+	const handleConfirmExit = () => {
+		setShowExitConfirm(false);
+		navigate(`/${placeId}/alarm`);
+	};
+
+	const handleCancelExit = () => {
+		setShowExitConfirm(false);
 	};
 
 	const ReadyToSubmit =
@@ -239,7 +262,7 @@ const NotificationCreate: React.FC = () => {
 
 	return (
 		<div>
-			<Header title="알림 작성" />
+			<Header title="알림 작성" onBackClick={handleBackClick} />
 			<div className="px-[20px] pt-[68px]">
 				<div className="flex items-center gap-[8px]">
 					<p className="text-base font-semibold">To:</p>
@@ -402,6 +425,16 @@ const NotificationCreate: React.FC = () => {
 
 				<SearchModal ref={searchModalRef} placeId={placeId} onSelectMember={handleAddManualMember} />
 				<Toast message={toastMsg} visible={showToast} />
+				<PopUpCardExit
+					isOpen={showExitConfirm}
+					onRequestClose={handleCancelExit}
+					title="알림 작성을 중단하고 나가시겠습니까?"
+					descript="입력한 내용들은 모두 초기화 됩니다."
+					first="취소"
+					second="확인"
+					onFirstClick={handleCancelExit}
+					onSecondClick={handleConfirmExit}
+				/>
 			</div>
 		</div>
 	);
