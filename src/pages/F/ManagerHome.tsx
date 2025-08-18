@@ -116,10 +116,10 @@ const toArray = (x: any): any[] =>
     ? x.data
     : [];
 
-
-
+// ====== 여기부터 변경: TaskUI에 cleaningId/checklistId 분리 ======
 type TaskUI = {
-  id: number;
+  cleaningId: number;          // UI용(목록/키)
+  checklistId: number | null;  // 서버 액션/업로드용
   title: string;
   dueTime: string | null;
   members: string[];
@@ -130,6 +130,7 @@ type TaskUI = {
   completedBy?: string | null;
   dutyId: number;
 };
+// ====== 변경 끝 ======
 
 type DutyUI = {
   id: number;
@@ -168,8 +169,16 @@ const ManagerHome: React.FC = () => {
   const [activePage, setActivePage] = useState(0);
   const [memberPopUp, setMemberPopUp] = useState(false);
   const [filter, setFilter] = useState<'all' | 'ing' | 'done'>('all');
+
+  // ====== 변경: 업로드 타겟 상태에 checklistId 포함 ======
   const [isUploadOpen, setUploadOpen] = useState(false);
-  const [uploadTaskId, setUploadTaskId] = useState<{ dutyId: number; id: number } | null>(null);
+  const [uploadTaskId, setUploadTaskId] = useState<{
+    dutyId: number;
+    cleaningId: number;
+    checklistId: number | null;
+  } | null>(null);
+  // ====== 변경 끝 ======
+
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   /* ---------- 데이터 로드 및 처리 로직 ---------- */
@@ -190,31 +199,31 @@ const ManagerHome: React.FC = () => {
         const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
         const taskList = toArray(infoRes);
 
+        // ====== 변경: 두 ID 모두 매핑 ======
         const tasksPromises = taskList.map(async (t: any) => {
-          // cleaningId를 여러 필드에서 찾기
-          const cleaningId = Number(t.cleaningId ?? t.id ?? t.checklistId);
-          console.log(`Processing task:`, t);
-          console.log(`Using cleaningId: ${cleaningId}`);
-
-          // displayedNames 필드에서 멤버 정보 가져오기
-          const members = Array.isArray(t.displayedNames) 
-            ? t.displayedNames.filter(Boolean).map(String)
-            : [];
-          console.log(`Members from displayedNames for cleaningId ${cleaningId}:`, members);
+          const cleaningId = Number(t.cleaningId ?? t.id ?? t.checklistId); // UI 키
+          const rawChecklist = Number(t.checklistId);
+          const checklistId = Number.isFinite(rawChecklist) ? rawChecklist : null;
 
           return {
-            id: cleaningId,
+            cleaningId,
+            checklistId,
             title: String(t.cleaningName ?? t.dutyName ?? t.name ?? ''),
             dueTime: t.endTime ?? null,
-            members: members,
-            memberCount: members.length, // 실제 멤버 배열의 길이 사용
-            isCamera: false, // 기본값으로 설정 (필요시 나중에 수정)
+            members: Array.isArray(t.displayedNames) 
+              ? t.displayedNames.filter(Boolean).map(String)
+              : [],
+            memberCount: Array.isArray(t.displayedNames) 
+              ? t.displayedNames.filter(Boolean).length
+              : 0,
+            isCamera: false,
             isChecked: !!(t.completed ?? t.isChecked),
             completedAt: t.completedAt ?? null,
             completedBy: t.completedBy ?? null,
             dutyId,
-          };
+          } as TaskUI;
         });
+        // ====== 변경 끝 ======
 
         const tasks = await Promise.all(tasksPromises);
 
@@ -240,8 +249,6 @@ const ManagerHome: React.FC = () => {
       try {
         await useMemberApi.me(pid).catch(() => {});
         const resolvedDuties = await fetchTaskData();
-        console.log('Loaded duties:', resolvedDuties);
-        console.log('Total tasks:', resolvedDuties.flatMap(d => d.tasks).length);
         if (mounted) setDuties(resolvedDuties);
       } catch (e) {
         console.error('Data loading failed:', e);
@@ -304,42 +311,53 @@ const ManagerHome: React.FC = () => {
     return '/bg/bgMiddle.svg';
   }, [page.percent]);
 
-  const toggleTask = async (dutyId: number, taskId: number) => {
-    const t = page.tasks.find((x) => x.id === taskId && x.dutyId === dutyId);
+  // ====== 변경: 토글 시 checklistId 사용, 로컬 패치 기준은 cleaningId ======
+  const toggleTask = async (dutyId: number, cleaningId: number) => {
+    const t = page.tasks.find((x) => x.cleaningId === cleaningId && x.dutyId === dutyId) as TaskUI | undefined;
     if (!t) return;
+
+    if (!t.checklistId) {
+      alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
+      return;
+    }
+
     try {
       if (t.isChecked) {
-        await useChecklistApi.incompleteChecklist(pid, taskId);
-        patchLocal(dutyId, taskId, { isChecked: false, completedAt: null, completedBy: null });
+        await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+        patchLocal(dutyId, cleaningId, { isChecked: false, completedAt: null, completedBy: null });
       } else {
-        await useChecklistApi.completeChecklist(pid, taskId);
+        await useChecklistApi.completeChecklist(pid, t.checklistId);
         const now = new Date().toTimeString().slice(0, 5);
-        patchLocal(dutyId, taskId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+        patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
       }
     } catch (e) {
       console.error('체크 전환 실패:', e);
       alert('체크 상태 변경 실패');
     }
   };
+  // ====== 변경 끝 ======
 
+  // ====== 변경: cleaningId 기준으로 로컬 패치 ======
   const patchLocal = useCallback(
-    (dutyId: number, id: number, patch: Partial<TaskUI>) => {
+    (dutyId: number, cleaningId: number, patch: Partial<TaskUI>) => {
       setDuties((prev) =>
         prev.map((d) =>
           d.id !== dutyId
             ? d
             : {
                 ...d,
-                tasks: d.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+                tasks: d.tasks.map((t) => (t.cleaningId === cleaningId ? { ...t, ...patch } : t)),
               }
         )
       );
     },
     []
   );
+  // ====== 변경 끝 ======
 
-  const openUploadFor = useCallback((dutyId: number, id: number) => {
-    setUploadTaskId({ dutyId, id });
+  // ====== 변경: 업로드용 open/close에 checklistId 포함 ======
+  const openUploadFor = useCallback((dutyId: number, cleaningId: number, checklistId: number | null) => {
+    setUploadTaskId({ dutyId, cleaningId, checklistId });
     setUploadOpen(true);
   }, []);
 
@@ -347,12 +365,21 @@ const ManagerHome: React.FC = () => {
     setUploadOpen(false);
     setUploadTaskId(null);
   }, []);
+  // ====== 변경 끝 ======
 
+  // ====== 변경: 사진 업로드 시 checklistId 사용 ======
   const confirmUpload = async (file: File) => {
     if (!uploadTaskId) return;
-    const { dutyId, id } = uploadTaskId;
+    const { dutyId, cleaningId, checklistId } = uploadTaskId;
+
+    if (!checklistId) {
+      alert('체크리스트 ID가 없어 사진 업로드를 진행할 수 없습니다.');
+      closeUpload();
+      return;
+    }
+
     try {
-      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(pid, id, {
+      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
         originalFileName: file.name,
         contentType: file.type,
       });
@@ -364,10 +391,10 @@ const ManagerHome: React.FC = () => {
       });
       if (!put.ok) throw new Error('S3 업로드 실패');
 
-      await useChecklistApi.completePhotoUpload(pid, id, { s3Key: presign.s3Key });
+      await useChecklistApi.completePhotoUpload(pid, checklistId, { s3Key: presign.s3Key });
 
       const now = new Date().toTimeString().slice(0, 5);
-      patchLocal(dutyId, id, { isChecked: true, completedAt: now, completedBy: 'manager' });
+      patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
     } catch (e) {
       console.error('사진 업로드 실패:', e);
       alert('사진 업로드 실패');
@@ -375,6 +402,7 @@ const ManagerHome: React.FC = () => {
       closeUpload();
     }
   };
+  // ====== 변경 끝 ======
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => setActivePage((p) => Math.min(p + 1, totalPages - 1)),
@@ -493,7 +521,7 @@ const ManagerHome: React.FC = () => {
           <div className="flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar">
             {visibleTasks.map((t) => (
               <TaskCard
-                key={`${t.dutyId}:${t.id}`}
+                key={`${t.dutyId}:${t.cleaningId}`}
                 title={t.title}
                 dueTime={t.dueTime ?? ''}
                 members={t.members}
@@ -502,9 +530,9 @@ const ManagerHome: React.FC = () => {
                 isChecked={t.isChecked}
                 completedAt={t.completedAt ?? undefined}
                 completedBy={t.completedBy ?? undefined}
-                onToggle={() => toggleTask(t.dutyId, t.id)}
+                onToggle={() => toggleTask(t.dutyId, t.cleaningId)}
                 onCameraClick={() =>
-                  !t.isChecked && t.isCamera && openUploadFor(t.dutyId, t.id)
+                  !t.isChecked && t.isCamera && openUploadFor(t.dutyId, t.cleaningId, t.checklistId)
                 }
               />
             ))}
