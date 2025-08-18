@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const SelectPlace = () => {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate('/MyPlace');
+    navigate('/login');
   };
 
   return (
@@ -23,7 +23,7 @@ const SelectPlace = () => {
         <img src={joinComplete} alt='회원가입 완료 표시' />
       </div>
       <div className='flex w-full justify-center mt-[229px]'>
-        <CTAButton onClick={handleClick}>내 플레이스로 이동</CTAButton>
+        <CTAButton onClick={handleClick}>로그인 화면으로 이동</CTAButton>
       </div>
     </div>
   );
