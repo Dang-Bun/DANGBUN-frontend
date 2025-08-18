@@ -35,8 +35,10 @@ import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import useCalendarApi from '../../hooks/useCalendarApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 
+ 
 const CATEGORY_ICON_SRC: Record<string, string> = {
   CAFE: CAFE_IMG,
   RESTAURANT: RESTAURANT_IMG,
@@ -63,18 +65,17 @@ const DUTY_ICON_SRC: Record<string, string> = {
 const arr = (x: unknown): unknown[] =>
   Array.isArray(x)
     ? x
-    : Array.isArray((x as any)?.data)
-      ? (x as any).data
-      : Array.isArray((x as any)?.data?.data)
-        ? (x as any).data.data
-        : Array.isArray((x as any)?.content)
-          ? (x as any).content
-          : Array.isArray((x as any)?.items)
-            ? (x as any).items
+    : Array.isArray((x as Record<string, unknown>)?.data)
+      ? (x as Record<string, unknown>).data as unknown[]
+      : Array.isArray((x as Record<string, unknown>)?.data?.data)
+        ? (x as Record<string, unknown>).data?.data as unknown[]
+        : Array.isArray((x as Record<string, unknown>)?.content)
+          ? (x as Record<string, unknown>).content as unknown[]
+          : Array.isArray((x as Record<string, unknown>)?.items)
+            ? (x as Record<string, unknown>).items as unknown[]
             : [];
 
-const obj = (x: unknown): unknown =>
-  (x as any)?.data?.data ?? (x as any)?.data ?? x ?? {};
+const obj = (x: unknown): unknown => (x as Record<string, unknown>)?.data?.data ?? (x as Record<string, unknown>)?.data ?? x ?? {};
 
 /* ---------------------- 화면 타입 ---------------------- */
 type DutyIconKey =
@@ -155,10 +156,18 @@ const MemberHome: React.FC = () => {
       try {
         if (!pid) return;
 
-        // 1) 내 정보
-        const me = obj(await useMemberApi.me(pid)) as { name?: string };
-        const myName = me.name ?? '';
-        setUserName(myName);
+                 // 1) 내 정보
+         const meResponse = await useMemberApi.me(pid);
+         console.log('🔍 [member] 원본 응답:', meResponse);
+         console.log('🔍 [member] data:', meResponse?.data);
+         console.log('🔍 [member] data.data:', meResponse?.data?.data);
+         
+         const me = obj(meResponse) as Record<string, unknown>;
+         console.log('🔍 [member] 파싱된 데이터:', me);
+         
+         const myName = (me.name ?? me.memberName ?? me.userName ?? me.nickname ?? '') as string;
+         console.log('🔍 [member] 사용자 이름:', myName);
+         setUserName(myName);
 
         // 2) 당번 목록
         const dutyRes = await useDutyApi.list(pid);
@@ -176,22 +185,29 @@ const MemberHome: React.FC = () => {
           ) as number;
           if (!dutyId) continue;
           const info = await useDutyApi.getCleaningInfo(pid, dutyId);
-          const raw: any[] = Array.isArray(info?.data?.tasks)
+          const raw: unknown[] = Array.isArray(info?.data?.tasks)
             ? info.data.tasks
             : arr(info?.data);
 
           const tasks: TaskUI[] = raw.map((t) => {
-            const members = (t.members ?? t.assignees ?? []).map(
-              (m: unknown) => (m as any)?.name ?? m
-            );
+            const names: string[] = Array.isArray((t as any)?.members ?? (t as any)?.assignees)
+              ? ((t as any)?.members ?? (t as any)?.assignees).map(
+                  (m: unknown) => (m as Record<string, unknown>)?.name ?? (m as unknown as string)
+                ).filter(Boolean)
+              : typeof (t as any)?.membersName === 'string'
+                ? String((t as any).membersName)
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : [];
             const mine =
               !!myName &&
-              (members.includes(myName) || members.includes('멤버 전체'));
+              (names.includes(myName) || names.includes('멤버 전체'));
             return {
               id: t.id,
               title: t.name ?? t.title ?? '',
-              dueTime: t.dueTime ?? null,
-              members,
+              dueTime: (t as any)?.endTime ?? t.dueTime ?? null,
+              members: names,
               isCamera: !!t.needPhoto,
               isChecked: !!t.completed,
               completedAt: t.completedAt ?? null,
@@ -372,7 +388,8 @@ const MemberHome: React.FC = () => {
           completedBy: null,
         });
       } else {
-        await useChecklistApi.completeChecklist(pid, taskId);
+        // 캘린더와 동일한 API 사용
+        await useCalendarApi.completeChecklist(pid, taskId);
         const now = new Date().toTimeString().slice(0, 5);
         patchLocal(taskId, {
           isChecked: true,
@@ -524,6 +541,7 @@ const MemberHome: React.FC = () => {
                     title={t.title}
                     dueTime={t.dueTime ?? ''}
                     members={t.members}
+                    memberCount={t.members?.length ?? 0}
                     isCamera={t.isCamera}
                     isChecked={t.isChecked}
                     completedAt={t.completedAt ?? undefined}

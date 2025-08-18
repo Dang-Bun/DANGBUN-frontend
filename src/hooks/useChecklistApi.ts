@@ -52,7 +52,7 @@ export const useChecklistApi = {
     body: CreateUploadUrlRequest
   ) =>
     api.post<CreateUploadUrlResponse>(
-      `/places/${placeId}/checkLists/${checklistId}/photos/upload-url`,
+      `/places/${placeId}/checklists/${checklistId}/photos/upload-url`,
       body
     ),
 
@@ -63,26 +63,26 @@ export const useChecklistApi = {
     body: CompletePhotoUploadRequest
   ) =>
     api.post<ApiEnvelope<null>>(
-      `/places/${placeId}/checkLists/${checklistId}/photos/complete`,
+      `/places/${placeId}/checklists/${checklistId}/photos/complete`,
       body
     ),
 
   /** 3) 체크리스트 완료 */
   completeChecklist: (placeId: number, checklistId: number) =>
     api.post<ApiEnvelope<CompleteChecklistData>>(
-      `/places/${placeId}/checkLists/${checklistId}/actions/complete`
+      `/places/${placeId}/checklists/${checklistId}/actions/complete`
     ),
 
   /** 4) 체크리스트 해제 */
   incompleteChecklist: (placeId: number, checklistId: number) =>
     api.post<ApiEnvelope<IncompleteChecklistData>>(
-      `/places/${placeId}/checkLists/${checklistId}/actions/incomplete`
+      `/places/${placeId}/checklists/${checklistId}/actions/incomplete`
     ),
 
   /** 5) 사진 접근 URL 조회 */
   getPhotoAccessUrl: (placeId: number, checklistId: number) =>
     api.get<ApiEnvelope<PhotoAccessData>>(
-      `/places/${placeId}/checkLists/${checklistId}/photos`
+      `/places/${placeId}/checklists/${checklistId}/photos`
     ),
 };
 
