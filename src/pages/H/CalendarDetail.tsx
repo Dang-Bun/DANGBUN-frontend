@@ -1,17 +1,15 @@
-import '../../styles/CalendarOverride.css';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
+import { useParams } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import toggleDown from '../../assets/home/toggleDown.svg';
-import toggleUp from '../../assets/home/toggleUp.svg';
-import { useCalendarApi } from '../../hooks/useCalendarApi';
+import toggleUp from '../../assets/home/toggleDown.svg';
+import useCalendarApi from '../../hooks/useCalendarApi';
 
 dayjs.locale('ko');
 
-// API 응답과 동일한 구조를 가진 타입 정의
 interface CleaningData {
   cleaningId: number;
   dutyName: string;
@@ -23,6 +21,7 @@ interface CleaningData {
 }
 
 const CalendarDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [cleaningData, setCleaningData] = useState<CleaningData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,37 +33,69 @@ const CalendarDetail: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const VISIBLE_COUNT = 3;
 
-  const PLACE_ID = 1;
-  const CHECKLIST_ID = 1;
-
   useEffect(() => {
     const fetchCleaningData = async () => {
       try {
         setLoading(true);
-        const response = await useCalendarApi.getCleanings(PLACE_ID, CHECKLIST_ID);
-        setCleaningData(response.data.data);
-      } catch (err) {
-        setError('청소 데이터를 불러오는 데 실패했습니다.');
-        console.error(err);
+        setError(null);
+
+        const PLACE_ID = localStorage.getItem('placeId');
+        const accessToken = localStorage.getItem('accessToken');
+        
+        if (!PLACE_ID || !accessToken) {
+          setError('로그인이 필요합니다.');
+          return;
+        }
+
+        const placeId = parseInt(PLACE_ID, 10);
+        const checklistId = Number(id);
+
+        if (!checklistId) {
+          setError('잘못된 체크리스트 ID입니다.');
+          return;
+        }
+
+        console.log('Debug - Fetching cleaning data for:', { placeId, checklistId });
+
+        const response = await useCalendarApi.getCleanings(placeId, checklistId);
+        console.log('Debug - Cleaning data response:', response.data);
+
+        // API 응답 데이터를 CleaningData 형식으로 변환
+        const apiData = response.data?.data;
+        if (!apiData) {
+          setError('청소 정보를 찾을 수 없습니다.');
+          return;
+        }
+
+        const cleaningData: CleaningData = {
+          cleaningId: apiData.cleaningId || checklistId,
+          dutyName: apiData.dutyName || apiData.title || '청소',
+          membersName: apiData.membersName || apiData.members || [],
+          needPhoto: apiData.needPhoto || false,
+          repeatType: apiData.repeatType || 'WEEKLY',
+          repeatDays: apiData.repeatDays || [],
+          dates: apiData.dates || []
+        };
+        
+        setCleaningData(cleaningData);
+      } catch (err: unknown) {
+        console.error('Error fetching cleaning data:', err);
+        if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response && err.response.status === 403) {
+          setError('권한이 없습니다. 다시 로그인해주세요.');
+        } else {
+          setError('데이터를 불러오는 데 실패했습니다.');
+        }
       } finally {
         setLoading(false);
       }
     };
-    fetchCleaningData();
-  }, []);
 
-  const highlightDays = useMemo(() => {
-    const map: Record<string, number> = { 'SUNDAY': 0, 'MONDAY': 1, 'TUESDAY': 2, 'WEDNESDAY': 3, 'THURSDAY': 4, 'FRIDAY': 5, 'SATURDAY': 6 };
-    if (!cleaningData?.repeatDays) return new Set<number>();
-    
-    return new Set(
-      cleaningData.repeatDays
-        .map((k) => map[k])
-        .filter((n): n is number => n !== undefined)
-    );
-  }, [cleaningData]);
+    fetchCleaningData();
+  }, [id]);
+
+
   
-  const memberNames = useMemo(() => {
+  const memberNames = React.useMemo(() => {
     return cleaningData?.membersName || [];
   }, [cleaningData]);
 
@@ -72,7 +103,7 @@ const CalendarDetail: React.FC = () => {
   const rest = memberNames.length > VISIBLE_COUNT ? memberNames.slice(VISIBLE_COUNT) : [];
   const hasMore = memberNames.length > VISIBLE_COUNT;
 
-  const monthOptions = useMemo(
+  const monthOptions = React.useMemo(
     () => Array.from({ length: 6 }, (_, i) => dayjs().add(i, 'month').startOf('month')),
     []
   );
@@ -83,7 +114,7 @@ const CalendarDetail: React.FC = () => {
     setActiveStartDate(next);
   };
 
-  const tileClassName = ({ date, view, activeStartDate }: any) => {
+  const tileClassName = ({ date, view, activeStartDate }: { date: Date; view: string; activeStartDate: Date }) => {
     if (view !== 'month') return '';
 
     const isSameMonth =
@@ -96,6 +127,7 @@ const CalendarDetail: React.FC = () => {
     if (!isSameMonth) return base + ' text-[#8e8e8e]';
 
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
+    
     if (cleaningData?.dates.includes(formattedDate)) {
         return base + ' !bg-blue-500 !text-white !rounded-full';
     }

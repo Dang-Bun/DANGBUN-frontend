@@ -33,10 +33,19 @@ const BottomBar = () => {
       <button
         type='button'
         onClick={() => {
-          if (role === '매니저' || role === 'manager') {
-            navigate('/home/manager', { state: { role, placeId } });
+          const placeName = localStorage.getItem('placeName');
+          const placeIcon = localStorage.getItem('placeIcon');
+          const state = { 
+            role, 
+            placeId: placeId ? Number(placeId) : undefined,
+            placeName,
+            placeIcon
+          };
+          
+          if (role === '매니저'|| role === 'manager') {
+            navigate('/home/manager', { state });
           } else {
-            navigate('/home/member', { state: { role, placeId } });
+            navigate('/home/member', { state });
           }
         }}
       >

@@ -9,14 +9,12 @@ type Props = {
 };
 
 const SelectBottom: React.FC<Props> = ({ onOpenInfo, onViewPhoto, onDelete }) => {
-  const navigate = useNavigate();
   const handleOpenInfo = () => {
     onOpenInfo?.();
-    navigate('/calendar/content');
   };
 
   return (
-    <div className="h-[212px] gapx-[18px] bg-white rounded-[24px] flex flex-col items-center justify-center">
+    <div className="h-[212px] gapx-[18px] bg-white rounded-[24px] flex flex-col items-center justify-center z-50 relative">
       <img src={grayBar} alt="바" className="pt-[20px]" />
       <div className="flex flex-col p-[18px] w-full max-w-[375px]">
         <div>

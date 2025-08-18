@@ -101,9 +101,10 @@ const ManagerHome: React.FC = () => {
     state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
   };
   // 컨텍스트: state 우선, 없으면 localStorage
-  const pid = Number(state?.placeId);
-  const placeName = state?.placeName;
-  const placeIconKey = state?.placeIcon
+  const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
+  const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
+  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
+  
   useEffect(() => {
     if (pid) localStorage.setItem('placeId', String(pid));
     if (placeName) localStorage.setItem('placeName', placeName);

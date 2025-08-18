@@ -109,16 +109,20 @@ type DutyUI = {
 /* ---------------------- 컴포넌트 ---------------------- */
 const MemberHome: React.FC = () => {
   const navigate = useNavigate();
-  const { placeId } = (useLocation().state || {}) as { placeId?: number };
+  const { state } = useLocation() as {
+    state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
+  };
 
   /* 컨텍스트 */
-  const pid = Number(placeId ?? localStorage.getItem('placeId') ?? 0);
-  const placeIconKey =
-    (useLocation().state as any)?.placeIcon ??
-    localStorage.getItem('placeIcon');
-  useEffect(() => {
-    if (placeId) localStorage.setItem('placeId', String(placeId));
-  }, [placeId]);
+  const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
+  const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
+  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
+  
+  useEffect(() => { 
+    if (pid) localStorage.setItem('placeId', String(pid));
+    if (placeName) localStorage.setItem('placeName', placeName);
+    if (placeIconKey) localStorage.setItem('placeIcon', placeIconKey);
+  }, [pid, placeName, placeIconKey]);
 
   /* 상태 */
   const [loading, setLoading] = useState(true);
@@ -374,23 +378,13 @@ const MemberHome: React.FC = () => {
         }}
       />
       {/* 상단 */}
-      <div {...swipeHandlers} className='relative z-10 px-5 pt-4 flex-shrink-0'>
-        <div className='flex flex-col items-center h-[420px]'>
-          <div className='flex items-center relative'>
-            <span className='font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2'>
-              당번
-            </span>
-            <div className='flex items-center gap-[210px]'>
-              <PlaceNameCard
-                place='플레이스'
-                type={page.percent >= 100 ? 'complete' : 'default'}
-              />
-              <img
-                src={notificationImage}
-                alt='알림'
-                className='w-[36px] cursor-pointer'
-                onClick={goToNotification}
-              />
+      <div {...swipeHandlers} className="relative z-10 px-5 pt-4 flex-shrink-0">
+        <div className="flex flex-col items-center h-[420px]">
+          <div className="flex items-center relative">
+            <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">당번</span>
+            <div className="flex items-center gap-[210px]">
+              <PlaceNameCard place={placeName} type={page.percent >= 100 ? 'complete' : 'default'} />
+              <img src={notificationImage} alt="알림" className="w-[36px] cursor-pointer" onClick={goToNotification} />
             </div>
           </div>
           <div className='mt-[66px] mb-[18px]'>
