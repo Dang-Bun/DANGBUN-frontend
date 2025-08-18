@@ -299,23 +299,54 @@ const MemberHome: React.FC = () => {
     return () => { mounted = false; };
   }, [pid]);
 
-  // 알림 확인 로직
+  // 알림 확인 로직 - localStorage 기반으로 변경
   useEffect(() => {
     if (!pid) return;
-    const checkUnreadNotifications = async () => {
+    
+    const checkUnreadNotifications = () => {
       try {
-        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
-        const notifications = res?.data?.data || [];
-        const hasUnread = notifications.some((n: any) => !n.isRead);
-        setHasUnreadNotifications(hasUnread);
+        // localStorage에서 알림 목록 가져오기
+        const stored = localStorage.getItem(`notifications_${pid}`);
+        if (stored) {
+          const notifications = JSON.parse(stored);
+          const hasUnread = notifications.some((n: any) => !n.read);
+          setHasUnreadNotifications(hasUnread);
+        } else {
+          // localStorage에 없으면 API로 확인
+          useNotificationApi.listReceived(pid, { page: 0, size: 20 })
+            .then(res => {
+              const notifications = res?.data?.data || [];
+              const hasUnread = notifications.some((n: any) => !n.isRead);
+              setHasUnreadNotifications(hasUnread);
+            })
+            .catch(() => {
+              setHasUnreadNotifications(false);
+            });
+        }
       } catch {
-        setHasUnreadNotifications(true);
+        setHasUnreadNotifications(false);
       }
     };
+    
     checkUnreadNotifications();
+    
+    // localStorage 변경 감지
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `notifications_${pid}`) {
+        checkUnreadNotifications();
+      }
+    };
+    
+    // 페이지 포커스 시 확인
     const handleFocus = () => checkUnreadNotifications();
+    
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleFocus);
-    return () => { window.removeEventListener('focus', handleFocus); };
+    
+    return () => { 
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus); 
+    };
   }, [pid]);
 
   /* ---------- 파생 상태 및 이벤트 핸들러 ---------- */

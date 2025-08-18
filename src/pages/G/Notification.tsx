@@ -146,6 +146,15 @@ const Notification: React.FC = () => {
 						descript={n.descript}
 						timeAgo={n.timeAgo}
 						onClick={() => {
+							// 읽음 처리
+							if (!n.read) {
+								setList(prev => 
+									prev.map(item => 
+										item.id === n.id ? { ...item, read: true } : item
+									)
+								);
+							}
+							
 							console.log('카드 클릭 - 전달할 데이터:', n);
 							navigate(`/${placeId}/alarm/${n.id}`, {
 								state: {
