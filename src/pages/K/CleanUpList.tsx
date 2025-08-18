@@ -190,7 +190,7 @@ const CleanUpList = () => {
         </div>
       ) : (
         <div
-          className='flex flex-col overflow-y-auto items-center justify-start'
+          className='flex flex-col overflow-y-auto items-center justify-start gap-4'
           style={{ paddingTop: contentMargin }}
         >
           {dangbunList.map((duty, index) => (

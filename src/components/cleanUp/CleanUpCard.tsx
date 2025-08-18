@@ -147,30 +147,43 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       };
       const res = useDutyApi.assignCleaningMembers(placeId, dutyId, data);
       console.log(res);
+
+      setCleaningList((prev) =>
+        prev.map((c) =>
+          c.cleaningId === cleaningId
+            ? { ...c, displayedNames: clickedMembers }
+            : c
+        )
+      );
     } catch (e) {
       console.log(e);
     }
   };
 
   return (
-    <div className='flex flex-col gap-4'>
-      <button
-        className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
-        onClick={() => setSpecOpen(!specOpen)}
-      >
-        <div className='flex flex-row items-center gap-1'>
-          <img src={iconSrc} alt='icon' className='w-9 h-9' />
-          <p className='text-zinc-600 text-sm font-normal leading-tight'>
-            {title}
-          </p>
-        </div>
-        {specOpen ? (
-          <img src={up} alt='close' />
-        ) : (
-          <img src={down} alt='open' />
-        )}
-      </button>
-      {specOpen ? (
+    <div className='flex flex-col gap-4 '>
+      <div className='w-[353px] border-gray-300 border-t ' />
+
+      <div className='flex flex-col'>
+        <button
+          className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
+          onClick={() => setSpecOpen(!specOpen)}
+        >
+          <div className='flex flex-row items-center gap-3'>
+            <img src={iconSrc} alt='icon' className='w-9 h-9' />
+            <p className='text-zinc-600 text-base font-normal leading-tight'>
+              {title}
+            </p>
+          </div>
+          {specOpen ? (
+            <img src={up} alt='close' />
+          ) : (
+            <img src={down} alt='open' />
+          )}
+        </button>
+      </div>
+
+      {specOpen && cleaningList.length !== 0 ? (
         <div className='flex flex-col gap-3'>
           {cleaningList.map((cleaning) => (
             <div key={cleaning.cleaningId}>
