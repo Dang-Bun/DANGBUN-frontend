@@ -1,4 +1,4 @@
-import api from '../apis/axios'; 
+import api from '../apis/axios';
 
 const useNotificationApi = {
   // 받은 알림(수신함)
@@ -23,7 +23,9 @@ const useNotificationApi = {
 
   // 최근 검색어
   recentRecipientSearches: (placeId: number, params?: any) =>
-    api.get(`/places/${placeId}/notifications/recipients/recent-searches`, { params }),
+    api.get(`/places/${placeId}/notifications/recipients/recent-searches`, {
+      params,
+    }),
 };
 
 export default useNotificationApi;

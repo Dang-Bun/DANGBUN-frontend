@@ -40,7 +40,9 @@ const Notification: React.FC = () => {
   );
 
   const defaultTab = location.state?.tab === 'transmit' ? 'transmit' : 'inbox';
-  const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(defaultTab);
+  const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(
+    defaultTab
+  );
 
   const [list, setList] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +62,10 @@ const Notification: React.FC = () => {
         const res =
           selectedTab === 'transmit'
             ? await useNotificationApi.listSent(placeId, { page: 0, size: 20 })
-            : await useNotificationApi.listReceived(placeId, { page: 0, size: 20 });
+            : await useNotificationApi.listReceived(placeId, {
+                page: 0,
+                size: 20,
+              });
 
         const raw = res?.data?.data;
         const rows = toArray(raw);
@@ -80,7 +85,10 @@ const Notification: React.FC = () => {
         const status = e?.response?.status;
         if (status === 403) {
           setForbidden(true);
-          setError(e?.response?.data?.message || '해당 플레이스에 소속된 멤버가 아닙니다.');
+          setError(
+            e?.response?.data?.message ||
+              '해당 플레이스에 소속된 멤버가 아닙니다.'
+          );
         } else if (status === 401) {
           setError('로그인이 필요합니다.');
         } else {
@@ -101,30 +109,32 @@ const Notification: React.FC = () => {
     navigate(`/${placeId}/alarm/create`);
   };
 
-  const handleCardClick = async (id: string) => {
-    if (!placeId) return;
-    
-    try {
-      await useNotificationApi.markAsRead(placeId, id);
-      setList(prevList =>
-        prevList.map(item =>
-          item.id === id ? { ...item, read: true } : item
-        )
-      );
-    } catch (e) {
-      console.error("알림 읽음 처리 실패", e);
-    } finally {
-      navigate(`/${placeId}/alarm/${id}`);
-    }
-  };
+  // const handleCardClick = async (id: string) => {
+  //   if (!placeId) return;
+
+  //   try {
+  //     await useNotificationApi.markAsRead(placeId, id);
+  //     setList(prevList =>
+  //       prevList.map(item =>
+  //         item.id === id ? { ...item, read: true } : item
+  //       )
+  //     );
+  //   } catch (e) {
+  //     console.error("알림 읽음 처리 실패", e);
+  //   } finally {
+  //     navigate(`/${placeId}/alarm/${id}`);
+  //   }
+  // };
 
   if (!placeId) {
     return (
-      <div className="flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen">
-        <Header title="알림함" />
-        <div className="mt-6 px-6 text-center">
-          <p className="text-sm text-red-500">유효하지 않은 접근입니다.</p>
-          <p className="text-sm text-gray-500 mt-1">플레이스를 먼저 선택한 뒤 다시 시도해주세요.</p>
+      <div className='flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen'>
+        <Header title='알림함' />
+        <div className='mt-6 px-6 text-center'>
+          <p className='text-sm text-red-500'>유효하지 않은 접근입니다.</p>
+          <p className='text-sm text-gray-500 mt-1'>
+            플레이스를 먼저 선택한 뒤 다시 시도해주세요.
+          </p>
         </div>
         <BottomBar />
       </div>
@@ -132,29 +142,35 @@ const Notification: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen">
+    <div className='flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen'>
       <Header
-        title="알림함"
-        rightElement={<img src={CreateNotificationIcon} alt="쓰기 아이콘" className="w-[24px] h-[24px]" />}
+        title='알림함'
+        rightElement={
+          <img
+            src={CreateNotificationIcon}
+            alt='쓰기 아이콘'
+            className='w-[24px] h-[24px]'
+          />
+        }
         onRightClick={handleWriteClick}
       />
 
       <NotificationTab selectedTab={selectedTab} onChange={setSelectedTab} />
 
-      <div className="flex flex-col items-center gap-4 mt-4 w-full px-4">
-        {loading && <p className="text-sm text-gray-500">불러오는 중…</p>}
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className='flex flex-col items-center gap-4 mt-4 w-full px-4'>
+        {loading && <p className='text-sm text-gray-500'>불러오는 중…</p>}
+        {error && <p className='text-sm text-red-500'>{error}</p>}
 
         {!loading && forbidden && (
-          <div className="flex flex-col items-center gap-3 mt-2">
+          <div className='flex flex-col items-center gap-3 mt-2'>
             <button
-              className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm"
+              className='px-4 py-2 rounded-xl bg-blue-500 text-white text-sm'
               onClick={() => navigate(`/${placeId}/join`)}
             >
               이 플레이스 참여하기
             </button>
             <button
-              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm"
+              className='px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm'
               onClick={() => navigate('/places')}
             >
               다른 플레이스 선택
@@ -163,25 +179,26 @@ const Notification: React.FC = () => {
         )}
 
         {!loading && !error && !forbidden && list.length === 0 && (
-          <p className="text-sm text-gray-500">알림이 없습니다.</p>
+          <p className='text-sm text-gray-500'>알림이 없습니다.</p>
         )}
 
         {!forbidden &&
           list.map((n) => (
             <NotificationCard
               key={n.id}
-              type="member"
+              type='member'
               read={n.read}
               title={n.title}
               descript={n.descript}
               timeAgo={n.timeAgo}
-              onClick={() => handleCardClick(n.id)}
+              // onClick={() => handleCardClick(n.id)}
             />
           ))}
       </div>
 
-      <p className="text-xs text-[#848484]">
-        모든 알림은 최대 <span className="font-semibold"> 30일 </span> 동안 저장됩니다.
+      <p className='text-xs text-[#848484]'>
+        모든 알림은 최대 <span className='font-semibold'> 30일 </span> 동안
+        저장됩니다.
       </p>
       <BottomBar />
     </div>
