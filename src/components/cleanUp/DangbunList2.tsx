@@ -26,7 +26,7 @@ const ICON_MAP: Record<string, string> = {
 
 interface DangbunListProps {
   placeId: number;
-  onChange: (value: string) => void;
+  onSelectDuty: (dutyId: number) => void;
 }
 
 interface DangbunOption {
@@ -35,7 +35,7 @@ interface DangbunOption {
   icon: string;
 }
 
-const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
+const DangbunList2 = ({ placeId, onSelectDuty }: DangbunListProps) => {
   const [options, setOptions] = useState<DangbunOption[]>([]);
 
   useEffect(() => {
@@ -59,7 +59,9 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
   }, []);
 
   const handleChange = (option: DangbunOption | null) => {
-    onChange(option?.name ?? '');
+    if (option) {
+      onSelectDuty(option.value); // dutyId 전달
+    }
   };
 
   const custom = ({ data }: any) => (
@@ -136,4 +138,4 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
   );
 };
 
-export default DangbunList;
+export default DangbunList2;
