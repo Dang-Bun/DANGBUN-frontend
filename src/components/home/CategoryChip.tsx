@@ -15,14 +15,14 @@ const CategoryChip = ({ onSelect }: CategoryChipProps) => {
       </button>
       <div className="w-[60%] h-px bg-gray-300" />
       <button
-        onClick={() => onSelect('ing')}
+        onClick={() => onSelect('done')}
         className="text-center hover:bg-gray-100 text-[#797C82] font-[14px] py-2.5"
       >
         달성 완료
       </button>
       <div className="w-[60%] h-px bg-gray-300" />
       <button
-        onClick={() => onSelect('done')}
+        onClick={() => onSelect('ing')}
         className="text-center hover:bg-gray-100 text-[#797C82] font-[14px] py-2.5"
       >
         달성 미완료
