@@ -121,7 +121,7 @@ const Modifyduty = () => {
   return (
     <div className='p-4'>
       {/* 상단 네비 */}
-      <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4'>
+      <div className='relative flex w-full h-[50px] items-center mb-4'>
         <div className='absolute'>
           <img
             src={left_chevron}
@@ -145,7 +145,7 @@ const Modifyduty = () => {
       {/* 아이콘 선택 */}
       <div>
         <div className='mb-2 text-[18px] font-normal'>아이콘</div>
-        <div className='flex gap-3 overflow-x-auto pb-2 hide-scrollbar'>
+        <div className='flex gap-3 overflow-x-auto pb-2 no-scrollbar'>
           {iconList.map((icon, idx) => (
             <div
               key={idx}

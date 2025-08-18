@@ -81,7 +81,7 @@ export default function AddClean() {
   };
 
   return (
-    <div className='w-full min-h-screen bg-white mx-auto pt-[74px]'>
+    <div className='w-full min-h-screen bg-white mx-auto pt-3'>
       {/* 헤더 */}
       <div className='relative flex items-center mb-6'>
         <button className='absolute left-0'>
