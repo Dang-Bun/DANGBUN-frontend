@@ -31,11 +31,20 @@ export const useCleaningApi = {
     api.get(`/places/${placeId}/cleanings/unassigned`),
 
   /** 특정 당번에서, 선택 멤버들이 참여 중인 청소 목록 조회 */
-  filterCleaningsByMembers: (placeId: Id, dutyId: Id, memberIds: Id[]) =>
-    api.get(`/places/${placeId}/duties/${dutyId}/cleanings/filter-by-members`, {
-      params: { memberIds },
-      paramsSerializer: { indexes: false },
-    }),
+  filterCleaningsByMembers: (
+    placeId: number,
+    dutyId: number,
+    memberIds: number[]
+  ) => {
+    return api.get(
+      `/places/${placeId}/duties/${dutyId}/cleanings/filter-by-members`,
+      {
+        params: {
+          memberIds: memberIds.join(','), // 👉 "12,7"
+        },
+      }
+    );
+  },
 
   /** 당번별 청소 생성 */
   createCleaning: (placeId: Id, data: UpdateCleaningPayload) =>

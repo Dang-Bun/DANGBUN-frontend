@@ -20,9 +20,8 @@ import greenCheck from '../../assets/cleanUpList/GreenCheck.svg';
 import BottomSheet from './BottomSheet';
 
 import { useDutyApi } from '../../hooks/useDutyApi';
-import useCleaningApi from '../../hooks/useCleaningApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
-import { filter } from 'framer-motion/client';
+import useCleaningApi from '../../hooks/useCleaningApi';
 
 interface CleanUpCardProps {
   title: string;
@@ -30,6 +29,7 @@ interface CleanUpCardProps {
   dutyId: number;
   placeId: number;
   members: string[];
+  fMembers: number[];
 }
 
 interface Cleaning {
@@ -56,6 +56,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   placeId,
   dutyId,
   members,
+  fMembers,
 }) => {
   const [open, setOpen] = useState(false);
   const [specOpen, setSpecOpen] = useState(false);
@@ -69,30 +70,21 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   const [currentCleaning, setCurrentCleaning] = useState(0);
   const [clickedCleaning, setClickedCleaning] = useState(0);
   const iconSrc = ICON_MAP[icon] ?? icon;
-
-  const [alreadyMember, setAlreadyMember] = useState([]);
-
+  const [clickedMembersMap, setClickedMembersMap] = useState<
+    Record<number, string[]>
+  >({});
   const handlePlus = (cleaning: Cleaning) => {
-    const combined = Array.from(
-      new Set([...filteredMembers, ...cleaning.displayedNames])
-    );
-    setClickedMembers(combined);
-    console.log(combined);
+    const prev = clickedMembersMap[cleaning.cleaningId] || [];
+    const combined = Array.from(new Set([...prev, ...cleaning.displayedNames]));
 
+    setClickedMembersMap((prevMap) => ({
+      ...prevMap,
+      [cleaning.cleaningId]: combined,
+    }));
+
+    setClickedCleaning(cleaning.cleaningId);
     setOpen(true);
   };
-
-  useEffect(() => {
-    const getEffect = async () => {
-      try {
-        const res = await useMemberApi.me(placeId);
-        setCurrentCleaning(res.data.memberId);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    getEffect();
-  });
 
   useEffect(() => {
     const getEffect = async () => {
@@ -113,7 +105,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
       }
     };
     getEffect();
-  }, []);
+  }, [placeId, dutyId]);
 
   useEffect(() => {
     const fetchMemberMap = async () => {
@@ -138,41 +130,69 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
     fetchMemberMap();
   }, [placeId]);
 
-  const handleEditMember = async (cleaningId: number, memberIds: number[]) => {
+  const handleEditMember = async (
+    cleaningId: number,
+    memberIds: number[],
+    memberNames: string[]
+  ) => {
     try {
+      console.log(cleaningId);
       const data = {
         assignType: 'CUSTOM',
         cleaningId: cleaningId,
-        memberIds: memberIds,
+        memberIds: memberIds.length === 0 ? null : memberIds,
       };
       const res = useDutyApi.assignCleaningMembers(placeId, dutyId, data);
       console.log(res);
+
+      setCleaningList((prev) =>
+        prev.map((c) =>
+          c.cleaningId === cleaningId
+            ? { ...c, displayedNames: memberNames }
+            : c
+        )
+      );
     } catch (e) {
       console.log(e);
     }
   };
 
+  const filteredCleaningList =
+    fMembers.length === 0
+      ? cleaningList
+      : cleaningList.filter((cleaning) =>
+          cleaning.displayedNames.some((name) => {
+            const memberId = nameToId[name];
+            return memberId !== undefined && fMembers.includes(memberId);
+          })
+        );
+
   return (
-    <div className='flex flex-col gap-4'>
-      <button
-        className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
-        onClick={() => setSpecOpen(!specOpen)}
-      >
-        <div className='flex flex-row items-center gap-1'>
-          <img src={iconSrc} alt='icon' className='w-9 h-9' />
-          <p className='text-zinc-600 text-sm font-normal leading-tight'>
-            {title}
-          </p>
-        </div>
-        {specOpen ? (
-          <img src={up} alt='close' />
-        ) : (
-          <img src={down} alt='open' />
-        )}
-      </button>
-      {specOpen ? (
+    <div className='flex flex-col gap-4 '>
+      <div className='w-[353px] border-gray-300 border-t ' />
+
+      <div className='flex flex-col'>
+        <button
+          className='flex flex-row w-[353px] h-9 justify-between items-center pr-[7px] cursor-pointer'
+          onClick={() => setSpecOpen(!specOpen)}
+        >
+          <div className='flex flex-row items-center gap-3'>
+            <img src={iconSrc} alt='icon' className='w-9 h-9' />
+            <p className='text-zinc-600 text-base font-normal leading-tight'>
+              {title}
+            </p>
+          </div>
+          {specOpen ? (
+            <img src={up} alt='close' />
+          ) : (
+            <img src={down} alt='open' />
+          )}
+        </button>
+      </div>
+
+      {specOpen && (
         <div className='flex flex-col gap-3'>
-          {cleaningList.map((cleaning) => (
+          {filteredCleaningList.map((cleaning) => (
             <div key={cleaning.cleaningId}>
               <div className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'>
                 <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg'></div>
@@ -236,19 +256,19 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
             </div>
           ))}{' '}
         </div>
-      ) : (
-        <></>
       )}
 
       <BottomSheet
         isOpen={open}
         onClose={() => {
           setOpen(false);
-          const memberIds = clickedMembers
+
+          const selectedNames = clickedMembersMap[clickedCleaning] || [];
+          const selectedMemberIds = selectedNames
             .map((nm) => nameToId[nm])
             .filter((v): v is number => typeof v === 'number');
 
-          handleEditMember(clickedCleaning, memberIds);
+          handleEditMember(clickedCleaning, selectedMemberIds, selectedNames);
         }}
       >
         <div className='w-[353px] h-[348px]'>
@@ -303,21 +323,28 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
           <div className='flex flex-wrap gap-2 max-w-[353px] mt-5'>
             {members
               .filter((name) => name.includes(search))
-              .map((name, index) => (
-                <button
-                  key={index}
-                  className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer ${clickedMembers.includes(name) ? 'bg-[#00dc7b]' : 'bg-[#e5e5e5]'}`}
-                  onClick={() => {
-                    setClickedMembers((prev) =>
-                      prev.includes(name)
-                        ? prev.filter((n) => n !== name)
-                        : [...prev, name]
-                    );
-                  }}
-                >
-                  {name}
-                </button>
-              ))}
+              .map((name, index) => {
+                const currentClicked = clickedMembersMap[clickedCleaning] || [];
+                return (
+                  <button
+                    key={index}
+                    className={`px-5 py-[7px] rounded-lg text-white text-base font-semibold leading-snug cursor-pointer ${currentClicked.includes(name) ? 'bg-[#00dc7b]' : 'bg-[#e5e5e5]'}`}
+                    onClick={() => {
+                      setClickedMembersMap((prevMap) => {
+                        const current = prevMap[clickedCleaning] || [];
+                        return {
+                          ...prevMap,
+                          [clickedCleaning]: current.includes(name)
+                            ? current.filter((n) => n !== name)
+                            : [...current, name],
+                        };
+                      });
+                    }}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
           </div>
         </div>
       </BottomSheet>
