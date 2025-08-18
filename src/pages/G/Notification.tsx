@@ -1,208 +1,168 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import CreateNotificationIcon from '../../assets/notificationIcon/CreateNotificationIcon.svg';
 import NotificationTab from '../../components/notification/NotificationTab';
 import NotificationCard from '../../components/notification/NotificationCard';
 import BottomBar from '../../components/BottomBar';
-import useNotificationApi from '../../hooks/useNotificationApi';
 
 type NotificationItem = {
-  id: string;
-  type: 'inbox' | 'transmit';
-  title: string;
-  descript: string;
-  timeAgo: string;
-  read: boolean;
-};
-
-const toArray = (raw: any): any[] => {
-  if (Array.isArray(raw)) return raw;
-  if (Array.isArray(raw?.rows)) return raw.rows;
-  if (Array.isArray(raw?.content)) return raw.content;
-  if (Array.isArray(raw?.list)) return raw.list;
-  if (Array.isArray(raw?.items)) return raw.items;
-  if (Array.isArray(raw?.data)) return raw.data;
-  return [];
+	id: string;
+	type: 'inbox' | 'transmit';
+	title: string;
+	descript: string;
+	timeAgo: string;
+	read: boolean;
 };
 
 const Notification: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+	const navigate = useNavigate();
+	const location = useLocation();
 
-  const { placeId: placeIdParam } = useParams<{ placeId: string }>();
-  const placeId = useMemo(
-    () =>
-      placeIdParam && !Number.isNaN(Number(placeIdParam))
-        ? Number(placeIdParam)
-        : undefined,
-    [placeIdParam]
-  );
+	const { placeId: placeIdParam } = useParams<{ placeId: string }>();
+	const placeId = useMemo(
+		() =>
+			placeIdParam && !Number.isNaN(Number(placeIdParam))
+				? Number(placeIdParam)
+				: undefined,
+		[placeIdParam]
+	);
 
-  const defaultTab = location.state?.tab === 'transmit' ? 'transmit' : 'inbox';
-  const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(
-    defaultTab
-  );
+	const navState = (location.state as any) || {};
+	const defaultTab: 'inbox' | 'transmit' =
+		navState.tab === 'transmit' ? 'transmit' : 'inbox';
 
-  const [list, setList] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [forbidden, setForbidden] = useState(false);
+	const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(defaultTab);
+	
+	// localStorage에서 알림 목록을 가져오는 함수
+	const getStoredNotifications = (): NotificationItem[] => {
+		if (!placeId) return [];
+		try {
+			const stored = localStorage.getItem(`notifications_${placeId}`);
+			return stored ? JSON.parse(stored) : [];
+		} catch {
+			return [];
+		}
+	};
 
-  useEffect(() => {
-    if (!placeId) return;
-    let mounted = true;
+	// localStorage에 알림 목록을 저장하는 함수
+	const saveNotifications = (notifications: NotificationItem[]) => {
+		if (!placeId) return;
+		try {
+			localStorage.setItem(`notifications_${placeId}`, JSON.stringify(notifications));
+		} catch (error) {
+			console.error('알림 저장 실패:', error);
+		}
+	};
 
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        setForbidden(false);
+	const [list, setList] = useState<NotificationItem[]>(() => getStoredNotifications());
 
-        const res =
-          selectedTab === 'transmit'
-            ? await useNotificationApi.listSent(placeId, { page: 0, size: 20 })
-            : await useNotificationApi.listReceived(placeId, {
-                page: 0,
-                size: 20,
-              });
+	// 알림 목록이 변경될 때마다 localStorage에 저장
+	useEffect(() => {
+		saveNotifications(list);
+	}, [list, placeId]);
 
-        const raw = res?.data?.data;
-        const rows = toArray(raw);
+	useEffect(() => {
+		if (navState.justCreated && selectedTab === 'transmit' && placeId) {
+			const jc = navState.justCreated;
+			
+			// 템플릿 타입을 사용자 친화적인 제목으로 변환
+			const getTitle = (template: string) => {
+				switch (template) {
+					case 'CLEANING_PENDING':
+						return '미완료된 청소를 진행해주세요.';
+					case 'NEW_MEMBER_JOINED':
+						return '새로운 멤버가 참여했어요.';
+					case 'TASK_LIST_UPDATE':
+						return '청소 목록 변동사항을 전달해주세요.';
+					default:
+						return '알림';
+				}
+			};
 
-        const items: NotificationItem[] = rows.map((r: any) => ({
-          id: String(r.id ?? r.notificationId ?? ''),
-          type: selectedTab,
-          title: r.title ?? '',
-          descript: r.summary ?? r.content ?? '',
-          timeAgo: r.createdAt ?? r.created_at ?? '',
-          read: !!(r.read ?? r.isRead),
-        }));
+			const optimistic: NotificationItem = {
+				id: String(jc.id ?? jc.notificationId ?? Date.now()),
+				type: 'transmit',
+				title: jc.title ?? (jc.template ? getTitle(jc.template) : '알림'),
+				descript: jc.content ?? jc.message ?? '',
+				timeAgo: jc.createdAt ?? new Date().toISOString(),
+				read: false,
+			};
+			setList(prev => {
+				const exists = prev.some(p => p.id === optimistic.id);
+				return exists ? prev : [optimistic, ...prev];
+			});
+			navigate(location.pathname, { replace: true, state: { tab: 'transmit' } });
+		}
+	}, [navState.justCreated, selectedTab, placeId]); // navigate, location.pathname 제거
 
-        if (mounted) setList(items);
-      } catch (e: any) {
-        if (!mounted) return;
-        const status = e?.response?.status;
-        if (status === 403) {
-          setForbidden(true);
-          setError(
-            e?.response?.data?.message ||
-              '해당 플레이스에 소속된 멤버가 아닙니다.'
-          );
-        } else if (status === 401) {
-          setError('로그인이 필요합니다.');
-        } else {
-          setError(e?.response?.data?.message || e?.message || '불러오기 실패');
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
+	const handleWriteClick = () => {
+		if (!placeId) return;
+		navigate(`/${placeId}/alarm/create`);
+	};
 
-    return () => {
-      mounted = false;
-    };
-  }, [placeId, selectedTab]);
+	if (!placeId) {
+		return (
+			<div className="flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen">
+				<Header title="알림함" />
+				<div className="mt-6 px-6 text-center">
+					<p className="text-sm text-red-500">유효하지 않은 접근입니다.</p>
+					<p className="text-sm text-gray-500 mt-1">
+						플레이스를 먼저 선택한 뒤 다시 시도해주세요.
+					</p>
+				</div>
+				<BottomBar />
+			</div>
+		);
+	}
 
-  const handleWriteClick = () => {
-    if (!placeId) return;
-    navigate(`/${placeId}/alarm/create`);
-  };
+	return (
+		<div className="flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen">
+			<Header
+				title="알림함"
+				rightElement={
+					<img
+						src={CreateNotificationIcon}
+						alt="쓰기 아이콘"
+						className="w-[24px] h-[24px]"
+					/>
+				}
+				onRightClick={handleWriteClick}
+			/>
 
-  // const handleCardClick = async (id: string) => {
-  //   if (!placeId) return;
+			<NotificationTab selectedTab={selectedTab} onChange={(tab) => setSelectedTab(tab)} />
 
-  //   try {
-  //     await useNotificationApi.markAsRead(placeId, id);
-  //     setList(prevList =>
-  //       prevList.map(item =>
-  //         item.id === id ? { ...item, read: true } : item
-  //       )
-  //     );
-  //   } catch (e) {
-  //     console.error("알림 읽음 처리 실패", e);
-  //   } finally {
-  //     navigate(`/${placeId}/alarm/${id}`);
-  //   }
-  // };
+			<div className="flex flex-col items-center gap-4 mt-4 w-full px-4">
+				{list.length === 0 && (
+					<p className="text-sm text-gray-500">알림이 없습니다.</p>
+				)}
 
-  if (!placeId) {
-    return (
-      <div className='flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen'>
-        <Header title='알림함' />
-        <div className='mt-6 px-6 text-center'>
-          <p className='text-sm text-red-500'>유효하지 않은 접근입니다.</p>
-          <p className='text-sm text-gray-500 mt-1'>
-            플레이스를 먼저 선택한 뒤 다시 시도해주세요.
-          </p>
-        </div>
-        <BottomBar />
-      </div>
-    );
-  }
+				{list.map((n) => (
+					<NotificationCard
+						key={n.id}
+						type="member"
+						read={n.read}
+						title={n.title}
+						descript={n.descript}
+						timeAgo={n.timeAgo}
+						onClick={() => {
+							console.log('카드 클릭 - 전달할 데이터:', n);
+							navigate(`/${placeId}/alarm/${n.id}`, {
+								state: {
+									notification: n
+								}
+							});
+						}}
+					/>
+				))}
+			</div>
 
-  return (
-    <div className='flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen'>
-      <Header
-        title='알림함'
-        rightElement={
-          <img
-            src={CreateNotificationIcon}
-            alt='쓰기 아이콘'
-            className='w-[24px] h-[24px]'
-          />
-        }
-        onRightClick={handleWriteClick}
-      />
-
-      <NotificationTab selectedTab={selectedTab} onChange={setSelectedTab} />
-
-      <div className='flex flex-col items-center gap-4 mt-4 w-full px-4'>
-        {loading && <p className='text-sm text-gray-500'>불러오는 중…</p>}
-        {error && <p className='text-sm text-red-500'>{error}</p>}
-
-        {!loading && forbidden && (
-          <div className='flex flex-col items-center gap-3 mt-2'>
-            <button
-              className='px-4 py-2 rounded-xl bg-blue-500 text-white text-sm'
-              onClick={() => navigate(`/${placeId}/join`)}
-            >
-              이 플레이스 참여하기
-            </button>
-            <button
-              className='px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm'
-              onClick={() => navigate('/places')}
-            >
-              다른 플레이스 선택
-            </button>
-          </div>
-        )}
-
-        {!loading && !error && !forbidden && list.length === 0 && (
-          <p className='text-sm text-gray-500'>알림이 없습니다.</p>
-        )}
-
-        {!forbidden &&
-          list.map((n) => (
-            <NotificationCard
-              key={n.id}
-              type='member'
-              read={n.read}
-              title={n.title}
-              descript={n.descript}
-              timeAgo={n.timeAgo}
-              // onClick={() => handleCardClick(n.id)}
-            />
-          ))}
-      </div>
-
-      <p className='text-xs text-[#848484]'>
-        모든 알림은 최대 <span className='font-semibold'> 30일 </span> 동안
-        저장됩니다.
-      </p>
-      <BottomBar />
-    </div>
-  );
+			<p className="text-xs text-[#848484]">
+				모든 알림은 최대 <span className="font-semibold"> 30일 </span> 동안 저장됩니다.
+			</p>
+			<BottomBar />
+		</div>
+	);
 };
 
 export default Notification;

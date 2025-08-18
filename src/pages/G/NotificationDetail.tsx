@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import WritingChip from '../../components/notification/WritingChip';
 import ScrollToTop from '../../components/notification/ScrollToTop';
@@ -17,16 +17,43 @@ type NotificationDetailType = {
 
 const NotificationDetail = () => {
   const { placeId, notificationId } = useParams<{ placeId: string; notificationId: string }>();
+  const location = useLocation();
   const [notification, setNotification] = useState<NotificationDetailType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDetail = async () => {
-      if (!placeId || !notificationId) return;
+      if (!placeId || !notificationId) {
+        setLoading(false);
+        return;
+      }
+      
+      // location.state에서 전달받은 알림 데이터 확인
+      const passedNotification = (location.state as any)?.notification;
+      console.log('전달받은 알림 데이터:', passedNotification);
+      
+      if (passedNotification) {
+        // 전달받은 데이터가 있으면 사용
+        const parsed: NotificationDetailType = {
+          id: Number(passedNotification.id),
+          title: passedNotification.title,
+          sender: '나', // 보낸 알림이므로 발신자는 '나'
+          receivers: [], // 수신자 정보는 별도로 필요
+          time: passedNotification.timeAgo,
+          content: passedNotification.descript,
+        };
+        console.log('파싱된 알림 데이터:', parsed);
+        setNotification(parsed);
+        setLoading(false);
+        return;
+      }
+
+      // 전달받은 데이터가 없으면 API 호출
       try {
-        // 알림 상세 정보 조회
+        console.log('API 호출 시작');
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
         const data = res?.data;
+        console.log('API 응답:', data);
 
         const parsed: NotificationDetailType = {
           id: Number(data?.id ?? data?.notificationId),
@@ -44,13 +71,15 @@ const NotificationDetail = () => {
 
         setNotification(parsed);
       } catch (err) {
+        console.error('API 호출 실패:', err);
         setNotification(null);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchDetail();
-  }, [placeId, notificationId]);
+  }, [placeId, notificationId, location.state]);
 
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (!notification) return <div className="p-4">존재하지 않는 알림입니다.</div>;
