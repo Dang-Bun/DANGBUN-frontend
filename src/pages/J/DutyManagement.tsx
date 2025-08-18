@@ -18,6 +18,10 @@ type RoleItem = {
   displayedNames: string[];
   memberCount: number;
 };
+type SelectedCleaning = {
+  cleaningId: number;
+  name: string;
+} | null;
 
 /** ---------- 바텀시트 모달 ---------- */
 type AssignType = 'CUSTOM' | 'COMMON' | 'RANDOM';
