@@ -460,9 +460,9 @@ const DutyManagement = () => {
   };
 
   return (
-    <div className='flex flex-col h-screen bg-gray-50'>
+    <div className='flex flex-col h-screen bg-blue'>
       {/* 상단 헤더 */}
-      <div className='flex items-center justify-between bg-blue px-4 pt-15'>
+      <div className='flex items-center justify-between bg-blue px-4 pt-3'>
         <img
           src={left_chevron}
           alt='뒤로가기'
@@ -486,7 +486,7 @@ const DutyManagement = () => {
       </div>
 
       {/* 상단 파란 영역 + 아이콘/이름 (경계 걸침) */}
-      <div className='bg-blue relative flex flex-col items-center pb-30'>
+      <div className='bg-blue relative flex flex-col items-center pb-42'>
         <div className='absolute top-full -translate-y-1/2 flex flex-col items-center'>
           {iconUrl && (
             <img

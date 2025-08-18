@@ -82,7 +82,7 @@ const CreateDangbun = () => {
   return (
     <div className='p-4'>
       {/* 상단 네비 */}
-      <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4'>
+      <div className='relative flex w-full h-[50px] items-center mb-4'>
         <div className='absolute'>
           <img
             src={left_chevron}

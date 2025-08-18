@@ -101,7 +101,7 @@ export default function PlaceDetailed() {
   };
 
   return (
-    <div className='w-full min-h-screen bg-white mx-auto pt-[74px]'>
+    <div className='w-full bg-white mx-auto pt-3 px-4'>
       {/* 헤더 */}
       <div className='relative flex items-center mb-6'>
         <button className='absolute left-0'>

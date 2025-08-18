@@ -38,8 +38,8 @@ const DangerZoneMember = () => {
   }, [placeId]);
 
   return (
-    <div className='mt-[68px]'>
-      <div className='pl-[12px]'>
+    <div className='pt-3 px-4'>
+      <div>
         <img
           src={left_chevron}
           alt='뒤로가기'

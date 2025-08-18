@@ -110,7 +110,7 @@ const MyPlace: React.FC = () => {
 
   // 상단 바
   const Header = (
-    <div className='relative flex w-full h-[50px] items-center mt-[72px] mb-4 px-4'>
+    <div className='relative flex w-full h-[50px] items-center mb-4 px-4'>
       <div className='flex w-full text-[20px] justify-center'>내 플레이스</div>
       <img
         src={threebar}
@@ -175,7 +175,7 @@ const MyPlace: React.FC = () => {
                   role: p.role,
                   placeId: p.placeId,
                   placeName: p.name,
-                  placeIcon: p.category
+                  placeIcon: p.category,
                 },
               })
             }
