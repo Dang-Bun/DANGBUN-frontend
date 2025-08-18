@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CalendarTaskCard from '../../components/calendar/CalendarTaskCard';
 import DatePicker from '../../components/calendar/DatePicker';
 import toggleUp from '../../assets/calendar/toggleUp.svg';
@@ -19,6 +19,9 @@ import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import SelectBottom from '../../components/calendar/SelectBottom';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
+// import useCalendarApi from '../../hooks/useCalendarApi';
+
+// 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 
 dayjs.locale('ko');
@@ -40,6 +43,10 @@ const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
 
 const CalendarPage: React.FC = () => {
   const navigate = useNavigate();
+  const { state } = useLocation() as {
+    state?: { placeId?: number };
+  };
+
   const [checklists, setChecklists] = useState<TaskItem[]>([]);
   const [progress, setProgress] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(false);
@@ -68,19 +75,26 @@ const CalendarPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const PLACE_ID = localStorage.getItem('placeId');
+
+      // state에서 placeId를 우선 가져오고, 없으면 localStorage에서 가져옴
+      const PLACE_ID = state?.placeId ?? localStorage.getItem('placeId');
       const accessToken = localStorage.getItem('accessToken');
-      
+
       console.log('Debug - PLACE_ID:', PLACE_ID);
       console.log('Debug - accessToken exists:', !!accessToken);
-      
+
       if (!PLACE_ID || !accessToken) {
         setError('로그인이 필요합니다.');
         return;
       }
 
-      const placeId = parseInt(PLACE_ID, 10);
+      const placeId = Number(PLACE_ID);
+
+      // localStorage에 placeId 저장 (state에서 온 경우)
+      if (state?.placeId) {
+        localStorage.setItem('placeId', String(placeId));
+      }
+
       const year = activeStartDate.getFullYear();
       const month = activeStartDate.getMonth() + 1;
       const day = selectedDate.getDate();
@@ -104,7 +118,9 @@ const CalendarPage: React.FC = () => {
       console.log('Debug - Progress response:', progressResponse.data);
 
       // 체크리스트 데이터 파싱
-      const checklistData = checklistResponse.data?.data?.checklists || [];
+      const checklistData = checklistResponse.data?.data?.checklists || checklistResponse.data?.checklists || [];
+      console.log('Debug - Raw checklist data:', checklistData);
+      
       const parsedChecklists: TaskItem[] = checklistData.map((item: Record<string, unknown>) => ({
         dutyId: item.checklistId as number,
         dutyName: item.dutyName as string,
@@ -113,37 +129,74 @@ const CalendarPage: React.FC = () => {
           title: item.dutyName as string,
           isChecked: item.isComplete as boolean,
           isCamera: item.needPhoto as boolean,
-          completedAt: item.endTime ? `2025-01-17T${item.endTime}:00Z` : null,
+          completedAt: item.endTime ? `${item.date}T${item.endTime}:00Z` : null,
           completedBy: item.memberName as string,
-          date: selectedYMD,
+          date: item.date as string,
         },
       }));
+      setChecklists(parsedChecklists);
 
-      // 프로그레스 데이터 파싱
-      const progressData = progressResponse.data?.data?.dailyProgress || [];
+      // 프로그레스 데이터를 체크리스트 데이터에서 계산
       const progressMap = new Map<string, number>();
+      
+      // 날짜별로 체크리스트 그룹화
+      const tasksByDate = new Map<string, TaskItem[]>();
+      parsedChecklists.forEach(item => {
+        const date = item.task.date;
+        if (!tasksByDate.has(date)) {
+          tasksByDate.set(date, []);
+        }
+        tasksByDate.get(date)!.push(item);
+      });
+      
+      // 각 날짜별 완료율 계산
+      tasksByDate.forEach((tasks, date) => {
+        const total = tasks.length;
+        const completed = tasks.filter(task => task.task.isChecked).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        progressMap.set(date, percentage);
+        console.log(`Debug - Calculated progress for ${date}: ${completed}/${total} = ${percentage}%`);
+      });
+      
+      // API에서 받은 progress 데이터도 병합 (우선순위: API > 계산)
+      const progressData = progressResponse.data?.data?.dailyProgress || progressResponse.data?.dailyProgress || [];
+      console.log('Debug - Raw progress data from API:', progressData);
+      
       progressData.forEach((item: Record<string, unknown>) => {
         if (item.date && item.endPercent !== undefined) {
-          progressMap.set(item.date as string, item.endPercent as number);
+          const date = item.date as string;
+          const percent = item.endPercent as number;
+          progressMap.set(date, percent);
+          console.log(`Debug - Overriding progress for ${date}: ${percent}% (from API)`);
         }
       });
 
-      setChecklists(parsedChecklists);
+      console.log('Debug - Final progress map:', Array.from(progressMap.entries()));
       setProgress(progressMap);
     } catch (err: unknown) {
       console.error('API Error:', err);
+
+      // 403 에러 처리
       if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response && err.response.status === 403) {
         const errorResponse = err as Record<string, unknown>;
         const response = errorResponse.response as Record<string, unknown> | undefined;
         console.error('403 Forbidden - Response data:', response?.data);
+        console.error('403 Forbidden - Headers:', response?.headers);
+        const config = errorResponse.config as Record<string, unknown> | undefined;
+        console.error('403 Forbidden - Request URL:', config?.url);
+        console.error('403 Forbidden - Request method:', config?.method);
+        console.error('403 Forbidden - Authorization header:', config?.headers);
+
         setError('권한이 없습니다. 다시 로그인해주세요.');
+        // 토큰이 만료되었을 가능성이 높으므로 localStorage에서 토큰 제거
+        localStorage.removeItem('accessToken');
       } else {
         setError('데이터를 불러오는 데 실패했습니다.');
       }
     } finally {
       setLoading(false);
     }
-  }, [activeStartDate, selectedYMD]);
+  }, [activeStartDate, state?.placeId]);
 
   useEffect(() => {
     loadData();
@@ -157,7 +210,7 @@ const CalendarPage: React.FC = () => {
 
       const placeId = parseInt(PLACE_ID, 10);
       await useCalendarApi.completeChecklist(placeId, taskId);
-      
+
       // 성공 시 데이터 다시 로드
       await loadData();
     } catch (err) {
@@ -169,17 +222,22 @@ const CalendarPage: React.FC = () => {
   // 체크리스트 삭제 함수
   const handleDeleteChecklist = useCallback(async () => {
     if (!selectTask) return;
-    
+
     try {
       const PLACE_ID = localStorage.getItem('placeId');
       if (!PLACE_ID) return;
 
       const placeId = parseInt(PLACE_ID, 10);
-      await useCalendarApi.deleteChecklist(placeId, selectTask.id);
+      console.log(`[Delete] Deleting checklist ${selectTask.id} from place ${placeId}`);
       
+      await useCalendarApi.deleteChecklist(placeId, selectTask.id);
+
       // 성공 시 데이터 다시 로드
       await loadData();
       setIsDeleteOpen(false);
+      
+      // 성공 메시지 (선택사항)
+      console.log(`[Delete] Successfully deleted checklist ${selectTask.id}`);
     } catch (err) {
       console.error('체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
@@ -190,7 +248,7 @@ const CalendarPage: React.FC = () => {
   const allTasksByDate = useMemo(() => {
     const map = new Map<string, TaskItem[]>();
     checklists.forEach((item) => {
-      const key = toYMD(item.task.date);
+      const key = item.task.date;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(item);
     });
@@ -260,6 +318,12 @@ const CalendarPage: React.FC = () => {
       if (view !== 'month') return null;
       const ymd = toYMD(date);
       const progressValue = progress.get(ymd);
+      
+      // 디버깅: progress 값 확인
+      if (progressValue !== undefined) {
+        console.log(`Debug - Progress for ${ymd}: ${progressValue}%`);
+      }
+      
       if (progressValue === undefined) return <span className="text-base">{date.getDate()}</span>;
 
       const size = 36;
@@ -468,7 +532,16 @@ const CalendarPage: React.FC = () => {
           }}
           onOpenInfo={() => {
             setIsSelectOpen(false);
-            navigate(`/calendar/${selectTask.id}`);
+            const checklistId = selectTask.id;
+            console.log('Debug - Opening cleaning info for checklistId:', checklistId);
+            navigate(`/calendar/${checklistId}`, {
+              state: {
+                placeId: state?.placeId ?? Number(localStorage.getItem('placeId')),
+                checklistId: checklistId,
+                taskTitle: selectTask.title,
+                dutyName: displayedItems.find(item => item.task.id === selectTask.id)?.dutyName || ''
+              }
+            });
           }}
           onDelete={() => {
             setIsSelectOpen(false);
@@ -493,7 +566,15 @@ const CalendarPage: React.FC = () => {
         onSecondClick={handleDeleteChecklist}
       />
 
-      <DownloadPopUp isOpen={isPhotoOpen} onRequestClose={() => setIsPhotoOpen(false)} />
+      <DownloadPopUp 
+        isOpen={isPhotoOpen} 
+        onRequestClose={() => setIsPhotoOpen(false)}
+        hasPhoto={selectTask?.isCamera || false}
+        taskTitle={selectTask?.title || '청소'}
+        dutyName={displayedItems.find(item => item.task.id === selectTask?.id)?.dutyName || '당번'}
+        photoUrl={selectTask?.isCamera ? 'https://via.placeholder.com/264x196/4D83FD/FFFFFF?text=청소+사진' : undefined}
+        completedAt={selectTask?.completedAt || null}
+      />
 
       <DatePicker
         isOpen={isDatePickerOpen}

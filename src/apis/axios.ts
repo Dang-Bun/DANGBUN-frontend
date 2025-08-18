@@ -27,4 +27,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// 응답 인터셉터 추가
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // 403 에러 처리
+    if (error.response?.status === 403) {
+      console.error('403 Forbidden Error:', error.response.data);
+      // 토큰이 만료되었을 가능성이 높으므로 토큰 제거
+      localStorage.removeItem('accessToken');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
