@@ -37,7 +37,6 @@ import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 
- 
 const CATEGORY_ICON_SRC: Record<string, string> = {
   CAFE: CAFE_IMG,
   RESTAURANT: RESTAURANT_IMG,
@@ -74,7 +73,8 @@ const arr = (x: unknown): unknown[] =>
             ? (x as any).items
             : [];
 
-const obj = (x: unknown): unknown => (x as any)?.data?.data ?? (x as any)?.data ?? x ?? {};
+const obj = (x: unknown): unknown =>
+  (x as any)?.data?.data ?? (x as any)?.data ?? x ?? {};
 
 /* ---------------------- 화면 타입 ---------------------- */
 type DutyIconKey =
@@ -112,15 +112,22 @@ type DutyUI = {
 const MemberHome: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation() as {
-    state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
+    state?: {
+      placeId?: number;
+      placeName?: string;
+      placeIcon?: string;
+      role?: string;
+    };
   };
 
   /* 컨텍스트 */
   const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
-  const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
-  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
-  
-  useEffect(() => { 
+  const placeName =
+    state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
+  const placeIconKey =
+    state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
+
+  useEffect(() => {
     if (pid) localStorage.setItem('placeId', String(pid));
     if (placeName) localStorage.setItem('placeName', placeName);
     if (placeIconKey) localStorage.setItem('placeIcon', placeIconKey);
@@ -149,7 +156,7 @@ const MemberHome: React.FC = () => {
         if (!pid) return;
 
         // 1) 내 정보
-        const me = obj(await useMemberApi.me(pid));
+        const me = obj(await useMemberApi.me(pid)) as { name?: string };
         const myName = me.name ?? '';
         setUserName(myName);
 
@@ -174,9 +181,9 @@ const MemberHome: React.FC = () => {
             : arr(info?.data);
 
           const tasks: TaskUI[] = raw.map((t) => {
-                         const members = (t.members ?? t.assignees ?? []).map(
-               (m: unknown) => (m as any)?.name ?? m
-             );
+            const members = (t.members ?? t.assignees ?? []).map(
+              (m: unknown) => (m as any)?.name ?? m
+            );
             const mine =
               !!myName &&
               (members.includes(myName) || members.includes('멤버 전체'));
@@ -223,16 +230,21 @@ const MemberHome: React.FC = () => {
     };
   }, [pid]);
 
-    // 받은 알림 읽음 여부 확인
+  // 받은 알림 읽음 여부 확인
   useEffect(() => {
     if (!pid) return;
-    
+
     const checkUnreadNotifications = async () => {
       try {
-        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const res = await useNotificationApi.listReceived(pid, {
+          page: 0,
+          size: 20,
+        });
         const notifications = res?.data?.data || [];
-                 // isRead가 false인 알림이 있으면 mailDefault 표시
-         const hasUnread = notifications.some((notification: unknown) => !(notification as any).isRead);
+        // isRead가 false인 알림이 있으면 mailDefault 표시
+        const hasUnread = notifications.some(
+          (notification: unknown) => !(notification as any).isRead
+        );
         setHasUnreadNotifications(hasUnread);
       } catch (error) {
         console.error('알림 읽음 여부 확인 실패:', error);
@@ -253,16 +265,21 @@ const MemberHome: React.FC = () => {
     };
   }, [pid]);
 
-    // 받은 알림 읽음 여부 확인
+  // 받은 알림 읽음 여부 확인
   useEffect(() => {
     if (!pid) return;
-    
+
     const checkUnreadNotifications = async () => {
       try {
-        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const res = await useNotificationApi.listReceived(pid, {
+          page: 0,
+          size: 20,
+        });
         const notifications = res?.data?.data || [];
-                 // 읽지 않은 알림이 있으면 mail 표시, 그 외에는 mailDefault 표시
-         const hasUnread = notifications.length > 0 && notifications.some((notification: any) => !notification.isRead);
+        // 읽지 않은 알림이 있으면 mail 표시, 그 외에는 mailDefault 표시
+        const hasUnread =
+          notifications.length > 0 &&
+          notifications.some((notification: any) => !notification.isRead);
         setHasUnreadNotifications(hasUnread);
       } catch (error) {
         console.error('알림 읽음 여부 확인 실패:', error);
@@ -433,17 +450,24 @@ const MemberHome: React.FC = () => {
         }}
       />
       {/* 상단 */}
-      <div {...swipeHandlers} className="relative z-10 px-5 pt-4 flex-shrink-0">
-        <div className="flex flex-col items-center h-[420px]">
-          <div className="flex items-center relative">
-            <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">당번</span>
-            <div className="flex items-center gap-[210px]">
-              <PlaceNameCard 
-                place={placeName} 
-                type={page.percent >= 100 ? 'complete' : 'default'} 
+      <div {...swipeHandlers} className='relative z-10 px-5 pt-4 flex-shrink-0'>
+        <div className='flex flex-col items-center h-[420px]'>
+          <div className='flex items-center relative'>
+            <span className='font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2'>
+              당번
+            </span>
+            <div className='flex items-center gap-[210px]'>
+              <PlaceNameCard
+                place={placeName}
+                type={page.percent >= 100 ? 'complete' : 'default'}
                 onClick={() => navigate('/myplace')}
               />
-              <img src={notificationImage} alt="알림" className="w-[36px] cursor-pointer" onClick={goToNotification} />
+              <img
+                src={notificationImage}
+                alt='알림'
+                className='w-[36px] cursor-pointer'
+                onClick={goToNotification}
+              />
             </div>
           </div>
           <div className='mt-[66px] mb-[18px]'>
