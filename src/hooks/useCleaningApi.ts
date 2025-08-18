@@ -18,10 +18,12 @@ export type UpdateCleaningPayload = Partial<CreateCleaningPayload>;
 
 export const useCleaningApi = {
   /** 선택 멤버가 참여 중인 청소의 '당번' 목록 조회 */
-  getCleaningsDuties: (placeId: Id, memberIds: Id[]) =>
+  getCleaningsDuties: (placeId: number, memberIds: number[]) =>
     api.get(`/places/${placeId}/cleanings/duties`, {
-      params: { memberIds },
-      paramsSerializer: { indexes: false },
+      params: {
+        // 👉  [8,9]  ->  "8,9"
+        memberIds: memberIds.join(','),
+      },
     }),
 
   /** 미지정(어느 당번에도 속하지 않은) 청소 목록 조회 */

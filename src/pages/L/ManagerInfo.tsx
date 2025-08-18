@@ -6,7 +6,8 @@ import GreenUser from '../../assets/member/GreenUser.svg';
 import grayPlus from '../../assets/header/GrayPlus.svg';
 import DangbunList from '../../components/cleanUp/DangbunList';
 import { useMemberApi } from '../../hooks/useMemberApi';
-import useCleaningApi from '../../hooks/useCleaningApi';
+import { useCleaningApi } from '../../hooks/useCleaningApi';
+import { useDutyApi } from './../../hooks/useDutyApi';
 
 type MemberInfoResp = {
   member: {
@@ -22,12 +23,13 @@ const ManagerInfo: React.FC = () => {
   const placeId = Number(localStorage.getItem('placeId'));
   const memberId = (location.state as { memberId?: number })?.memberId;
 
+  const [assignLoading, setAssignLoading] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<MemberInfoResp | null>(null);
 
   // 당번 설정(기존 UI용)
-  const [dangbun, setDangbun] = useState(['']);
   const [count, setCount] = useState(1);
   const [myId, setMyId] = useState<number[]>([]);
 
@@ -83,6 +85,31 @@ const ManagerInfo: React.FC = () => {
   const role = data?.member?.role ?? '멤버';
   const isManager = role === '매니저';
   const firstDuty = data?.duties?.[0]?.dutyName ?? '-';
+
+  const handleAssignToDuty = async (dutyId: number) => {
+    if (!placeId || !dutyId || !memberId) return;
+    try {
+      setAssignLoading(true);
+      // payload는 문서 예시대로 { memberIds: [1,2,3] }
+      const payload = { memberIds: [memberId] };
+      const res = await useDutyApi.addMember(placeId, dutyId, payload);
+
+      if (res.data?.code === 20000) {
+        alert('멤버를 당번에 추가했어요.');
+        // 필요하다면 재조회
+        // const refreshed = await useMemberApi.get(placeId, memberId);
+        // setData(refreshed.data?.data ?? null);
+      } else {
+        alert(res.data?.message ?? '추가에 실패했어요.');
+      }
+    } catch (e: any) {
+      alert(
+        e?.response?.data?.message ?? e?.message ?? '추가 중 오류가 발생했어요.'
+      );
+    } finally {
+      setAssignLoading(false);
+    }
+  };
 
   return (
     <div className='flex flex-col pt-[52px] px-5 justify-center items-center'>
@@ -148,14 +175,9 @@ const ManagerInfo: React.FC = () => {
         {Array.from({ length: count }, (_, index) => (
           <DangbunList
             key={index}
-            onChange={(value) =>
-              setDangbun((prev) => {
-                const copy = [...prev];
-                copy[index] = value;
-                return copy;
-              })
-            }
             placeId={placeId}
+            // 🔽 DangbunList가 선택한 dutyId를 넘겨주도록 연결
+            onSelectDuty={(dutyId) => handleAssignToDuty(dutyId)}
           />
         ))}
 
