@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDutyApi } from '../../hooks/useDutyApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 import left_chevron from '../../assets/chevron/white_left_chevronImg.svg';
 import modify from '../../assets/dangbun/Modify.svg';
@@ -323,7 +324,33 @@ const DutyManagement = () => {
     if (!placeId || !dutyId) navigate('/management/manager');
   }, [placeId, dutyId, navigate]);
 
-  // 멤버 불러오기
+  // 전체 맴버 불러오기
+  const [waitingCount, setWaitingCount] = useState(0);
+  const [memberloading, setMemberLoading] = useState(false);
+  const [membererr, setMemberErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!placeId) return;
+    (async () => {
+      try {
+        setMemberLoading(true);
+        setMemberErr(null);
+        const res = await useMemberApi.list(placeId);
+        // 응답 예시:
+        // { code:20000, data:{ waitingMemberNumber:4, members:[{memberId, role, name, dutyName:[...]}] } }
+        const data = res?.data?.data ?? {};
+        setWaitingCount(data.waitingMemberNumber ?? 0);
+        setAllMembers(data.members ?? []);
+      } catch (e: any) {
+        setErr(
+          e?.response?.data?.message ?? e?.message ?? '멤버 목록 불러오기 실패'
+        );
+      } finally {
+        setMemberLoading(false);
+      }
+    })();
+  }, [placeId]);
+  // 당번 지정된 멤버 불러오기
   useEffect(() => {
     if (!placeId || !dutyId) return;
 
@@ -333,10 +360,9 @@ const DutyManagement = () => {
         setErr(null);
         const res = await useDutyApi.getMembers(placeId, dutyId);
         const list: DutyMember[] = res.data?.data ?? [];
-        setAllMembers(list);
 
         // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
-        // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
+        setSelectedMemberIds(list.map((m) => m.memberId));
       } catch (e: any) {
         setErr(
           e?.response?.data?.message ?? e?.message ?? '맴버 불러오기 실패'
