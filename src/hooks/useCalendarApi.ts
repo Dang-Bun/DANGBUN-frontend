@@ -7,7 +7,7 @@ export const useCalendarApi = {
     api.patch(`/places/${placeId}/calendar/${checklistId}/complete`),
 
   // 프로그레스바 조회 (이전 달, 다음 달 포함)
-  getProgress: (placeId: number, params?: { year?: number; month?: number }) =>
+  getProgress: (placeId: number, params?: { y?: number; m?: number }) =>
     api.get(`/places/${placeId}/calendar`, { params }),
 
   // 사진 확인
@@ -21,7 +21,7 @@ export const useCalendarApi = {
   // 날짜별 체크리스트 조회
   getChecklistsByDate: (
     placeId: number,
-    params: { year: number; month: number; day?: number }
+    params: { y: number; m: number }
   ) =>
     api.get(`/places/${placeId}/calendar/checklists`, { params }),
 

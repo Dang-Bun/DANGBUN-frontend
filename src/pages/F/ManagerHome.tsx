@@ -36,6 +36,7 @@ import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import useNotificationApi from '../../hooks/useNotificationApi';
 
 const CATEGORY_ICON_SRC: Record<string, string> = {
   CAFE: CAFE_IMG,
@@ -101,9 +102,10 @@ const ManagerHome: React.FC = () => {
     state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
   };
   // 컨텍스트: state 우선, 없으면 localStorage
-  const pid = Number(state?.placeId);
-  const placeName = state?.placeName;
-  const placeIconKey = state?.placeIcon
+  const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
+  const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
+  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
+  
   useEffect(() => {
     if (pid) localStorage.setItem('placeId', String(pid));
     if (placeName) localStorage.setItem('placeName', placeName);
@@ -120,6 +122,7 @@ const ManagerHome: React.FC = () => {
   // 업로드 팝업
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   /* ---------- 데이터 로드 ---------- */
   useEffect(() => {
@@ -197,6 +200,36 @@ const ManagerHome: React.FC = () => {
     return () => { mounted = false; };
   }, [pid]);
 
+    // 받은 알림 읽음 여부 확인
+  useEffect(() => {
+    if (!pid) return;
+    
+    const checkUnreadNotifications = async () => {
+      try {
+        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const notifications = res?.data?.data || [];
+                 // 읽지 않은 알림이 있으면 mail 표시, 그 외에는 mailDefault 표시
+         const hasUnread = notifications.length > 0 && notifications.some((notification: any) => !notification.isRead);
+        setHasUnreadNotifications(hasUnread);
+      } catch (error) {
+        console.error('알림 읽음 여부 확인 실패:', error);
+        setHasUnreadNotifications(true); // 에러 시에도 mailDefault 표시
+      }
+    };
+
+    checkUnreadNotifications();
+
+    // 페이지 포커스 시 알림 상태 다시 확인
+    const handleFocus = () => {
+      checkUnreadNotifications();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [pid]);
+
   /* ---------- 파생 ---------- */
   const allTasks = useMemo(() => duties.flatMap(d => d.tasks), [duties]);
 
@@ -227,8 +260,7 @@ const ManagerHome: React.FC = () => {
     return base;
   }, [page.tasks, filter]);
 
-  const hasUnread = useMemo(() => allTasks.some(t => !t.isChecked), [allTasks]);
-  const notificationImage = hasUnread ? mailDefault : mail;
+  const notificationImage = hasUnreadNotifications ? mailDefault : mail;
 
   const backgroundImage = useMemo(() => {
     if (page.percent <= 0) return '/bg/bg0.svg';
@@ -320,7 +352,11 @@ const ManagerHome: React.FC = () => {
           <div className="flex items-center relative">
             <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">당번</span>
             <div className="flex items-center gap-[210px]">
-              <PlaceNameCard place={placeName} type={page.percent >= 100 ? 'complete' : 'default'} />
+              <PlaceNameCard 
+                place={placeName} 
+                type={page.percent >= 100 ? 'complete' : 'default'} 
+                onClick={() => navigate('/myplace')}
+              />
               <img src={notificationImage} alt="알림" className="w-[36px] cursor-pointer" onClick={goToNotification} />
             </div>
           </div>

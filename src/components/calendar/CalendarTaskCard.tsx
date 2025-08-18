@@ -67,7 +67,10 @@ const CalendarTaskCard: React.FC<Props> = ({
 
         <button
           type="button"
-          onClick={onMenuClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onMenuClick?.();
+          }}
           className="p-2 -mr-1 rounded focus:outline-none hover:opacity-90"
           aria-label="작업 메뉴 열기"
         >

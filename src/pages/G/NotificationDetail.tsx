@@ -24,6 +24,7 @@ const NotificationDetail = () => {
     const fetchDetail = async () => {
       if (!placeId || !notificationId) return;
       try {
+        // 알림 상세 정보 조회
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
         const data = res?.data;
 

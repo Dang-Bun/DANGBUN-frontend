@@ -40,6 +40,13 @@ const Home: React.FC = () => {
   const placeName  = useMemo(() => state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스', [state?.placeName]);
   const placeIcon  = useMemo(() => state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC', [state?.placeIcon]);
 
+  // localStorage에 정보가 있으면 업데이트
+  useEffect(() => {
+    if (placeId) localStorage.setItem('placeId', String(placeId));
+    if (placeName) localStorage.setItem('placeName', placeName);
+    if (placeIcon) localStorage.setItem('placeIcon', placeIcon);
+  }, [placeId, placeName, placeIcon]);
+
   // 역할 결정
   const [role, setRole] = useState<Mode | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,17 +1,15 @@
-import '../../styles/CalendarOverride.css';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
+import { useParams, useLocation } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
 import toggleDown from '../../assets/home/toggleDown.svg';
-import toggleUp from '../../assets/home/toggleUp.svg';
-import { useCalendarApi } from '../../hooks/useCalendarApi';
+import toggleUp from '../../assets/home/toggleDown.svg';
+import useCalendarApi from '../../hooks/useCalendarApi';
 
 dayjs.locale('ko');
 
-// API 응답과 동일한 구조를 가진 타입 정의
 interface CleaningData {
   cleaningId: number;
   dutyName: string;
@@ -23,6 +21,16 @@ interface CleaningData {
 }
 
 const CalendarDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { state } = useLocation() as {
+    state?: { 
+      placeId?: number; 
+      checklistId?: number; 
+      taskTitle?: string; 
+      dutyName?: string 
+    };
+  };
+  
   const [cleaningData, setCleaningData] = useState<CleaningData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,37 +42,73 @@ const CalendarDetail: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const VISIBLE_COUNT = 3;
 
-  const PLACE_ID = 1;
-  const CHECKLIST_ID = 1;
-
   useEffect(() => {
     const fetchCleaningData = async () => {
       try {
         setLoading(true);
-        const response = await useCalendarApi.getCleanings(PLACE_ID, CHECKLIST_ID);
-        setCleaningData(response.data.data);
-      } catch (err) {
-        setError('청소 데이터를 불러오는 데 실패했습니다.');
-        console.error(err);
+        setError(null);
+
+        // state에서 placeId를 우선 가져오고, 없으면 localStorage에서 가져옴
+        const PLACE_ID = state?.placeId ?? localStorage.getItem('placeId');
+        const accessToken = localStorage.getItem('accessToken');
+        
+        if (!PLACE_ID || !accessToken) {
+          setError('로그인이 필요합니다.');
+          return;
+        }
+
+        const placeId = Number(PLACE_ID);
+        const checklistId = Number(id);
+
+        if (!checklistId) {
+          setError('잘못된 체크리스트 ID입니다.');
+          return;
+        }
+
+        console.log('Debug - Fetching cleaning data for checklistId:', checklistId, 'in placeId:', placeId);
+
+        // checklistId를 기반으로 청소 정보 조회 (Mock API 사용)
+        const response = await useCalendarApi.getCleanings(placeId, checklistId);
+        console.log('Debug - Cleaning data response:', response.data);
+
+        // API 응답 데이터를 CleaningData 형식으로 변환
+        const apiData = response.data?.data || response.data || {};
+        if (!apiData) {
+          setError(`체크리스트 ID ${checklistId}에 대한 청소 정보를 찾을 수 없습니다.`);
+          return;
+        }
+
+        const cleaningData: CleaningData = {
+          cleaningId: apiData.cleaningId || checklistId,
+          dutyName: apiData.dutyName || state?.taskTitle || '청소',
+          membersName: apiData.membersName || [],
+          needPhoto: apiData.needPhoto || false,
+          repeatType: 'WEEKLY' as const,
+          repeatDays: apiData.repeatDays || [],
+          dates: apiData.dates || []
+        };
+        
+        console.log('Debug - Parsed cleaning data:', cleaningData);
+        
+        setCleaningData(cleaningData);
+      } catch (err: unknown) {
+        console.error('Error fetching cleaning data:', err);
+        if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response && err.response.status === 403) {
+          setError('권한이 없습니다. 다시 로그인해주세요.');
+        } else {
+          setError('데이터를 불러오는 데 실패했습니다.');
+        }
       } finally {
         setLoading(false);
       }
     };
-    fetchCleaningData();
-  }, []);
 
-  const highlightDays = useMemo(() => {
-    const map: Record<string, number> = { 'SUNDAY': 0, 'MONDAY': 1, 'TUESDAY': 2, 'WEDNESDAY': 3, 'THURSDAY': 4, 'FRIDAY': 5, 'SATURDAY': 6 };
-    if (!cleaningData?.repeatDays) return new Set<number>();
-    
-    return new Set(
-      cleaningData.repeatDays
-        .map((k) => map[k])
-        .filter((n): n is number => n !== undefined)
-    );
-  }, [cleaningData]);
+    fetchCleaningData();
+  }, [id]);
+
+
   
-  const memberNames = useMemo(() => {
+  const memberNames = React.useMemo(() => {
     return cleaningData?.membersName || [];
   }, [cleaningData]);
 
@@ -72,7 +116,7 @@ const CalendarDetail: React.FC = () => {
   const rest = memberNames.length > VISIBLE_COUNT ? memberNames.slice(VISIBLE_COUNT) : [];
   const hasMore = memberNames.length > VISIBLE_COUNT;
 
-  const monthOptions = useMemo(
+  const monthOptions = React.useMemo(
     () => Array.from({ length: 6 }, (_, i) => dayjs().add(i, 'month').startOf('month')),
     []
   );
@@ -83,7 +127,7 @@ const CalendarDetail: React.FC = () => {
     setActiveStartDate(next);
   };
 
-  const tileClassName = ({ date, view, activeStartDate }: any) => {
+  const tileClassName = ({ date, view, activeStartDate }: { date: Date; view: string; activeStartDate: Date }) => {
     if (view !== 'month') return '';
 
     const isSameMonth =
@@ -96,6 +140,7 @@ const CalendarDetail: React.FC = () => {
     if (!isSameMonth) return base + ' text-[#8e8e8e]';
 
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
+    
     if (cleaningData?.dates.includes(formattedDate)) {
         return base + ' !bg-blue-500 !text-white !rounded-full';
     }
@@ -104,15 +149,48 @@ const CalendarDetail: React.FC = () => {
   };
 
   if (loading) {
-    return <div>로딩 중...</div>;
+    return (
+      <div>
+        <Header title="청소 정보" />
+        <div className="flex flex-col px-5 py-4 gap-8">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500">로딩 중...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>오류: {error}</div>;
+    return (
+      <div>
+        <Header title="청소 정보" />
+        <div className="flex flex-col px-5 py-4 gap-8">
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <p className="text-red-500 text-center">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-[#4D83FD] text-white rounded-lg"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
   
   if (!cleaningData) {
-    return <div>청소 데이터를 찾을 수 없습니다.</div>;
+    return (
+      <div>
+        <Header title="청소 정보" />
+        <div className="flex flex-col px-5 py-4 gap-8">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500">청소 데이터를 찾을 수 없습니다.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const weekDaysInKorean = {
@@ -137,7 +215,7 @@ const CalendarDetail: React.FC = () => {
         </div>
         <div className="flex justify-between">
           <span className="text-[16px] font-semibold">당번</span>
-          <span className="text-[#8E8E8E] text-[16px] font-normal">{cleaningData.dutyName}</span>
+          <span className="text-[#8E8E8E] text-[16px] font-normal">{state?.dutyName || cleaningData.dutyName}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-[16px] font-semibold">담당 멤버</span>
