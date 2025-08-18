@@ -17,20 +17,18 @@ type DutyIconKey =
   | 'BRUSH_PINK'
   | 'SPRAY_BLUE';
 
-type PlaceIconKey = 'BUILDING' | 'CAFE' | 'CINEMA' | 'DORMITORY' | 'GYM' | 'HOME';
-
 type DutySummary = {
   id: number;
   name: string;
-  percent: number;      // 0~100
+  percent: number; // 0~100
   iconKey: DutyIconKey; // 당번 아이콘
 };
 
 type Payload = {
   placeId?: number;
   placeName?: string;
-  percent?: number;     // 전체 진행률
-  placeIconKey?: PlaceIconKey;
+  percent?: number; // 전체 진행률
+  placeIconKey?: PlaceProgressCard.Category;
   duties?: DutySummary[];
 };
 
@@ -58,8 +56,10 @@ const ManagerOverview: React.FC = () => {
   if (!data) {
     return (
       <div>
-        <Header title="당번 진행률" />
-        <div className="p-6 text-sm text-gray-500">요약 데이터가 없습니다. 홈 화면에서 다시 들어와 주세요.</div>
+        <Header title='당번 진행률' />
+        <div className='p-6 text-sm text-gray-500'>
+          요약 데이터가 없습니다. 홈 화면에서 다시 들어와 주세요.
+        </div>
       </div>
     );
   }
@@ -72,7 +72,9 @@ const ManagerOverview: React.FC = () => {
       case 'high':
         return arr.sort((a, b) => b.percent - a.percent);
       case 'name':
-        return arr.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko-KR'));
+        return arr.sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '', 'ko-KR')
+        );
       case 'low':
       default:
         return arr.sort((a, b) => a.percent - b.percent);
@@ -80,13 +82,17 @@ const ManagerOverview: React.FC = () => {
   }, [data.duties, sortType]);
 
   const sortLabel =
-    sortType === 'low' ? '진행률 낮은 순' : sortType === 'high' ? '진행률 높은 순' : '당번 이름 순';
+    sortType === 'low'
+      ? '진행률 낮은 순'
+      : sortType === 'high'
+        ? '진행률 높은 순'
+        : '당번 이름 순';
 
   return (
     <div>
-      <Header title="당번 진행률" />
+      <Header title='당번 진행률' />
 
-      <div className="mt-13 flex flex-col justify-center items-center w-full">
+      <div className='mt-13 flex flex-col justify-center items-center w-full'>
         {/* 플레이스 카드: 장소명 + 전체 퍼센트 + (필요 시) 플레이스 아이콘 */}
         <PlaceProgressCard
           placeName={data.placeName}
@@ -94,18 +100,20 @@ const ManagerOverview: React.FC = () => {
           iconKey={data.placeIconKey}
         />
 
-        <div className="w-full max-w-[520px] mt-4 px-4 flex justify-between">
-          <span className="text-[16px] font-normal pl-1">당번 목록</span>
-          <div className="relative flex items-center gap-2">
-            <h2 className="text-[12px] text-[#797C82] font-normal">{sortLabel}</h2>
+        <div className='w-full max-w-[520px] mt-4 px-4 flex justify-between'>
+          <span className='text-[16px] font-normal pl-1'>당번 목록</span>
+          <div className='relative flex items-center gap-2'>
+            <h2 className='text-[12px] text-[#797C82] font-normal'>
+              {sortLabel}
+            </h2>
             <img
               src={toggle}
-              alt="정렬"
-              onClick={() => setPopupOpen(v => !v)}
-              className="w-[20px] h-[20px] cursor-pointer select-none"
+              alt='정렬'
+              onClick={() => setPopupOpen((v) => !v)}
+              className='w-[20px] h-[20px] cursor-pointer select-none'
             />
             {popupOpen && (
-              <div className="absolute right-0 top-[calc(100%+8px)] z-50">
+              <div className='absolute right-0 top-[calc(100%+8px)] z-50'>
                 <SortPopUp
                   onSelect={(t) => {
                     setSortType(t);
@@ -117,8 +125,8 @@ const ManagerOverview: React.FC = () => {
           </div>
         </div>
 
-        <div className="h-3" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className='h-3' />
+        <div className='grid grid-cols-2 gap-3'>
           {sortedDuties.map((d) => (
             <DangbunProgressCard
               key={d.id}
