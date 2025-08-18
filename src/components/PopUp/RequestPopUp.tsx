@@ -10,7 +10,7 @@ const RequestPopUp = ({
 }: {
   isWithdrawalOpen: boolean;
   closeWithdrawal: () => void;
-  userEmail: string;
+  userEmail?: string;
 }) => {
   const [isModalOpen2, setIsModalOpen2] = React.useState(false);
   const navigate = useNavigate();

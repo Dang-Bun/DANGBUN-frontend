@@ -11,7 +11,7 @@ interface PopUpCardProps {
   placeholder?: string;
   first?: string;
   second?: string;
-  userEmail: string;
+  userEmail?: string;
   onFirstClick?: () => void;
   onSecondClick?: (inputValue?: string) => void;
 }
