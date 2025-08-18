@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Location } from 'react-router-dom';
+import type { Location } from 'react-router-dom';
 
 import '../../styles/CalendarOverride.css';
 import Calendar from 'react-calendar';
