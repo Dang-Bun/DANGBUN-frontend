@@ -19,12 +19,13 @@ import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import SelectBottom from '../../components/calendar/SelectBottom';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
-// import useCalendarApi from '../../hooks/useCalendarApi';
+import utc from 'dayjs/plugin/utc';
 
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 
 dayjs.locale('ko');
+dayjs.extend(utc);
 
 type Task = {
   id: number;
@@ -69,7 +70,7 @@ const CalendarPage: React.FC = () => {
   const [selectTask, setSelectTask] = useState<Task | null>(null);
 
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
-  const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
+  const dateStr = dayjs(selectedDate).utc().format('YYYY-MM-DD');
 
   // API 데이터 로드
   const loadData = useCallback(async () => {
