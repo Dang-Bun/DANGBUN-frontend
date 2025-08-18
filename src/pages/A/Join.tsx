@@ -121,6 +121,7 @@ const Join = () => {
               placeholder='이름을 입력하세요'
               value={name}
               onChange={(e) => setName(e.target.value)}
+              maxLength={10}
             />
           </div>
           <div className='mb-[24px]'>
@@ -134,6 +135,7 @@ const Join = () => {
                   fontSize={16}
                   value={emailId}
                   onChange={(e) => setEmailId(e.target.value)}
+                  maxLength={20}
                 ></FreeInput>
                 <div>@</div>
                 {isCustomDomain ? (
@@ -169,6 +171,7 @@ const Join = () => {
                   fontSize={16}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
+                  maxLength={6}
                 />
                 {isRequested && timeLeft > 0 && (
                   <span
@@ -206,6 +209,7 @@ const Join = () => {
               type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              maxLength={20}
             />
             <div
               className={classNames(
