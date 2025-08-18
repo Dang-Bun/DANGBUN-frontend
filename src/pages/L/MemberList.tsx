@@ -37,6 +37,7 @@ const MemberList: React.FC = () => {
         // { code:20000, data:{ waitingMemberNumber:4, members:[{memberId, role, name, dutyName:[...]}] } }
         const data = res?.data?.data ?? {};
         setWaitingCount(data.waitingMemberNumber ?? 0);
+        console.log(waitingCount);
         setMembers(data.members ?? []);
       } catch (e: any) {
         setErr(

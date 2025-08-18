@@ -13,44 +13,47 @@ const BottomBar = () => {
   const location = useLocation();
 
   const [role] = useState<string | null>(() => localStorage.getItem('role'));
-  const [placeId] = useState<string | null>(() => localStorage.getItem('placeId'));
+  const [placeId] = useState<string | null>(() =>
+    localStorage.getItem('placeId')
+  );
 
-  const pathname = (location.pathname.replace(/\/+$/, '') || '/');
+  const pathname = location.pathname.replace(/\/+$/, '') || '/';
 
-  const isCalendar = pathname === '/calendar' || pathname.startsWith('/calendar/');
+  const isCalendar =
+    pathname === '/calendar' || pathname.startsWith('/calendar/');
   const isHome = pathname.startsWith('/home/');
   const isSetting = pathname.startsWith('/setting/');
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full h-[83px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]">
-      <button type="button" onClick={() => navigate('/calendar')}>
-        <img src={isCalendar ? CalendarPressed : Calendar} alt="캘린더" />
+    <div className='fixed bottom-0 left-0 right-0 w-full h-[83px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
+      <button type='button' onClick={() => navigate('/calendar')}>
+        <img src={isCalendar ? CalendarPressed : Calendar} alt='캘린더' />
       </button>
 
       <button
-        type="button"
+        type='button'
         onClick={() => {
-          if (role === '매니저'|| role === 'manager') {
+          if (role === '매니저' || role === 'manager') {
             navigate('/home/manager', { state: { role, placeId } });
           } else {
             navigate('/home/member', { state: { role, placeId } });
           }
         }}
       >
-        <img src={isHome ? HomePressed : Home} alt="홈" />
+        <img src={isHome ? HomePressed : Home} alt='홈' />
       </button>
 
       <button
-        type="button"
+        type='button'
         onClick={() => {
-          if (role === '매니저') {
+          if (role === '매니저' || role === 'manager') {
             navigate('/setting/manager');
           } else {
             navigate('/setting/member');
           }
         }}
       >
-        <img src={isSetting ? SettingPressed : Setting} alt="설정" />
+        <img src={isSetting ? SettingPressed : Setting} alt='설정' />
       </button>
     </div>
   );
