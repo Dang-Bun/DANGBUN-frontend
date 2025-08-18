@@ -4,7 +4,7 @@ import { useDutyApi } from '../../hooks/useDutyApi';
 
 import Plus from '../../assets/dangbun/plus.svg';
 import BottomBar from '../../components/BottomBar';
-import nothingDangbun from '../../assets/dangbun/nothingDangBun.svg';
+import nothingDangbun from '../../assets/dangbun/nothingDangbun.svg';
 import left_chevron from '../../assets/chevron/left_chevronImg.svg';
 
 import dangbunFile from '../../assets/dangbun/DangbunFile.svg';
