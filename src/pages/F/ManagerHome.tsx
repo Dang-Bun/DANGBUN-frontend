@@ -181,6 +181,7 @@ const ManagerHome: React.FC = () => {
   // ====== 변경 끝 ======
 
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [hasNotifications, setHasNotifications] = useState(false);
 
   /* ---------- 데이터 로드 및 처리 로직 ---------- */
   useEffect(() => {
@@ -287,21 +288,27 @@ const ManagerHome: React.FC = () => {
         const stored = localStorage.getItem(`notifications_${pid}`);
         if (stored) {
           const notifications = JSON.parse(stored);
+          const hasAnyNotifications = notifications.length > 0;
           const hasUnread = notifications.some((n: any) => !n.read);
+          setHasNotifications(hasAnyNotifications);
           setHasUnreadNotifications(hasUnread);
         } else {
           // localStorage에 없으면 API로 확인
           useNotificationApi.listReceived(pid, { page: 0, size: 20 })
             .then(res => {
               const notifications = res?.data?.data || [];
+              const hasAnyNotifications = notifications.length > 0;
               const hasUnread = notifications.some((n: any) => !n.isRead);
+              setHasNotifications(hasAnyNotifications);
               setHasUnreadNotifications(hasUnread);
             })
             .catch(() => {
+              setHasNotifications(false);
               setHasUnreadNotifications(false);
             });
         }
       } catch {
+        setHasNotifications(false);
         setHasUnreadNotifications(false);
       }
     };
@@ -350,7 +357,8 @@ const ManagerHome: React.FC = () => {
     return base;
   }, [page.tasks, filter]);
 
-  const notificationImage = hasUnreadNotifications ? mail : mailDefault;
+  // 알림 이미지 로직: 알림이 있고 읽지 않은 알림이 있을 때만 mail 아이콘 표시
+  const notificationImage = hasNotifications && hasUnreadNotifications ? mail : mailDefault;
   const backgroundImage = useMemo(() => {
     if (page.percent <= 0) return '/bg/bg0.svg';
     if (page.percent >= 100) return '/bg/bg100.svg';

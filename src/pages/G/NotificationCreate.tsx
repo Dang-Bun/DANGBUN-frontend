@@ -13,6 +13,7 @@ import Toast from '../../components/PopUp/TostPopUp';
 import PopUpCardExit from '../../components/PopUp/PopUpCardExit';
 import useDutyApi from '../../hooks/useDutyApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 type Duty = { id: number; name?: string };
 type Person = { id: number; name: string };
@@ -20,7 +21,7 @@ type Person = { id: number; name: string };
 const TEMPLATE_MAP = {
 	clean: 'CLEANING_PENDING',
 	newMember: 'NEW_MEMBER_JOINED',
-	update: 'TASK_LIST_UPDATE',
+	update: 'CLEANING_LIST_CHANGED',
 } as const;
 
 const DEFAULT_MSG: Record<keyof typeof TEMPLATE_MAP, string> = {
@@ -48,6 +49,7 @@ const NotificationCreate: React.FC = () => {
 	const [duties, setDuties] = useState<Duty[]>([]);
 	const [dutyMembers, setDutyMembers] = useState<Record<number, Person[]>>({});
 	const [loadingMembers, setLoadingMembers] = useState(false);
+	const [currentUser, setCurrentUser] = useState<{ id: number; name: string } | null>(null);
 	const searchModalRef = useRef<SearchHandler>(null);
 	const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -82,6 +84,28 @@ const NotificationCreate: React.FC = () => {
 		setShowExitConfirm(false);
 	};
 
+	// 현재 사용자 정보 가져오기
+	useEffect(() => {
+		const fetchCurrentUser = async () => {
+			try {
+				const res = await useMemberApi.me(placeId);
+				const userData = res?.data?.data;
+				if (userData) {
+					setCurrentUser({
+						id: userData.memberId || userData.id,
+						name: userData.name || userData.memberName || '사용자'
+					});
+				}
+			} catch (error) {
+				console.error('현재 사용자 정보 가져오기 실패:', error);
+			}
+		};
+
+		if (placeId) {
+			fetchCurrentUser();
+		}
+	}, [placeId]);
+
 	const ReadyToSubmit =
 		(Object.values(dangbunSelections).some((arr) => arr.length > 0) || manualMembers.length > 0) &&
 		((selectedCard === 'template' && selectedTemplateType !== null) ||
@@ -115,17 +139,18 @@ const NotificationCreate: React.FC = () => {
 				template: TEMPLATE_MAP[selectedTemplateType],
 				content: DEFAULT_MSG[selectedTemplateType],
 			};
+
 		} else {
 			payload = {
 				receiverMemberIds: recipientIds,
-				template: 'CUSTOM',
+				template: 'NONE',
 				content: customContent.trim(),
 			};
+
 		}
 
 		try {
 			const res = await useNotificationApi.create(placeId, payload);
-			console.log('알림 생성 응답:', res?.data); // 디버깅용 로그
 			
 			// 서버 응답 상태 확인 - 500 에러 등이 발생했을 때 처리
 			if (!res || res.status >= 400) {
@@ -152,8 +177,21 @@ const NotificationCreate: React.FC = () => {
 						: customContent.trim(),
 					template: selectedCard === 'template' && selectedTemplateType 
 						? TEMPLATE_MAP[selectedTemplateType] 
-						: 'CUSTOM',
+						: 'NONE',
 					createdAt: new Date().toISOString(),
+					senderName: currentUser?.name || '나', // 현재 로그인한 사용자 이름
+					receivers: manualMembers.length > 0 
+						? manualMembers.map(m => ({ id: m.id, name: m.name }))
+						: Object.values(dangbunSelections).flat().length > 0
+						? Object.values(dangbunSelections).flat().map(memberId => {
+							// dutyMembers에서 해당 멤버 정보 찾기
+							for (const dutyMembersList of Object.values(dutyMembers)) {
+								const member = dutyMembersList.find(m => m.id === memberId);
+								if (member) return { id: member.id, name: member.name };
+							}
+							return { id: memberId, name: '멤버' };
+						})
+						: [], // 기본값
 				};
 				navigate(`/${placeId}/alarm`, {
 					state: {
@@ -271,11 +309,13 @@ const NotificationCreate: React.FC = () => {
 							...Object.entries(dangbunSelections)
 								.map(([idStr, ids]) => {
 									const dutyId = Number(idStr);
+									const duty = duties.find(d => d.id === dutyId);
+									const dutyName = duty?.name || `당번 ${dutyId}`;
 									const names =
 										(dutyMembers[dutyId] || [])
 											.filter((p) => ids.includes(p.id))
 											.map((p) => p.name);
-									return names.length ? `당번 ${dutyId} (${names.join(', ')})` : null;
+									return names.length ? `${dutyName} (${names.join(', ')})` : null;
 								})
 								.filter(Boolean) as string[],
 							...manualMembers.map((m) => m.name),

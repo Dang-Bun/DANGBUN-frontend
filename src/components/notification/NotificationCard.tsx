@@ -40,6 +40,17 @@ const formatTimeAgo = (isoString: string): string => {
 
 
 const NotificationCard = ({type, read=false, title, descript, timeAgo, onClick }:NotiChiptProps) => {
+
+	const MAX_TITLE_LENGTH = 20;
+	const MAX_DESCRIPT_LENGTH = 60; // 두 줄 정도 표시되도록 설정
+	
+	const truncatedTitle = title.length > MAX_TITLE_LENGTH 
+		? title.substring(0, MAX_TITLE_LENGTH) + '...' 
+		: title;
+		
+	const truncatedDescript = descript.length > MAX_DESCRIPT_LENGTH 
+		? descript.substring(0, MAX_DESCRIPT_LENGTH) + '...' 
+		: descript;
     let imgSrc = '';
     if(read){
         if(type ==='member'){
@@ -72,8 +83,8 @@ const NotificationCard = ({type, read=false, title, descript, timeAgo, onClick }
       <button onClick={onClick} className={`relative w-[353px] h-[124px] p-[12px] flex flex-col align-baseline rounded-[8px] ${bgColor}`}>
         <img src={imgSrc} alt="Chip img" className='w-[61px] h-fit mb-2' />
         <div className='gap-2 flex flex-col items-start'>
-            <p className={` text-base font-semibold ${textColor} px-[10px] `}>{title}</p>
-            <p className='text-xs text-[#848484] px-[10px]'>{descript}</p>
+            <p className={` text-base font-semibold ${textColor} px-[10px] text-left`}>{truncatedTitle}</p>
+            <p className='text-xs text-[#848484] px-[10px] text-left'>{truncatedDescript}</p>
         </div>
         <span className="absolute top-[12px] right-[16px] text-[12px] text-[#797C82]">
             {formatTimeAgo(timeAgo)}
