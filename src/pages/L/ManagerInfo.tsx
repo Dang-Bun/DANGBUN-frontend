@@ -8,6 +8,7 @@ import DangbunList from '../../components/cleanUp/DangbunList2';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from './../../hooks/useDutyApi';
+import { div } from 'framer-motion/client';
 
 type MemberInfoResp = {
   member: {
@@ -84,7 +85,8 @@ const ManagerInfo: React.FC = () => {
   const name = data?.member?.name ?? '';
   const role = data?.member?.role ?? '멤버';
   const isManager = role === '매니저';
-  const firstDuty = data?.duties?.[0]?.dutyName ?? '-';
+  const duties = data?.duties ?? [];
+  const informations = data?.member?.information ?? {};
 
   const handleAssignToDuty = async (dutyId: number) => {
     if (!placeId || !dutyId || !memberId) return;
@@ -143,7 +145,7 @@ const ManagerInfo: React.FC = () => {
           </div>
 
           {/* 내용 카드 */}
-          <div className='flex flex-col px-4 py-[11px] bg-stone-50 rounded-br-lg rounded-bl-lg'>
+          <div className='flex flex-col px-4 py-[11px] bg-[#f9f9f9] rounded-br-lg rounded-bl-lg'>
             <div className='flex flex-row items-center justify-between'>
               <p
                 className={`${isManager ? 'text-blue-500' : 'text-[#38be8b]'} font-semibold`}
@@ -152,7 +154,7 @@ const ManagerInfo: React.FC = () => {
               </p>
               <div
                 className={`h-8 px-3 flex rounded-lg justify-center items-center text-sm font-semibold text-center
-                ${isManager ? 'bg-indigo-100 text-blue-500' : 'bg-[#ebfff6] text-[#00dc7b]'}`}
+                ${isManager ? 'bg-indigo-100 text-blue-500' : 'bg-[#ebfff6] text-[#00dd7c]'}`}
               >
                 {role}
               </div>
@@ -160,9 +162,36 @@ const ManagerInfo: React.FC = () => {
 
             <div className='self-stretch h-0 opacity-50 outline-1 outline-offset-[-0.25px] outline-neutral-200 my-2.5' />
 
-            <div className='flex flex-row items-center justify-between gap-[18px]'>
+            <div className='flex flex-row items-center justify-between'>
               <p className='text-zinc-500 font-semibold'>당번</p>
-              <p className='text-base'>{firstDuty}</p>
+              <div className='flex flex-col gap-1'>
+                {duties.length > 0 ? (
+                  duties.map((duty: { dutyName: string }, idx: number) => (
+                    <p key={idx} className='text-base'>
+                      {duty.dutyName}
+                    </p>
+                  ))
+                ) : (
+                  <p className='text-base font-normal text-[#bdbdbd]'>미지정</p>
+                )}
+              </div>
+            </div>
+            <div>
+              {informations ? (
+                Object.entries(informations).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className='flex flex-row items-center justify-between gap-[18px]'
+                  >
+                    <p className='text-zinc-500 font-semibold'>{key}</p>
+                    <div className='flex flex-col gap-2'>
+                      <p className='text-base'>{value}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className='text-base'>미지정</p>
+              )}
             </div>
           </div>
         </div>
