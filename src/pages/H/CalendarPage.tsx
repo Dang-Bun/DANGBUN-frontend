@@ -119,51 +119,63 @@ const CalendarPage: React.FC = () => {
       const duties = placeData.duties || [];
       console.log('Debug - Duties from place API:', duties);
 
-      // 선택된 날짜의 체크리스트만 필터링
-      const checklistData: any[] = [];
-      duties.forEach((duty: any) => {
-        const checkLists = duty.checkLists || [];
-        checkLists.forEach((checklist: any) => {
-          // 날짜 필터링 (현재는 모든 체크리스트를 표시)
-          checklistData.push({
-            ...checklist,
-            dutyName: duty.dutyName || duty.name,
-            dutyId: duty.dutyId || duty.id
-          });
-        });
-      });
+             // 모든 체크리스트를 날짜별로 분류
+       const checklistDataByDate: Map<string, any[]> = new Map();
+       
+       duties.forEach((duty: any) => {
+         const checkLists = duty.checkLists || [];
+         checkLists.forEach((checklist: any) => {
+           // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
+           const checklistDate = checklist.date || selectedYMD; // 날짜 정보가 없으면 선택된 날짜 사용
+           
+           if (!checklistDataByDate.has(checklistDate)) {
+             checklistDataByDate.set(checklistDate, []);
+           }
+           
+           checklistDataByDate.get(checklistDate)!.push({
+             ...checklist,
+             dutyName: duty.dutyName || duty.name,
+             dutyId: duty.dutyId || duty.id
+           });
+         });
+       });
 
-      console.log('Debug - Filtered checklist data:', checklistData);
+              // 모든 날짜의 체크리스트를 하나의 배열로 변환
+       const allChecklists: TaskItem[] = [];
+       
+       checklistDataByDate.forEach((checklists, date) => {
+         checklists.forEach((item: Record<string, unknown>) => {
+           allChecklists.push({
+             dutyId: item.dutyId as number,
+             dutyName: item.dutyName as string,
+             task: {
+               id: item.checkListId as number,
+               title: item.cleaningName as string,
+               isChecked: !!(item.completeTime || item.completedAt || item.completed),
+               isCamera: !!(item.needPhoto || item.isCamera),
+               completedAt: item.completeTime || item.completedAt || null,
+               completedBy: item.completedBy as string || null,
+               date: date, // 실제 날짜 사용
+             },
+           });
+         });
+       });
 
-      const parsedChecklists: TaskItem[] = checklistData.map(
-        (item: Record<string, unknown>) => ({
-          dutyId: item.dutyId as number,
-          dutyName: item.dutyName as string,
-          task: {
-            id: item.checkListId as number,
-            title: item.cleaningName as string,
-            isChecked: !!(item.completeTime || item.completedAt || item.completed),
-            isCamera: !!(item.needPhoto || item.isCamera),
-            completedAt: item.completeTime || item.completedAt || null,
-            completedBy: item.completedBy as string || null,
-            date: selectedYMD, // 선택된 날짜 사용
-          },
-        })
-      );
-      setChecklists(parsedChecklists);
+              console.log('Debug - All checklists with dates:', allChecklists);
+       setChecklists(allChecklists);
 
-      // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
-      const progressMap = new Map<string, number>();
+       // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
+       const progressMap = new Map<string, number>();
 
-      // 날짜별로 체크리스트 그룹화
-      const tasksByDate = new Map<string, TaskItem[]>();
-      parsedChecklists.forEach((item) => {
-        const date = item.task.date;
-        if (!tasksByDate.has(date)) {
-          tasksByDate.set(date, []);
-        }
-        tasksByDate.get(date)!.push(item);
-      });
+       // 날짜별로 체크리스트 그룹화
+       const tasksByDate = new Map<string, TaskItem[]>();
+       allChecklists.forEach((item) => {
+         const date = item.task.date;
+         if (!tasksByDate.has(date)) {
+           tasksByDate.set(date, []);
+         }
+         tasksByDate.get(date)!.push(item);
+       });
 
       // 각 날짜별 완료율 계산
       tasksByDate.forEach((tasks, date) => {
