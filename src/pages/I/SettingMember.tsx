@@ -11,10 +11,11 @@ import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 const SettingMember = () => {
   const navigate = useNavigate();
-
+  const [placeName, setPlaceName] = useState('');
   const [name, setName] = useState('');
   const [memberId, setMemberId] = useState('');
   const placeId = Number(localStorage.getItem('placeId'));
@@ -40,21 +41,48 @@ const SettingMember = () => {
     })();
   }, [placeId]);
 
+  //플레이스 이름 불러오기
+  useEffect(() => {
+    const fetchPlaceInfo = async () => {
+      try {
+        const res = await usePlaceApi.placeSearch(placeId);
+        if (res.data.code === 20000) {
+          setPlaceName(res.data.data.placeName); // API 응답 구조에 맞게 수정
+        } else {
+          console.warn(`⚠️ 플레이스 정보 불러오기 실패: ${res.data.message}`);
+        }
+      } catch (error: any) {
+        console.error('❌ 플레이스 정보 API 호출 실패:', error);
+      }
+    };
+
+    if (placeId) {
+      fetchPlaceInfo();
+    }
+  }, [placeId]);
+
   return (
     <div className='flex flex-col justify-between pt-3 py-4'>
       {/* 상단 */}
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
-          <img
-            src={PlaceName}
-            alt='플레이스 이름'
-            className='absolute left-0 cursor-pointer'
-            onClick={() => {
-              navigate('/myPlace');
-            }}
-          />
-          <div className='mx-auto text-[20px] font-400'>설정</div>
+          <div className='relative'>
+            <img
+              src={PlaceName}
+              alt='플레이스 이름'
+              className='cursor-pointer'
+              onClick={() => {
+                navigate('/myPlace');
+              }}
+            />
+            <span className='absolute inset-0 flex items-center justify-center text-white text-[12px] font-normal'>
+              {placeName}
+            </span>
+          </div>
+          <div className='absolute left-[47%] mx-auto text-[20px] font-400'>
+            설정
+          </div>
         </div>
 
         {/* 유저 정보 카드 */}
