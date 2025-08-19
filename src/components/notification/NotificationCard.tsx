@@ -15,27 +15,43 @@ interface NotiChiptProps {
     onClick?: () => void;
 }
 
-const formatTimeAgo = (isoString: string): string => {
-    const now = new Date();
-    const date = new Date(isoString);
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+const formatTimeAgo = (timeAgo: string): string => {
+    // 이미 포맷된 문자열이면 그대로 반환
+    if (timeAgo.includes('전') || timeAgo.includes('/') || timeAgo === '방금 전') {
+        return timeAgo;
+    }
+    
+    // ISO 문자열이나 날짜 문자열인 경우 처리
+    try {
+        const now = new Date();
+        const date = new Date(timeAgo);
+        
+        if (isNaN(date.getTime())) {
+            return '방금 전';
+        }
+        
+        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) {
-        return "방금 전";
+        if (seconds < 60) {
+            return "방금 전";
+        }
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) {
+            return `${minutes}분 전`;
+        }
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) {
+            return `${hours}시간 전`;
+        }
+        const days = Math.floor(hours / 24);
+        if (days < 7) {
+            return `${days}일 전`;
+        }
+        return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (error) {
+        console.warn('날짜 파싱 실패:', timeAgo, error);
+        return '방금 전';
     }
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) {
-        return `${minutes}분 전`;
-    }
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-        return `${hours}시간 전`;
-    }
-    const days = Math.floor(hours / 24);
-    if (days < 7) {
-        return `${days}일 전`;
-    }
-    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 

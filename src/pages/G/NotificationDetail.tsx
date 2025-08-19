@@ -30,7 +30,7 @@ const NotificationDetail = () => {
       }
       
       // location.state에서 전달받은 알림 데이터 확인
-      const passedNotification = (location.state as any)?.notification;
+      const passedNotification = (location.state as Record<string, unknown>)?.notification;
       
       if (passedNotification) {
         // 제목을 첫 번째 마침표까지만 표시
@@ -55,7 +55,7 @@ const NotificationDetail = () => {
       // 전달받은 데이터가 없으면 API 호출
       try {
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
-        const data = res?.data;
+        const data = res?.data?.data || res?.data;
 
         // 제목을 첫 번째 마침표까지만 표시
         const apiTitle = data?.title ?? '';
@@ -63,17 +63,51 @@ const NotificationDetail = () => {
           ? apiTitle.split('.')[0] + '.'
           : apiTitle;
         
+        // 받는 사람 정보 파싱 개선
+        let receivers: { id: number; name: string }[] = [];
+        
+        // receiverMemberIds가 있으면 해당 ID들을 사용해서 멤버 정보 가져오기
+        if (Array.isArray(data?.receiverMemberIds) && data.receiverMemberIds.length > 0) {
+          // receiverMemberIds를 기반으로 멤버 정보 생성
+          receivers = data.receiverMemberIds.map((id: number, index: number) => ({
+            id: Number(id),
+            name: `멤버 ${index + 1}` // 실제 멤버 이름은 API에서 가져와야 함
+          }));
+        } else if (Array.isArray(data?.receivers)) {
+          // 기존 receivers 배열이 있는 경우
+          receivers = data.receivers.map((r: Record<string, unknown>) => ({
+            id: Number(r?.id ?? r?.memberId),
+            name: String(r?.name ?? r?.memberName ?? '멤버'),
+          }));
+        }
+        
+        // 날짜 형식 변환
+        const formatDate = (dateStr: string) => {
+          try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours < 12 ? '오전' : '오후';
+            const displayHours = hours < 12 ? hours : hours - 12;
+            const displayHoursStr = displayHours === 0 ? '12' : String(displayHours);
+            
+            return `${year}.${month}.${day} ${ampm} ${displayHoursStr}:${minutes}`;
+          } catch (error) {
+            return dateStr;
+          }
+        };
+
         const parsed: NotificationDetailType = {
           id: Number(data?.id ?? data?.notificationId),
           title: apiTitleWithFirstPeriod,
-          sender: data?.senderName ?? '알 수 없음',
-          receivers: Array.isArray(data?.receivers)
-            ? data.receivers.map((r: any) => ({
-                id: Number(r?.id ?? r?.memberId),
-                name: r?.name ?? r?.memberName ?? '멤버',
-              }))
-            : [],
-          time: data?.createdAt ?? '',
+          sender: data?.senderName ?? (data?.sender as any)?.name ?? '알 수 없음',
+          receivers: receivers,
+          time: formatDate(data?.createdAt ?? data?.createdTime ?? ''),
           content: data?.content ?? data?.message ?? '',
         };
 
