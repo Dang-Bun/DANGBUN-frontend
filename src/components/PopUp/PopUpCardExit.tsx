@@ -30,7 +30,7 @@ const PopUpCardExit: React.FC<PopUpCardExitProps> = ({
       onRequestClose={onRequestClose}
       ariaHideApp={false}
       className='flex justify-center items-center h-screen'
-      overlayClassName='fixed inset-0 w-[393px] h-screen mx-auto bg-black/60 z-50 flex justify-center items-center'
+      overlayClassName='fixed inset-0 w-full h-screen mx-auto bg-black/60 z-50 flex justify-center items-center'
     >
       <div
         className='flex flex-col justify-center items-center w-[306px] p-5 bg-[#fff] rounded-[8px] whitespace-pre-line'
@@ -43,7 +43,7 @@ const PopUpCardExit: React.FC<PopUpCardExitProps> = ({
 
         {/* 제목 */}
         <h2 className='text-[16px] font-[600] text-center mb-2'>{title}</h2>
-        
+
         {/* 설명 */}
         {descript && (
           <p className='text-[12px] font-[400] text-[#8e8e8e] text-center'>

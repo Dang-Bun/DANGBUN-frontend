@@ -36,7 +36,7 @@ const PopUpCode = ({
       onRequestClose={onRequestClose}
       ariaHideApp={false}
       className='flex justify-center items-center h-screen'
-      overlayClassName='fixed inset-0 w-[393px] h-[852px] mx-auto bg-black/60 z-50 flex justify-center items-center'
+      overlayClassName='fixed inset-0 w-full h-[852px] mx-auto bg-black/60 z-50 flex justify-center items-center'
     >
       <div
         className='flex flex-col justify-center items-center w-[306px] pt-8 pb-8 bg-[#fff] rounded-[8px] whitespace-pre-line '
