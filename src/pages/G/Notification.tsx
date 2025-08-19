@@ -126,10 +126,16 @@ const Notification: React.FC = () => {
 						return null;
 					}
 					
-					// 보낸 사람 정보
-					senderName = String(item.senderName || (item.sender as Record<string, unknown>)?.name || '알 수 없음');
-					// 받는 사람들 정보 (현재 사용자 포함)
-					if (Array.isArray(item.receivers || item.recipients)) {
+					// 보낸 사람 정보 - API 문서에 따른 senderName 직접 사용
+					senderName = String(item.senderName || '알 수 없음');
+					
+					// 받는 사람들 정보 - receiverNames 배열 사용
+					if (Array.isArray(item.receiverNames)) {
+						receivers = item.receiverNames.map((name: string, index: number) => ({
+							id: index + 1,
+							name: String(name || '멤버')
+						}));
+					} else if (Array.isArray(item.receivers || item.recipients)) {
 						receivers = (item.receivers || item.recipients).map((r: unknown) => ({
 							id: Number((r as Record<string, unknown>)?.id || 0),
 							name: String((r as Record<string, unknown>)?.name || '')
@@ -323,7 +329,7 @@ const Notification: React.FC = () => {
 				{list.map((n) => {
 					// sender의 역할에 따라 type 결정
 					const isManager = n.senderName === '관리자' || n.senderName === '나' || n.senderName?.includes('관리자');
-					const cardType = isManager ? 'member' : 'manager';
+					const cardType = isManager ? 'manager' : 'member';
 					
 					return (
 						<NotificationCard

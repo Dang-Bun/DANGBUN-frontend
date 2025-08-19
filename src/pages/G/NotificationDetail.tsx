@@ -63,21 +63,13 @@ const NotificationDetail = () => {
           ? apiTitle.split('.')[0] + '.'
           : apiTitle;
         
-        // 받는 사람 정보 파싱 개선
+        // 받는 사람 정보 파싱
         let receivers: { id: number; name: string }[] = [];
         
-        // receiverMemberIds가 있으면 해당 ID들을 사용해서 멤버 정보 가져오기
-        if (Array.isArray(data?.receiverMemberIds) && data.receiverMemberIds.length > 0) {
-          // receiverMemberIds를 기반으로 멤버 정보 생성
-          receivers = data.receiverMemberIds.map((id: number, index: number) => ({
-            id: Number(id),
-            name: `멤버 ${index + 1}` // 실제 멤버 이름은 API에서 가져와야 함
-          }));
-        } else if (Array.isArray(data?.receivers)) {
-          // 기존 receivers 배열이 있는 경우
-          receivers = data.receivers.map((r: Record<string, unknown>) => ({
-            id: Number(r?.id ?? r?.memberId),
-            name: String(r?.name ?? r?.memberName ?? '멤버'),
+        if (Array.isArray(data?.receiverNames) && data.receiverNames.length > 0) {
+          receivers = data.receiverNames.map((name: string, index: number) => ({
+            id: index + 1,
+            name: String(name || '멤버')
           }));
         }
         
@@ -97,7 +89,7 @@ const NotificationDetail = () => {
             const displayHoursStr = displayHours === 0 ? '12' : String(displayHours);
             
             return `${year}.${month}.${day} ${ampm} ${displayHoursStr}:${minutes}`;
-          } catch (error) {
+          } catch {
             return dateStr;
           }
         };
@@ -105,7 +97,7 @@ const NotificationDetail = () => {
         const parsed: NotificationDetailType = {
           id: Number(data?.id ?? data?.notificationId),
           title: apiTitleWithFirstPeriod,
-          sender: data?.senderName ?? (data?.sender as any)?.name ?? '알 수 없음',
+          sender: data?.senderName ?? '알 수 없음',
           receivers: receivers,
           time: formatDate(data?.createdAt ?? data?.createdTime ?? ''),
           content: data?.content ?? data?.message ?? '',
