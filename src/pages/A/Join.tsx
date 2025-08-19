@@ -36,6 +36,7 @@ const Join = () => {
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isVerifyCode, setIsVerifyCode] = useState(true);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -48,7 +49,6 @@ const Join = () => {
   const handleRequestVerification = () => {
     setIsRequested(true);
     setTimeLeft(180); // 3분
-    // TODO: 실제 인증번호 요청 API 호출
   };
 
   const formatTime = (seconds: number) => {
@@ -70,6 +70,8 @@ const Join = () => {
 
       if (response.data.code === 20000) {
         console.log('인증번호 요청 성공');
+        setIsCooldown(true);
+        setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -191,7 +193,13 @@ const Join = () => {
 
               {/* 인증번호 요청 버튼 */}
               <FreeButton
-                variant={isEmailFilled ? 'blue' : 'thickGray'}
+                variant={
+                  isCooldown
+                    ? 'thickGray'
+                    : isEmailFilled
+                      ? 'blue'
+                      : 'thickGray'
+                }
                 maxWidth={158}
                 height={50}
                 fontSize={16}
