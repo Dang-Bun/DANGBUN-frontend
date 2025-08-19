@@ -35,6 +35,7 @@ const Join = () => {
   } = useJoinForm();
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [isVerifyCode, setIsVerifyCode] = useState(true);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -90,6 +91,8 @@ const Join = () => {
 
       if (response.data.code === 20000) {
         navigate('/joinComplete');
+      } else if (response.data.code === 60002) {
+        setIsVerifyCode(false);
       } else {
         alert(`❗ 실패: ${response.data.message}`);
       }
@@ -146,6 +149,7 @@ const Join = () => {
                     fontSize={16}
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
+                    maxLength={15}
                   />
                 ) : (
                   <Dropdown
@@ -199,6 +203,13 @@ const Join = () => {
                 {isRequested ? '인증번호 재요청' : '인증번호 요청'}
               </FreeButton>
             </div>
+            {!isVerifyCode && (
+              <div>
+                <div className='text-[12px] mt-[2px] text-gray-6'>
+                  *올바른 인증번호를 입력해주세요
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <div className='text-[16px] font-medium mb-[8px]'>
