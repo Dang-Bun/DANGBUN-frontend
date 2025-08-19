@@ -5,6 +5,7 @@ import WritingChip from '../../components/notification/WritingChip';
 import ScrollToTop from '../../components/notification/ScrollToTop';
 import BottomBar from '../../components/BottomBar';
 import useNotificationApi from '../../hooks/useNotificationApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 type NotificationDetailType = {
   id: number;
@@ -28,31 +29,8 @@ const NotificationDetail = () => {
         setLoading(false);
         return;
       }
-      
-      // location.state에서 전달받은 알림 데이터 확인
-      const passedNotification = (location.state as Record<string, unknown>)?.notification;
-      
-      if (passedNotification) {
-        // 제목을 첫 번째 마침표까지만 표시
-        const titleWithFirstPeriod = passedNotification.title.includes('.') 
-          ? passedNotification.title.split('.')[0] + '.'
-          : passedNotification.title;
-        
-        // 전달받은 데이터가 있으면 사용
-        const parsed: NotificationDetailType = {
-          id: Number(passedNotification.id),
-          title: titleWithFirstPeriod,
-          sender: passedNotification.senderName || '나', // 실제 발신자 이름 사용
-          receivers: passedNotification.receivers || [], // 실제 수신자 정보 사용
-          time: passedNotification.timeAgo,
-          content: passedNotification.descript,
-        };
-        setNotification(parsed);
-        setLoading(false);
-        return;
-      }
 
-      // 전달받은 데이터가 없으면 API 호출
+      // 항상 API 호출
       try {
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
         const data = res?.data?.data || res?.data;
@@ -113,7 +91,7 @@ const NotificationDetail = () => {
     };
     
     fetchDetail();
-  }, [placeId, notificationId, location.state]);
+  }, [placeId, notificationId]);
 
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (!notification) return <div className="p-4">존재하지 않는 알림입니다.</div>;
