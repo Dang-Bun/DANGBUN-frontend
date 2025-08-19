@@ -48,7 +48,7 @@ const EnterCode = () => {
       {/* 참여 코드 영역 */}
       <div className='flex w-full items-center gap-[10px] mt-[20px]'>
         {/* 코드 */}
-        <div className='flex w-[268px] h-[56px] bg-[#f9f9f9] rounded-lg flex items-center px-4 text-[16px] text-[#5a5d62] font-semibold'>
+        <div className='flex w-[268px] h-[56px] bg-[#f9f9f9] rounded-lg items-center px-4 text-[16px] text-[#5a5d62] font-semibold'>
           {inviteCode || '---'}
         </div>
 
