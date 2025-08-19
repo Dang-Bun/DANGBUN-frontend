@@ -169,16 +169,27 @@ const MyPlace: React.FC = () => {
           <button
             key={p.placeId}
             className='w-full h-[117px] bg-white rounded-xl p-4 shadow-sm flex items-center gap-3 text-left cursor-pointer'
-            onClick={() =>
-              navigate(`/home`, {
-                state: {
-                  role: p.role,
-                  placeId: p.placeId,
-                  placeName: p.name,
-                  placeIcon: p.category,
-                },
-              })
-            }
+            onClick={() => {
+              if (p.role === null) {
+                navigate('/placejoin2', {
+                  state: {
+                    placeName: p.name,
+                    category: p.category,
+                    placeId: p.placeId,
+                  },
+                });
+              } else {
+                // role이 있으면 /home 으로 이동
+                navigate('/home', {
+                  state: {
+                    role: p.role,
+                    placeId: p.placeId,
+                    placeName: p.name,
+                    placeIcon: p.category,
+                  },
+                });
+              }
+            }}
           >
             {/* 아이콘 원 */}
             <div
