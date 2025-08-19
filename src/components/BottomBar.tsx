@@ -25,9 +25,10 @@ const BottomBar = () => {
   const isSetting = pathname.startsWith('/setting/');
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full h-[83px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]">
-      <button 
-        type="button" 
+    <div className='fixed bottom-0 left-0 right-0 w-full h-[70px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
+      <button
+        type='button'
+        className='cursor-pointer'
         onClick={() => {
           const placeId = localStorage.getItem('placeId');
           if (placeId) {
@@ -37,22 +38,23 @@ const BottomBar = () => {
           }
         }}
       >
-        <img src={isCalendar ? CalendarPressed : Calendar} alt="캘린더" />
+        <img src={isCalendar ? CalendarPressed : Calendar} alt='캘린더' />
       </button>
 
       <button
+        className='cursor-pointer'
         type='button'
         onClick={() => {
           const placeName = localStorage.getItem('placeName');
           const placeIcon = localStorage.getItem('placeIcon');
-          const state = { 
-            role, 
+          const state = {
+            role,
             placeId: placeId ? Number(placeId) : undefined,
             placeName,
-            placeIcon
+            placeIcon,
           };
-          
-          if (role === '매니저'|| role === 'manager') {
+
+          if (role === '매니저' || role === 'manager') {
             navigate('/home/manager', { state });
           } else {
             navigate('/home/member', { state });
@@ -63,6 +65,7 @@ const BottomBar = () => {
       </button>
 
       <button
+        className='cursor-pointer'
         type='button'
         onClick={() => {
           if (role === '매니저' || role === 'manager') {
