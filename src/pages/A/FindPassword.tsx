@@ -33,6 +33,7 @@ const FindPassword = () => {
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isVerifyCode, setIsVerifyCode] = useState(true);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -65,7 +66,9 @@ const FindPassword = () => {
       );
 
       if (response.data.code === 20000) {
-        alert('✅ 인증번호가 이메일로 전송되었습니다.');
+        console.log('✅ 인증번호가 이메일로 전송되었습니다.');
+        setIsCooldown(true);
+        setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -178,7 +181,13 @@ const FindPassword = () => {
 
               {/* 인증번호 요청 버튼 */}
               <FreeButton
-                variant={isEmailFilled ? 'blue' : 'thickGray'}
+                variant={
+                  isCooldown
+                    ? 'thickGray'
+                    : isEmailFilled
+                      ? 'blue'
+                      : 'thickGray'
+                }
                 maxWidth={158}
                 height={50}
                 fontSize={16}
