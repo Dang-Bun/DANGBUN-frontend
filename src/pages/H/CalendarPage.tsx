@@ -23,6 +23,7 @@ import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 dayjs.locale('ko');
 
@@ -101,13 +102,9 @@ const CalendarPage: React.FC = () => {
         dayjs(selectedDate).format('YYYY-MM-DD')
       );
 
-      // 체크리스트 데이터 로드
-      const checklistResponse = await useCalendarApi.getChecklistsByDate(
-        placeId,
-        dateStr
-      );
-
-      console.log('Debug - Checklist response:', checklistResponse.data);
+      // 플레이스 조회 API 사용 (홈화면과 동일)
+      const placeResponse = await usePlaceApi.placeSearch(placeId);
+      console.log('Debug - Place response:', placeResponse.data);
 
       // 프로그레스 데이터 로드
       const progressResponse = await useCalendarApi.getProgress(placeId, {
@@ -117,27 +114,39 @@ const CalendarPage: React.FC = () => {
 
       console.log('Debug - Progress response:', progressResponse.data);
 
-      // 체크리스트 데이터 파싱
-      const checklistData =
-        checklistResponse.data?.data?.checklists ||
-        checklistResponse.data?.checklists ||
-        [];
-      console.log('Debug - Raw checklist data:', checklistData);
+      // 플레이스 데이터에서 체크리스트 추출
+      const placeData = placeResponse?.data?.data || placeResponse?.data || {};
+      const duties = placeData.duties || [];
+      console.log('Debug - Duties from place API:', duties);
+
+      // 선택된 날짜의 체크리스트만 필터링
+      const checklistData: any[] = [];
+      duties.forEach((duty: any) => {
+        const checkLists = duty.checkLists || [];
+        checkLists.forEach((checklist: any) => {
+          // 날짜 필터링 (현재는 모든 체크리스트를 표시)
+          checklistData.push({
+            ...checklist,
+            dutyName: duty.dutyName || duty.name,
+            dutyId: duty.dutyId || duty.id
+          });
+        });
+      });
+
+      console.log('Debug - Filtered checklist data:', checklistData);
 
       const parsedChecklists: TaskItem[] = checklistData.map(
         (item: Record<string, unknown>) => ({
-          dutyId: item.checklistId as number,
+          dutyId: item.dutyId as number,
           dutyName: item.dutyName as string,
           task: {
-            id: item.checklistId as number,
-            title: item.dutyName as string,
-            isChecked: item.isComplete as boolean,
-            isCamera: item.needPhoto as boolean,
-            completedAt: item.endTime
-              ? `${item.date}T${item.endTime}:00Z`
-              : null,
-            completedBy: item.memberName as string,
-            date: item.date as string,
+            id: item.checkListId as number,
+            title: item.cleaningName as string,
+            isChecked: !!(item.completeTime || item.completedAt || item.completed),
+            isCamera: !!(item.needPhoto || item.isCamera),
+            completedAt: item.completeTime || item.completedAt || null,
+            completedBy: item.completedBy as string || null,
+            date: selectedYMD, // 선택된 날짜 사용
           },
         })
       );
@@ -227,13 +236,13 @@ const CalendarPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeStartDate]);
+  }, [activeStartDate, selectedDate]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // 체크리스트 토글 함수
+  // 체크리스트 토글 함수 - 완료/취소 모두 처리
   const handleToggleChecklist = useCallback(
     async (taskId: number) => {
       try {
@@ -241,16 +250,45 @@ const CalendarPage: React.FC = () => {
         if (!PLACE_ID) return;
 
         const placeId = parseInt(PLACE_ID, 10);
-        await useCalendarApi.completeChecklist(placeId, taskId);
+        
+        // 현재 task의 상태 확인
+        const currentTask = checklists.find(item => item.task.id === taskId);
+        if (!currentTask) {
+          console.error('Task not found:', taskId);
+          return;
+        }
+
+        console.log('🔍 체크리스트 토글 시도:', {
+          taskId,
+          currentStatus: currentTask.task.isChecked,
+          placeId
+        });
+
+        if (currentTask.task.isChecked) {
+          // 완료된 상태면 취소
+          console.log('🔍 체크리스트 취소 시도...');
+          await useChecklistApi.incompleteChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 취소 성공');
+        } else {
+          // 미완료 상태면 완료
+          console.log('🔍 체크리스트 완료 시도...');
+          await useChecklistApi.completeChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 완료 성공');
+        }
 
         // 성공 시 데이터 다시 로드
         await loadData();
       } catch (err) {
-        console.error('체크리스트 토글 실패:', err);
+        console.error('❌ 체크리스트 토글 실패:', err);
+        console.error('❌ 에러 상세:', {
+          message: err.message,
+          status: err.response?.status,
+          data: err.response?.data
+        });
         setError('체크리스트 상태 변경에 실패했습니다.');
       }
     },
-    [loadData]
+    [loadData, checklists]
   );
 
   // 체크리스트 삭제 함수
