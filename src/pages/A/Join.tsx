@@ -69,8 +69,8 @@ const Join = () => {
       );
 
       if (response.data.code === 20000) {
-        console.log('인증번호 요청 성공');
         setIsCooldown(true);
+        console.log('인증번호 요청 성공');
         setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
