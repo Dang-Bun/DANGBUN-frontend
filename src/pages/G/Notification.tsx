@@ -320,28 +320,34 @@ const Notification: React.FC = () => {
 					<p className="text-sm text-gray-500">알림이 없습니다.</p>
 				)}
 
-				{list.map((n) => (
-					<NotificationCard
-						key={n.id}
-						type="member"
-						read={n.read}
-						title={n.title}
-						descript={n.descript}
-						timeAgo={n.timeAgo}
-						onClick={() => {
-							// 읽음 처리
-							if (!n.read) {
-								handleReadNotification(n.id);
-							}
-							
-							navigate(`/${placeId}/alarm/${n.id}`, {
-								state: {
-									notification: n
+				{list.map((n) => {
+					// sender의 역할에 따라 type 결정
+					const isManager = n.senderName === '관리자' || n.senderName === '나' || n.senderName?.includes('관리자');
+					const cardType = isManager ? 'member' : 'manager';
+					
+					return (
+						<NotificationCard
+							key={n.id}
+							type={cardType}
+							read={n.read}
+							title={n.title}
+							descript={n.descript}
+							timeAgo={n.timeAgo}
+							onClick={() => {
+								// 읽음 처리
+								if (!n.read) {
+									handleReadNotification(n.id);
 								}
-							});
-						}}
-					/>
-				))}
+								
+								navigate(`/${placeId}/alarm/${n.id}`, {
+									state: {
+										notification: n
+									}
+								});
+							}}
+						/>
+					);
+				})}
 			</div>
 
 			<p className="text-xs text-[#848484]">
