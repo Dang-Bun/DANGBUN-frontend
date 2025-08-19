@@ -35,6 +35,8 @@ const Join = () => {
   } = useJoinForm();
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [isVerifyCode, setIsVerifyCode] = useState(true);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -47,7 +49,6 @@ const Join = () => {
   const handleRequestVerification = () => {
     setIsRequested(true);
     setTimeLeft(180); // 3분
-    // TODO: 실제 인증번호 요청 API 호출
   };
 
   const formatTime = (seconds: number) => {
@@ -68,7 +69,9 @@ const Join = () => {
       );
 
       if (response.data.code === 20000) {
+        setIsCooldown(true);
         console.log('인증번호 요청 성공');
+        setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -90,6 +93,8 @@ const Join = () => {
 
       if (response.data.code === 20000) {
         navigate('/joinComplete');
+      } else if (response.data.code === 60002) {
+        setIsVerifyCode(false);
       } else {
         alert(`❗ 실패: ${response.data.message}`);
       }
@@ -146,6 +151,7 @@ const Join = () => {
                     fontSize={16}
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
+                    maxLength={15}
                   />
                 ) : (
                   <Dropdown
@@ -187,7 +193,13 @@ const Join = () => {
 
               {/* 인증번호 요청 버튼 */}
               <FreeButton
-                variant={isEmailFilled ? 'blue' : 'thickGray'}
+                variant={
+                  isCooldown
+                    ? 'thickGray'
+                    : isEmailFilled
+                      ? 'blue'
+                      : 'thickGray'
+                }
                 maxWidth={158}
                 height={50}
                 fontSize={16}
@@ -199,6 +211,13 @@ const Join = () => {
                 {isRequested ? '인증번호 재요청' : '인증번호 요청'}
               </FreeButton>
             </div>
+            {!isVerifyCode && (
+              <div>
+                <div className='text-[12px] mt-[2px] text-gray-6'>
+                  *올바른 인증번호를 입력해주세요
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <div className='text-[16px] font-medium mb-[8px]'>

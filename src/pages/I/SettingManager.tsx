@@ -13,12 +13,16 @@ import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
+import { usePlaceApi } from './../../hooks/usePlaceApi';
 
 const SettingManager = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [placeName, setPlaceName] = useState('');
+  const [memberId, setMemberId] = useState('');
   const placeId = Number(localStorage.getItem('placeId'));
 
+  //맴버 정보 불러오기
   useEffect(() => {
     if (!placeId) return;
 
@@ -27,13 +31,32 @@ const SettingManager = () => {
         const res = await useMemberApi.me(placeId); // ✅ API 호출
         // 응답 구조에 따라 name 키가 다를 수 있으니 안전하게 파싱
         const payload = res?.data?.data;
+        const Id = payload?.memberId ?? '';
         const memberName =
           payload?.name ?? payload?.memberName ?? payload?.userName ?? '';
 
+        setMemberId(Id);
         setName(memberName); // ✅ 문자열로 세팅
         // console.log('내 멤버 정보:', payload);
       } catch (error) {
         console.error('유저 정보 불러오기 실패:', error);
+      }
+    })();
+  }, [placeId]);
+
+  //플레이스 이름 불러오기
+  useEffect(() => {
+    if (!placeId) return;
+
+    (async () => {
+      try {
+        const res = await usePlaceApi.placeSearch(placeId); // ✅ API 호출
+        const payload = res?.data?.data;
+        const Name = payload?.placeName ?? '';
+
+        setPlaceName(Name); // ✅ 문자열로 세팅
+      } catch (error) {
+        console.error('플레이스 이름 불러오기 실패:', error);
       }
     })();
   }, [placeId]);
@@ -44,20 +67,34 @@ const SettingManager = () => {
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
-          <img
-            src={PlaceName}
-            alt='플레이스 이름'
-            className='absolute left-0 cursor-pointer'
-            onClick={() => {
-              navigate('/myPlace');
-            }}
-          />
+          <div className='relative'>
+            <img
+              src={PlaceName}
+              alt='플레이스 이름'
+              className='cursor-pointer'
+              onClick={() => {
+                navigate('/myPlace');
+              }}
+            />
+            <span className='absolute inset-0 flex items-center justify-center text-white text-[12px] font-normal'>
+              {placeName}
+            </span>
+          </div>
           <div className='mx-auto text-[20px] font-400'>설정</div>
         </div>
 
         {/* 유저 정보 카드 */}
         <div className='bg-[#81a9ff] rounded-xl p-4 mb-6'>
-          <div className='flex items-center mb-4'>
+          <div
+            className='flex items-center mb-4'
+            onClick={() =>
+              navigate('/managerInfo', {
+                state: {
+                  memberId: memberId,
+                },
+              })
+            }
+          >
             <div className='text-[14px] font-medium text-white'>
               {name} 님의 정보
             </div>

@@ -32,6 +32,8 @@ const FindPassword = () => {
   } = useFindForm();
   const [isRequested, setIsRequested] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [isVerifyCode, setIsVerifyCode] = useState(true);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -64,7 +66,9 @@ const FindPassword = () => {
       );
 
       if (response.data.code === 20000) {
-        alert('✅ 인증번호가 이메일로 전송되었습니다.');
+        setIsCooldown(true);
+        console.log('✅ 인증번호가 이메일로 전송되었습니다.');
+        setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
       }
@@ -86,6 +90,8 @@ const FindPassword = () => {
       if (response.data.code === 20000) {
         alert('✅ 비밀번호가 성공적으로 재설정되었습니다.');
         navigate('/login'); // 비밀번호 변경 후 로그인 페이지로 이동
+      } else if (response.data.code === 60002) {
+        setIsVerifyCode(false);
       } else {
         alert(`❗ 실패: ${response.data.message}`);
       }
@@ -100,7 +106,7 @@ const FindPassword = () => {
 
   return (
     <>
-      <div className='w-full max-w-[393px] min-h-screen mx-auto px-4 py-6 flex flex-col gap-6'>
+      <div className='w-full min-h-screen mx-auto px-4 py-6 flex flex-col gap-6'>
         <div className='relative flex items-center mb-[48px]'>
           <img
             src={left_chevron}
@@ -122,6 +128,7 @@ const FindPassword = () => {
                   fontSize={16}
                   value={emailId}
                   onChange={(e) => setEmailId(e.target.value)}
+                  maxLength={20}
                 ></FreeInput>
                 <div>@</div>
                 {isCustomDomain ? (
@@ -132,6 +139,7 @@ const FindPassword = () => {
                     fontSize={16}
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
+                    maxLength={15}
                   />
                 ) : (
                   <Dropdown
@@ -157,6 +165,7 @@ const FindPassword = () => {
                   fontSize={16}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
+                  maxLength={6}
                 />
                 {isRequested && timeLeft > 0 && (
                   <span
@@ -172,7 +181,13 @@ const FindPassword = () => {
 
               {/* 인증번호 요청 버튼 */}
               <FreeButton
-                variant={isEmailFilled ? 'blue' : 'thickGray'}
+                variant={
+                  isCooldown
+                    ? 'thickGray'
+                    : isEmailFilled
+                      ? 'blue'
+                      : 'thickGray'
+                }
                 maxWidth={158}
                 height={50}
                 fontSize={16}
@@ -184,6 +199,13 @@ const FindPassword = () => {
                 {isRequested ? '인증번호 재요청' : '인증번호 요청'}
               </FreeButton>
             </div>
+            {!isVerifyCode && (
+              <div>
+                <div className='text-[12px] mt-[2px] text-gray-6'>
+                  *올바른 인증번호를 입력해주세요
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <div className='text-[16px] font-medium mb-[8px]'>
@@ -194,6 +216,7 @@ const FindPassword = () => {
               type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              maxLength={20}
             />
             <div
               className={classNames(
