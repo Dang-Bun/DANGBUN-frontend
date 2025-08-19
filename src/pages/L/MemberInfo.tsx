@@ -69,7 +69,7 @@ const MemberInfo: React.FC<MemberInfoProps> = ({
         {Object.entries(information).map(([key, value]) => (
           <div key={key} className='flex flex-row items-center justify-between'>
             <p className='text-zinc-500 text-sm font-semibold'>{key}</p>
-            <p className='text-sm font-normal'>{value ?? '-'}</p>
+            <p className='text-sm font-normal'>{value ?? '미지정'}</p>
           </div>
         ))}
       </div>

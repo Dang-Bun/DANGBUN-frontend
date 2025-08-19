@@ -84,7 +84,7 @@ const ManagerInfo: React.FC = () => {
   const name = data?.member?.name ?? '';
   const role = data?.member?.role ?? '멤버';
   const isManager = role === '매니저';
-  const firstDuty = data?.duties?.[0]?.dutyName ?? '-';
+  const firstDuty = data?.duties?.[0]?.dutyName ?? '미지정';
 
   const handleAssignToDuty = async (dutyId: number) => {
     if (!placeId || !dutyId || !memberId) return;
