@@ -43,9 +43,7 @@ const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
 
 const CalendarPage: React.FC = () => {
   const navigate = useNavigate();
-  const { state } = useLocation() as {
-    state?: { role?: string };
-  };
+  const { state } = useLocation();
 
   const [checklists, setChecklists] = useState<TaskItem[]>([]);
   const [progress, setProgress] = useState<Map<string, number>>(new Map());
@@ -98,7 +96,10 @@ const CalendarPage: React.FC = () => {
       console.log('📡 [Calendar] API 요청 파라미터');
       console.log('   📍 placeId:', placeId);
       console.log('   📅 year:', year, 'month:', month);
-      console.log('   📅 selectedDate:', dayjs(selectedDate).format('YYYY-MM-DD'));
+      console.log(
+        '   📅 selectedDate:',
+        dayjs(selectedDate).format('YYYY-MM-DD')
+      );
 
       // 체크리스트 데이터 로드
       const checklistResponse = await useCalendarApi.getChecklistsByDate(
@@ -561,7 +562,7 @@ const CalendarPage: React.FC = () => {
               displayedItems.map(({ dutyName, task }) => (
                 <SwipeableRow
                   key={task.id}
-                  disabled={!isManager}
+                  // disabled={!isManager}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
                   <div>
