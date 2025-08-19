@@ -1,10 +1,10 @@
 import React from 'react';
 import { useState } from 'react';
-import left_Chevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
 import SelectableRoleCard from './../../components/place/SelectableRollCard';
 import type { RoleType } from '../../components/place/SelectableRollCard';
 import { useNavigate } from 'react-router-dom';
+import Header from '../../components/HeaderBar';
 
 const AddPlace = () => {
   const [selected, setSelected] = useState<'manager' | 'member' | null>(null);
@@ -12,13 +12,7 @@ const AddPlace = () => {
 
   return (
     <div>
-      <div className='mt-[68px] pl-[12px]'>
-        <img
-          src={left_Chevron}
-          alt='뒤로가기'
-          onClick={() => navigate('/myPlace')}
-        />
-      </div>
+      <Header title='' showBackButton={true}></Header>
       <div className='text-[20px] font-normal pl-[20px] mt-[13px] mb-[42px]'>
         어떤 목적으로 사용하시나요?
       </div>
@@ -48,7 +42,7 @@ const AddPlace = () => {
           />
         </div>
       </div>
-      <div className='flex justify-center mt-[50px]'>
+      <div className='fixed w-full bottom-3 flex justify-center'>
         <CTAButton
           variant={selected ? 'blue' : 'thickGray'}
           onClick={
