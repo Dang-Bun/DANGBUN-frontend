@@ -13,6 +13,8 @@ type NotificationItem = {
 	descript: string;
 	timeAgo: string;
 	read: boolean;
+	senderName?: string;
+	receivers?: { id: number; name: string }[];
 };
 
 const Notification: React.FC = () => {
@@ -35,10 +37,10 @@ const Notification: React.FC = () => {
 	const [selectedTab, setSelectedTab] = useState<'inbox' | 'transmit'>(defaultTab);
 	
 	// localStorage에서 알림 목록을 가져오는 함수
-	const getStoredNotifications = (): NotificationItem[] => {
+	const getStoredNotifications = (tab: 'inbox' | 'transmit'): NotificationItem[] => {
 		if (!placeId) return [];
 		try {
-			const stored = localStorage.getItem(`notifications_${placeId}`);
+			const stored = localStorage.getItem(`notifications_${placeId}_${tab}`);
 			return stored ? JSON.parse(stored) : [];
 		} catch {
 			return [];
@@ -46,24 +48,32 @@ const Notification: React.FC = () => {
 	};
 
 	// localStorage에 알림 목록을 저장하는 함수
-	const saveNotifications = (notifications: NotificationItem[]) => {
+	const saveNotifications = (notifications: NotificationItem[], tab: 'inbox' | 'transmit') => {
 		if (!placeId) return;
 		try {
-			localStorage.setItem(`notifications_${placeId}`, JSON.stringify(notifications));
+			localStorage.setItem(`notifications_${placeId}_${tab}`, JSON.stringify(notifications));
 		} catch (error) {
 			console.error('알림 저장 실패:', error);
 		}
 	};
 
-	const [list, setList] = useState<NotificationItem[]>(() => getStoredNotifications());
+	const [inboxList, setInboxList] = useState<NotificationItem[]>(() => getStoredNotifications('inbox'));
+	const [transmitList, setTransmitList] = useState<NotificationItem[]>(() => getStoredNotifications('transmit'));
+
+	// 현재 선택된 탭에 따른 알림 목록
+	const list = selectedTab === 'inbox' ? inboxList : transmitList;
 
 	// 알림 목록이 변경될 때마다 localStorage에 저장
 	useEffect(() => {
-		saveNotifications(list);
-	}, [list, placeId]);
+		saveNotifications(inboxList, 'inbox');
+	}, [inboxList, placeId]);
 
 	useEffect(() => {
-		if (navState.justCreated && selectedTab === 'transmit' && placeId) {
+		saveNotifications(transmitList, 'transmit');
+	}, [transmitList, placeId]);
+
+	useEffect(() => {
+		if (navState.justCreated && placeId) {
 			const jc = navState.justCreated;
 			
 			// 템플릿 타입을 사용자 친화적인 제목으로 변환
@@ -87,14 +97,19 @@ const Notification: React.FC = () => {
 				descript: jc.content ?? jc.message ?? '',
 				timeAgo: jc.createdAt ?? new Date().toISOString(),
 				read: false,
+				senderName: jc.senderName || '나',
+				receivers: jc.receivers || [],
 			};
-			setList(prev => {
+			
+			// 보낸 알림 탭에만 추가
+			setTransmitList(prev => {
 				const exists = prev.some(p => p.id === optimistic.id);
 				return exists ? prev : [optimistic, ...prev];
 			});
+			
 			navigate(location.pathname, { replace: true, state: { tab: 'transmit' } });
 		}
-	}, [navState.justCreated, selectedTab, placeId]); // navigate, location.pathname 제거
+	}, [navState.justCreated, placeId]); // selectedTab 제거
 
 	const handleWriteClick = () => {
 		if (!placeId) return;
@@ -148,14 +163,21 @@ const Notification: React.FC = () => {
 						onClick={() => {
 							// 읽음 처리
 							if (!n.read) {
-								setList(prev => 
-									prev.map(item => 
-										item.id === n.id ? { ...item, read: true } : item
-									)
-								);
+								if (selectedTab === 'inbox') {
+									setInboxList(prev => 
+										prev.map(item => 
+											item.id === n.id ? { ...item, read: true } : item
+										)
+									);
+								} else {
+									setTransmitList(prev => 
+										prev.map(item => 
+											item.id === n.id ? { ...item, read: true } : item
+										)
+									);
+								}
 							}
 							
-							console.log('카드 클릭 - 전달할 데이터:', n);
 							navigate(`/${placeId}/alarm/${n.id}`, {
 								state: {
 									notification: n

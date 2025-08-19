@@ -16,7 +16,8 @@ type NotificationDetailType = {
 };
 
 const NotificationDetail = () => {
-  const { placeId, notificationId } = useParams<{ placeId: string; notificationId: string }>();
+  const { placeId, id } = useParams<{ placeId: string; id: string }>();
+  const notificationId = id; // 라우터에서 :id로 정의되어 있으므로 id를 사용
   const location = useLocation();
   const [notification, setNotification] = useState<NotificationDetailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,19 +31,22 @@ const NotificationDetail = () => {
       
       // location.state에서 전달받은 알림 데이터 확인
       const passedNotification = (location.state as any)?.notification;
-      console.log('전달받은 알림 데이터:', passedNotification);
       
       if (passedNotification) {
+        // 제목을 첫 번째 마침표까지만 표시
+        const titleWithFirstPeriod = passedNotification.title.includes('.') 
+          ? passedNotification.title.split('.')[0] + '.'
+          : passedNotification.title;
+        
         // 전달받은 데이터가 있으면 사용
         const parsed: NotificationDetailType = {
           id: Number(passedNotification.id),
-          title: passedNotification.title,
-          sender: '나', // 보낸 알림이므로 발신자는 '나'
-          receivers: [], // 수신자 정보는 별도로 필요
+          title: titleWithFirstPeriod,
+          sender: passedNotification.senderName || '나', // 실제 발신자 이름 사용
+          receivers: passedNotification.receivers || [], // 실제 수신자 정보 사용
           time: passedNotification.timeAgo,
           content: passedNotification.descript,
         };
-        console.log('파싱된 알림 데이터:', parsed);
         setNotification(parsed);
         setLoading(false);
         return;
@@ -50,14 +54,18 @@ const NotificationDetail = () => {
 
       // 전달받은 데이터가 없으면 API 호출
       try {
-        console.log('API 호출 시작');
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
         const data = res?.data;
-        console.log('API 응답:', data);
 
+        // 제목을 첫 번째 마침표까지만 표시
+        const apiTitle = data?.title ?? '';
+        const apiTitleWithFirstPeriod = apiTitle.includes('.') 
+          ? apiTitle.split('.')[0] + '.'
+          : apiTitle;
+        
         const parsed: NotificationDetailType = {
           id: Number(data?.id ?? data?.notificationId),
-          title: data?.title ?? '',
+          title: apiTitleWithFirstPeriod,
           sender: data?.senderName ?? '알 수 없음',
           receivers: Array.isArray(data?.receivers)
             ? data.receivers.map((r: any) => ({
@@ -92,14 +100,18 @@ const NotificationDetail = () => {
 
         <div className="flex gap-[12px] items-center my-[10px]">
           <span className="text-sm font-medium">보낸 사람</span>
-          <WritingChip label={notification.sender} type="member" />
+          <WritingChip label={notification.sender} type="member" selected={true}/>
         </div>
 
         <div className="flex gap-[12px] items-center my-[10px]">
           <span className="text-sm font-medium">받는 사람</span>
-          {notification.receivers.map((r) => (
-            <WritingChip key={r.id} label={r.name} type="member" />
-          ))}
+          {notification.receivers.length > 0 ? (
+            notification.receivers.map((r) => (
+              <WritingChip key={r.id} label={r.name} type="member" selected={true} />
+            ))
+          ) : (
+            <WritingChip label="전체" type="member" selected={true}/>
+          )}
         </div>
 
         <p className="text-xs text-gray-500 mb-4">{notification.time}</p>
