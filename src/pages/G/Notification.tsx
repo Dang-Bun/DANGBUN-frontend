@@ -55,6 +55,8 @@ const Notification: React.FC = () => {
 				response = await useNotificationApi.listSent(placeId, { page: 0, size: 50 });
 			}
 
+			console.log(`🔍 ${tab} API 응답:`, response?.data);
+
 			// API 응답 구조에 맞게 데이터 추출
 			const responseData = response?.data?.data || response?.data || {};
 			const data = Array.isArray(responseData) 
@@ -115,6 +117,8 @@ const Notification: React.FC = () => {
 							name: String((r as Record<string, unknown>)?.name || '')
 						}));
 					}
+					
+
 				} else {
 					// 받은 알림: 현재 사용자가 받는 사람 중 하나인지 확인
 					const receiverIds = Array.isArray(item.receiverMemberIds) 
@@ -143,13 +147,18 @@ const Notification: React.FC = () => {
 					}
 				}
 				
+				// 읽음 상태 처리 - 받은 알림만 읽음 상태 고려
+				const readStatus = tab === 'inbox' 
+					? Boolean(item.isRead || item.read || false)  // 받은 알림만 읽음 상태 확인
+					: false;  // 보낸 알림은 항상 읽음 처리됨으로 간주
+				
 				return {
 					id: uniqueId,
 					type: tab,
 					title: String(item.title || item.content || '알림'),
 					descript: String(item.content || item.message || ''),
 					timeAgo,
-					read: Boolean(item.isRead || item.read || false),
+					read: readStatus,
 					senderName,
 					receivers,
 				};
@@ -254,7 +263,7 @@ const Notification: React.FC = () => {
 		navigate(`/${placeId}/alarm/create`);
 	};
 
-	// 읽음 처리 함수
+	// 읽음 처리 함수 - 받은 알림에서만 작동
 	const handleReadNotification = async (notificationId: string) => {
 		if (!placeId) return;
 		
@@ -262,21 +271,21 @@ const Notification: React.FC = () => {
 			// markAsRead API로 읽음 처리
 			await useNotificationApi.markAsRead(placeId, Number(notificationId));
 			
-			// 로컬 상태 업데이트 - 받은 알림과 보낸 알림 모두 업데이트
+			// 로컬 상태 업데이트 - 받은 알림만 업데이트
 			setInboxList(prev => 
 				prev.map(item => 
 					item.id === notificationId ? { ...item, read: true } : item
 				)
 			);
-			setTransmitList(prev => 
-				prev.map(item => 
-					item.id === notificationId ? { ...item, read: true } : item
-				)
-			);
 			
-			// 홈 화면의 알림 상태도 업데이트하기 위해 localStorage에 이벤트 발생
+			// 홈 화면의 알림 상태도 업데이트하기 위해 이벤트 발생
 			window.dispatchEvent(new CustomEvent('notificationRead', { 
 				detail: { placeId, notificationId } 
+			}));
+			
+			// 읽지 않은 알림 상태 업데이트 이벤트 발생
+			window.dispatchEvent(new CustomEvent('notificationStatusChanged', { 
+				detail: { placeId } 
 			}));
 		} catch (error) {
 			console.error('읽음 처리 실패:', error);
@@ -305,6 +314,7 @@ const Notification: React.FC = () => {
 		<div className="flex flex-col items-center pt-[60px] pb-[80px] gap-4 bg-white min-h-screen">
 			<Header
 				title="알림함"
+				showBackButton={false}
 				rightElement={
 					<img
 						src={CreateNotificationIcon}
@@ -335,8 +345,8 @@ const Notification: React.FC = () => {
 						descript={n.descript}
 						timeAgo={n.timeAgo}
 						onClick={() => {
-							// 읽음 처리
-							if (!n.read) {
+							// 읽음 처리 - 받은 알림에서만
+							if (selectedTab === 'inbox' && !n.read) {
 								handleReadNotification(n.id);
 							}
 							
