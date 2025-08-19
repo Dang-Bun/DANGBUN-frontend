@@ -122,6 +122,7 @@ const FindPassword = () => {
                   fontSize={16}
                   value={emailId}
                   onChange={(e) => setEmailId(e.target.value)}
+                  maxLength={20}
                 ></FreeInput>
                 <div>@</div>
                 {isCustomDomain ? (
@@ -132,6 +133,7 @@ const FindPassword = () => {
                     fontSize={16}
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
+                    maxLength={15}
                   />
                 ) : (
                   <Dropdown
@@ -157,6 +159,7 @@ const FindPassword = () => {
                   fontSize={16}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
+                  maxLength={6}
                 />
                 {isRequested && timeLeft > 0 && (
                   <span
@@ -194,6 +197,7 @@ const FindPassword = () => {
               type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              maxLength={20}
             />
             <div
               className={classNames(
