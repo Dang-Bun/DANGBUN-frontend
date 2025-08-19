@@ -74,9 +74,24 @@ const Notification: React.FC = () => {
 			}
 			
 			const notifications: NotificationItem[] = data.map((item: Record<string, unknown>, index: number) => {
-				// 고유한 ID 생성 (서버 ID가 없으면 인덱스 기반으로 생성)
-				const itemId = item.id || item.notificationId;
-				const uniqueId = itemId ? String(itemId) : `${tab}_${Date.now()}_${index}`;
+				// 서버에서 가져온 ID 사용
+				let itemId: string | number | undefined;
+				
+				if (tab === 'inbox') {
+					// 받은 알림: notificationReceiverId.notificationId 사용
+					const notificationReceiverId = item.notificationReceiverId as Record<string, unknown> | undefined;
+					itemId = notificationReceiverId?.notificationId as string | number | undefined;
+				} else {
+					// 보낸 알림: 직접 id 또는 notificationId 사용
+					itemId = item.id || item.notificationId;
+				}
+				
+				if (!itemId) {
+					console.error('알림 ID를 찾을 수 없습니다:', item);
+					return null;
+				}
+				
+				const uniqueId = String(itemId);
 				
 				// 날짜 처리 개선
 				const dateStr = item.createdAt || item.sentAt || item.createdTime || item.sentTime;
@@ -120,31 +135,24 @@ const Notification: React.FC = () => {
 					
 
 				} else {
-					// 받은 알림: 현재 사용자가 받는 사람 중 하나인지 확인
-					const receiverIds = Array.isArray(item.receiverMemberIds) 
-						? item.receiverMemberIds.map((id: unknown) => Number(id))
-						: [];
+					// 받은 알림: 현재 사용자가 받는 사람인지 확인
+					// API 응답 구조에 따라 receiverId 확인
+					const notificationReceiverId = item.notificationReceiverId as Record<string, unknown> | undefined;
+					const receiverId = notificationReceiverId?.receiverId as number | undefined;
 					
-					// 현재 사용자가 받는 사람 목록에 없으면 이 알림을 제외
-					if (!currentUser || !receiverIds.includes(currentUser.id)) {
+					// 현재 사용자가 받는 사람이 아니면 이 알림을 제외
+					if (!currentUser || receiverId !== currentUser.id) {
 						return null;
 					}
 					
 					// 보낸 사람 정보 - API 문서에 따른 senderName 직접 사용
 					senderName = String(item.senderName || '알 수 없음');
 					
-					// 받는 사람들 정보 - receiverNames 배열 사용
-					if (Array.isArray(item.receiverNames)) {
-						receivers = item.receiverNames.map((name: string, index: number) => ({
-							id: index + 1,
-							name: String(name || '멤버')
-						}));
-					} else if (Array.isArray(item.receivers || item.recipients)) {
-						receivers = (item.receivers || item.recipients).map((r: unknown) => ({
-							id: Number((r as Record<string, unknown>)?.id || 0),
-							name: String((r as Record<string, unknown>)?.name || '')
-						}));
-					}
+					// 받는 사람들 정보 - 현재 사용자 정보 사용
+					receivers = [{
+						id: currentUser.id,
+						name: currentUser.name
+					}];
 				}
 				
 				// 읽음 상태 처리 - 받은 알림만 읽음 상태 고려
@@ -205,18 +213,18 @@ const Notification: React.FC = () => {
 
 	// 컴포넌트 마운트 시 알림 목록 가져오기
 	useEffect(() => {
-		if (placeId) {
+		if (placeId && currentUser) {
 			fetchNotifications('inbox');
 			fetchNotifications('transmit');
 		}
-	}, [placeId]);
+	}, [placeId, currentUser]);
 
 	// 탭 변경 시 해당 탭의 알림 목록 새로고침
 	useEffect(() => {
-		if (placeId) {
+		if (placeId && currentUser) {
 			fetchNotifications(selectedTab);
 		}
-	}, [selectedTab, placeId]);
+	}, [selectedTab, placeId, currentUser]);
 
 	// 새로 생성된 알림 처리
 	useEffect(() => {
@@ -345,12 +353,23 @@ const Notification: React.FC = () => {
 						descript={n.descript}
 						timeAgo={n.timeAgo}
 						onClick={() => {
+							console.log('🔍 알림 클릭:', {
+								id: n.id,
+								title: n.title,
+								selectedTab,
+								read: n.read,
+								placeId
+							});
+							
 							// 읽음 처리 - 받은 알림에서만
 							if (selectedTab === 'inbox' && !n.read) {
 								handleReadNotification(n.id);
 							}
 							
-							navigate(`/${placeId}/alarm/${n.id}`, {
+							const targetUrl = `/${placeId}/alarm/${n.id}`;
+							console.log('🚀 이동할 URL:', targetUrl);
+							
+							navigate(targetUrl, {
 								state: {
 									notification: n
 								}
