@@ -7,7 +7,6 @@ import white_right_chevron from '../../assets/chevron/white_right_chevron.svg';
 import blue_right_chevron from '../../assets/chevron/blue_right_chevron.svg';
 import Sweep from '../../assets/cleanIcon/sweepImg_2.svg';
 import NameTag from '../../assets/setting/NameTag.svg';
-import Cinema from '../../assets/placeIcon/cinemaImg.svg';
 import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +16,7 @@ const SettingMember = () => {
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
+  const [memberId, setMemberId] = useState('');
   const placeId = Number(localStorage.getItem('placeId'));
 
   useEffect(() => {
@@ -27,9 +27,11 @@ const SettingMember = () => {
         const res = await useMemberApi.me(placeId); // ✅ API 호출
         // 응답 구조에 따라 name 키가 다를 수 있으니 안전하게 파싱
         const payload = res?.data?.data;
+        const Id = payload?.memberId ?? '';
         const memberName =
           payload?.name ?? payload?.memberName ?? payload?.userName ?? '';
 
+        setMemberId(Id);
         setName(memberName); // ✅ 문자열로 세팅
         // console.log('내 멤버 정보:', payload);
       } catch (error) {
@@ -57,7 +59,16 @@ const SettingMember = () => {
 
         {/* 유저 정보 카드 */}
         <div className='bg-[#4ceba5] rounded-xl p-4 mb-6'>
-          <div className='flex items-center mb-4'>
+          <div
+            className='flex items-center mb-4'
+            onClick={() =>
+              navigate('/managerInfo', {
+                state: {
+                  memberId: memberId,
+                },
+              })
+            }
+          >
             <div className='text-[14px] font-medium text-white'>
               {name} 님의 정보
             </div>
