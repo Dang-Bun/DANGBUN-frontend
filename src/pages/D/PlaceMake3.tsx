@@ -20,9 +20,9 @@ const toRoleType = (value: unknown): RoleType => {
     'OFFICE',
     'RESTAURANT',
     'SCHOOL',
-    'PLUS',
+    'ETC',
   ] as const;
-  return (allowed.includes(upper as any) ? upper : 'PLUS') as RoleType;
+  return (allowed.includes(upper as any) ? upper : 'ETC') as RoleType;
 };
 
 const PlaceMake3 = () => {
