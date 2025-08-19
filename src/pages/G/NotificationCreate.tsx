@@ -88,6 +88,16 @@ const NotificationCreate: React.FC = () => {
 		(selectedCard === 'write' && customContent.trim() !== ''));
 
 	const handleTransmit = async () => {
+		// 디버깅용 로그 추가
+		console.log('🔍 [NotificationCreate] 전송 시도:', {
+			selectedCard,
+			selectedTemplateType,
+			ReadyToSubmit,
+			dangbunSelections: Object.values(dangbunSelections).some((arr) => arr.length > 0),
+			manualMembers: manualMembers.length > 0,
+			customContent: customContent.trim() !== ''
+		});
+		
 		if (!ReadyToSubmit) return;
 
 		const idsFromManual = manualMembers.map((m) => m.id).filter((id) => id > 0);
@@ -115,12 +125,18 @@ const NotificationCreate: React.FC = () => {
 				template: TEMPLATE_MAP[selectedTemplateType],
 				content: DEFAULT_MSG[selectedTemplateType],
 			};
+			console.log('🔍 [NotificationCreate] 템플릿 페이로드:', {
+				template: TEMPLATE_MAP[selectedTemplateType],
+				content: DEFAULT_MSG[selectedTemplateType],
+				selectedTemplateType
+			});
 		} else {
 			payload = {
 				receiverMemberIds: recipientIds,
 				template: 'CUSTOM',
 				content: customContent.trim(),
 			};
+			console.log('🔍 [NotificationCreate] 커스텀 페이로드:', payload);
 		}
 
 		try {
@@ -380,17 +396,26 @@ const NotificationCreate: React.FC = () => {
 							<TemplateCard
 								type="clean"
 								selected={selectedTemplateType === 'clean'}
-								onClick={() => setSelectedTemplateType('clean')}
+								onClick={() => {
+									console.log('🔍 [NotificationCreate] clean 템플릿 선택');
+									setSelectedTemplateType('clean');
+								}}
 							/>
 							<TemplateCard
 								type="newMember"
 								selected={selectedTemplateType === 'newMember'}
-								onClick={() => setSelectedTemplateType('newMember')}
+								onClick={() => {
+									console.log('🔍 [NotificationCreate] newMember 템플릿 선택');
+									setSelectedTemplateType('newMember');
+								}}
 							/>
 							<TemplateCard
 								type="update"
 								selected={selectedTemplateType === 'update'}
-								onClick={() => setSelectedTemplateType('update')}
+								onClick={() => {
+									console.log('🔍 [NotificationCreate] update 템플릿 선택');
+									setSelectedTemplateType('update');
+								}}
 							/>
 						</div>
 					)}
