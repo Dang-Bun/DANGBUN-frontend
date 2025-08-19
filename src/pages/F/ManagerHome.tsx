@@ -35,10 +35,10 @@ import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
 import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
 import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 
-import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 /* ============================
  * 상수/타입
@@ -154,15 +154,16 @@ const ManagerHome: React.FC = () => {
     };
   };
 
-  const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
-  const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
-  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon');
-
-  useEffect(() => {
-    if (pid) localStorage.setItem('placeId', String(pid));
-    if (placeName) localStorage.setItem('placeName', placeName);
-    if (placeIconKey) localStorage.setItem('placeIcon', placeIconKey);
-  }, [pid, placeName, placeIconKey]);
+  const pid = Number(state?.placeId ?? 0);
+  
+  // 플레이스 정보 상태 추가
+  const [placeInfo, setPlaceInfo] = useState<{
+    placeName: string;
+    placeIconKey: string;
+  }>({
+    placeName: '플레이스',
+    placeIconKey: 'CAFE'
+  });
 
   // 화면 상태
   const [loading, setLoading] = useState(true);
@@ -190,52 +191,102 @@ const ManagerHome: React.FC = () => {
     const fetchTaskData = async () => {
       if (!pid) return [];
       
-      const dutyRes = await useDutyApi.list(pid);
-      const dutyList = toArray(dutyRes);
+      // 플레이스 조회 API 사용
+      const placeRes = await usePlaceApi.placeSearch(pid);
+      console.log('🔍 매니저 홈 플레이스 조회 API 응답:', placeRes?.data);
+      
+      const placeData = placeRes?.data?.data || placeRes?.data || {};
+      
+      // 플레이스 정보 설정
+      if (mounted) {
+        setPlaceInfo({
+          placeName: placeData.placeName || '플레이스',
+          placeIconKey: placeData.category || 'CAFE'
+        });
+      }
+      
+      const duties = placeData.duties || [];
+      console.log('🔍 매니저 홈 duties:', duties);
 
-      const dutyPromises = dutyList.map(async (d: any) => {
-        const dutyId = Number(d?.dutyId ?? d?.id);
-        if (!Number.isFinite(dutyId)) return null;
+             // duty 중복 제거를 위해 Map 사용 (더 안전한 방법)
+       const uniqueDuties = new Map();
+       
+       duties.forEach((d: any, index: number) => {
+         // dutyId를 우선적으로 사용하고, 없으면 index 사용
+         const dutyId = Number(d.dutyId || d.id || index);
+         
+         if (Number.isFinite(dutyId)) {
+           // 같은 dutyId가 있으면 덮어쓰기 (마지막 것이 우선)
+           uniqueDuties.set(dutyId, d);
+         } else {
+           // dutyId가 없으면 index를 사용
+           uniqueDuties.set(index, d);
+         }
+       });
+       
+       const dutyPromises = Array.from(uniqueDuties.values()).map(async (d: any, index: number) => {
+         const dutyId = Number(d.dutyId || d.id || index);
+         if (!Number.isFinite(dutyId)) return null;
 
-        // 각 당번별로 청소 정보 조회
-        const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
-        const taskList = toArray(infoRes);
+        // 홈화면 API 구조에 맞게 처리
+        const checkLists = d.checkLists || [];
+        console.log(`🔍 Duty ${dutyId} checkLists:`, checkLists);
 
-        // ====== 변경: 두 ID 모두 매핑 ======
-        const tasksPromises = taskList.map(async (t: any) => {
-          const cleaningId = Number(t.cleaningId ?? t.id ?? t.checklistId); // UI 키
-          const rawChecklist = Number(t.checklistId);
-          const checklistId = Number.isFinite(rawChecklist) ? rawChecklist : null;
+        // ====== 변경: 실제 API 응답 구조에 맞게 수정 ======
+        const tasksPromises = checkLists.map(async (t: any) => {
+          // API 응답 구조에 맞게 필드명 수정 (예시 응답 기준)
+          const cleaningId = Number(t.checkListId || t.cleaningId || t.id); // UI 키로 checkListId 사용
+          const checklistId = Number.isFinite(Number(t.checkListId)) ? Number(t.checkListId) : null;
+
+                     // 멤버 목록 파싱 - members 배열에서 멤버 이름 추출 (중복 제거)
+           let names: string[] = [];
+           const members = t.members || [];
+
+           if (Array.isArray(members)) {
+             const allNames = members
+               .map((m: any) => {
+                 if (typeof m === 'string') return m;
+                 if (typeof m === 'object' && m && 'memberName' in m) {
+                   return String(m.memberName || '');
+                 }
+                 if (typeof m === 'object' && m && 'name' in m) {
+                   return String(m.name || '');
+                 }
+                 return '';
+               })
+               .filter(Boolean);
+             
+             // 중복 제거
+             names = [...new Set(allNames)];
+           }
+
+          // 완료 상태 확인 - completeTime이 있으면 완료된 것으로 간주
+          const isCompleted = !!(t.completeTime || t.completedAt || t.completed);
 
           // 디버깅용 로그 추가
           console.log('🔍 [ManagerHome] Task 데이터:', {
             cleaningId,
-            title: t.cleaningName ?? t.dutyName ?? t.name,
-            membersName: t.membersName,
-            displayedNames: t.displayedNames,
-            endTime: t.endTime,
+            checklistId,
+            title: t.cleaningName,
+            members: t.members,
+            parsedNames: names,
+            completeTime: t.completeTime,
+            isCompleted,
             needPhoto: t.needPhoto,
+            endTime: t.endTime,
           });
 
           return {
             cleaningId,
             checklistId,
-            title: String(t.cleaningName ?? t.dutyName ?? t.name ?? ''),
-            dueTime: t.endTime ?? null,
-            members: Array.isArray(t.displayedNames) 
-              ? t.displayedNames.filter(Boolean).map(String)
-              : (typeof t.membersName === 'string' 
-                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean)
-                  : []),
-            memberCount: Array.isArray(t.displayedNames) 
-              ? t.displayedNames.filter(Boolean).length
-              : (typeof t.membersName === 'string' 
-                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean).length
-                  : 0),
-            isCamera: !!t.needPhoto,
-            isChecked: !!(t.completed ?? t.isChecked),
-            completedAt: t.completedAt ?? null,
-            completedBy: t.completedBy ?? null,
+            title: String(t.cleaningName || ''),
+            dueTime: t.endTime || t.dueTime || null,
+            members: names,
+            memberCount: names.length,
+            isCamera: !!(t.needPhoto || t.isCamera || t.n), // n 필드도 확인
+            isChecked: isCompleted,
+            completedAt: t.completeTime || t.completedAt || null,
+            completedBy: t.completedBy || null,
             dutyId,
           } as TaskUI;
         });
@@ -243,7 +294,7 @@ const ManagerHome: React.FC = () => {
 
         const tasks = await Promise.all(tasksPromises);
 
-        const iconRaw = String(d?.icon ?? '').toUpperCase();
+        const iconRaw = String(d.icon || '').toUpperCase();
         const normalized = (ICON_ALIASES[iconRaw] ?? iconRaw) as string;
         const iconKey: DutyIconKey = VALID_DUTY_KEYS.includes(normalized as DutyIconKey)
           ? (normalized as DutyIconKey)
@@ -251,7 +302,7 @@ const ManagerHome: React.FC = () => {
 
         return {
           id: dutyId,
-          name: d?.name ?? d?.dutyName ?? '',
+          name: d.dutyName || d.name || '', // dutyName을 우선적으로 사용
           iconKey,
           tasks,
         };
@@ -260,19 +311,23 @@ const ManagerHome: React.FC = () => {
       return (await Promise.all(dutyPromises)).filter(Boolean) as DutyUI[];
     };
 
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        await useMemberApi.me(pid).catch(() => {});
-        const resolvedDuties = await fetchTaskData();
-        if (mounted) setDuties(resolvedDuties);
-      } catch (e) {
-        console.error('Data loading failed:', e);
-        if (mounted) setDuties([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
+         const loadData = async () => {
+       setLoading(true);
+       try {
+         // 현재 사용자 정보 가져오기
+         const meResponse = await useMemberApi.me(pid);
+         const me = meResponse?.data?.data ?? meResponse?.data ?? meResponse ?? {};
+         console.log('🔍 현재 사용자 정보:', me);
+         
+         const resolvedDuties = await fetchTaskData();
+         if (mounted) setDuties(resolvedDuties);
+       } catch (e) {
+         console.error('Data loading failed:', e);
+         if (mounted) setDuties([]);
+       } finally {
+         if (mounted) setLoading(false);
+       }
+     };
 
     loadData();
     return () => { mounted = false; };
@@ -330,10 +385,10 @@ const ManagerHome: React.FC = () => {
     const done = base.filter((t) => t.isChecked).length;
     const percent = total ? Math.round((done / total) * 100) : 0;
     const name = activePage === 0 ? '플레이스 전체' : duties[activePage - 1]?.name ?? '';
-    const iconKeyForProgressBar = activePage === 0 ? placeIconKey : (duties[activePage - 1]?.iconKey as string);
+    const iconKeyForProgressBar = activePage === 0 ? placeInfo.placeIconKey : (duties[activePage - 1]?.iconKey as string);
     const icon = activePage === 0 ? CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG : DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG;
     return { name, percent, tasks: base, icon };
-  }, [activePage, allTasks, duties, placeIconKey]);
+  }, [activePage, allTasks, duties, placeInfo.placeIconKey]);
 
   const totalPages = duties.length + 1;
 
@@ -352,30 +407,48 @@ const ManagerHome: React.FC = () => {
     return '/bg/bgMiddle.svg';
   }, [page.percent]);
 
-  // ====== 변경: 토글 시 checklistId 사용 ======
-  const toggleTask = async (dutyId: number, checklistId: number) => {
-    const t = page.tasks.find((x) => x.checklistId === checklistId && x.dutyId === dutyId) as TaskUI | undefined;
-    if (!t) return;
+     // ====== 변경: 토글 시 checklistId 사용 ======
+   const toggleTask = async (dutyId: number, checklistId: number) => {
+     const t = page.tasks.find((x) => x.checklistId === checklistId && x.dutyId === dutyId) as TaskUI | undefined;
+     if (!t) return;
 
-    if (!t.checklistId) {
-      alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
-      return;
-    }
+     if (!t.checklistId) {
+       alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
+       return;
+     }
 
-    try {
-      if (t.isChecked) {
-        await useChecklistApi.incompleteChecklist(pid, t.checklistId);
-        patchLocal(dutyId, t.cleaningId, { isChecked: false, completedAt: null, completedBy: null });
-      } else {
-        await useChecklistApi.completeChecklist(pid, t.checklistId);
-        const now = new Date().toTimeString().slice(0, 5);
-        patchLocal(dutyId, t.cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
-      }
-    } catch (e) {
-      console.error('체크 전환 실패:', e);
-      alert('체크 상태 변경 실패');
-    }
-  };
+     console.log('🔍 체크리스트 토글 시도:', {
+       taskTitle: t.title,
+       checklistId: t.checklistId,
+       dutyId: t.dutyId,
+       isChecked: t.isChecked,
+       members: t.members,
+       placeId: pid
+     });
+
+     try {
+       if (t.isChecked) {
+         console.log('🔍 체크리스트 해제 시도...');
+         await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+         patchLocal(dutyId, t.cleaningId, { isChecked: false, completedAt: null, completedBy: null });
+         console.log('✅ 체크리스트 해제 성공');
+       } else {
+         console.log('🔍 체크리스트 완료 시도...');
+         await useChecklistApi.completeChecklist(pid, t.checklistId);
+         const now = new Date().toTimeString().slice(0, 5);
+         patchLocal(dutyId, t.cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+         console.log('✅ 체크리스트 완료 성공');
+       }
+     } catch (e) {
+       console.error('❌ 체크 전환 실패:', e);
+       console.error('❌ 에러 상세:', {
+         message: e.message,
+         status: e.response?.status,
+         data: e.response?.data
+       });
+       alert('체크 상태 변경 실패');
+     }
+   };
   // ====== 변경 끝 ======
 
   // ====== 변경: cleaningId 기준으로 로컬 패치 ======
@@ -489,11 +562,11 @@ const ManagerHome: React.FC = () => {
               당번
             </span>
             <div className="flex items-center gap-[210px]">
-              <PlaceNameCard
-                place={placeName}
-                type={page.percent >= 100 ? 'complete' : 'default'}
-                onClick={() => navigate('/myplace')}
-              />
+                             <PlaceNameCard
+                 place={placeInfo.placeName}
+                 type={page.percent >= 100 ? 'complete' : 'default'}
+                 onClick={() => navigate('/myplace')}
+               />
               <img
                 src={notificationImage}
                 alt="알림"
@@ -508,26 +581,26 @@ const ManagerHome: React.FC = () => {
               percentage={page.percent}
               iconSrc={page.icon}
               title={page.name}
-              onCenterClick={() => {
-                const payload = {
-                  placeId: pid,
-                  placeName,
-                  percent: Math.min(100, Math.max(0, page.percent)),
-                  placeIconKey,
-                  duties: duties.map((d) => {
-                    const total = d.tasks.length;
-                    const done = d.tasks.filter((t) => t.isChecked).length;
-                    return {
-                      id: d.id,
-                      name: d.name,
-                      percent: total ? Math.round((done / total) * 100) : 0,
-                      iconKey: d.iconKey,
-                    };
-                  }),
-                };
-                sessionStorage.setItem('overviewPayload', JSON.stringify(payload));
-                navigate('/home/manager/overview', { state: payload });
-              }}
+                             onCenterClick={() => {
+                 const payload = {
+                   placeId: pid,
+                   placeName: placeInfo.placeName,
+                   percent: Math.min(100, Math.max(0, page.percent)),
+                   placeIconKey: placeInfo.placeIconKey,
+                   duties: duties.map((d) => {
+                     const total = d.tasks.length;
+                     const done = d.tasks.filter((t) => t.isChecked).length;
+                     return {
+                       id: d.id,
+                       name: d.name,
+                       percent: total ? Math.round((done / total) * 100) : 0,
+                       iconKey: d.iconKey,
+                     };
+                   }),
+                 };
+                 sessionStorage.setItem('overviewPayload', JSON.stringify(payload));
+                 navigate('/home/manager/overview', { state: payload });
+               }}
               dotCount={totalPages}
               dotIndex={activePage}
               onDotSelect={setActivePage}
