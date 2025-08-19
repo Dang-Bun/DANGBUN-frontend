@@ -43,7 +43,7 @@ const EnterCode = () => {
   return (
     <div className='w-full max-w-[393px] min-h-screen mx-auto px-4 py-6 flex flex-col'>
       {/* 상단 헤더 */}
-      <HeaderBar title='' />
+      <HeaderBar title='참여코드 생성' />
       <div className='text-black text-[20px] font-normal'>참여 코드</div>
       {/* 참여 코드 영역 */}
       <div className='flex w-full items-center gap-[10px] mt-[20px]'>
