@@ -22,6 +22,7 @@ import arrowBack from '../../assets/nav/arrowBack.svg';
 
 import { useMemberApi } from '../../hooks/useMemberApi';
 import useCleaningApi from '../../hooks/useCleaningApi';
+import HeaderBar from '../../components/HeaderBar';
 
 const DAILY_MAP: Record<string, string> = {
   매일: 'DAILY',
@@ -215,15 +216,7 @@ const CleanAdd = () => {
 
   return (
     <div className='flex flex-col mt-[52px] px-5 gap-5'>
-      <div className='fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center '>
-        <button
-          onClick={() => setIsModalOpen3(true)}
-          className='absolute left-4 cursor-pointer'
-          aria-label='뒤로가기'
-        >
-          <img src={arrowBack} alt='뒤로가기' className='w-5 h-5' />
-        </button>
-      </div>
+      <HeaderBar title='' showBackButton={true} />
 
       <div className='flex flex-col gap-3'>
         <p className='text-lg font-normal leading-relaxed'>청소 이름</p>
