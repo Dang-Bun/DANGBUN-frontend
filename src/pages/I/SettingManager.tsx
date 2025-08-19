@@ -46,19 +46,22 @@ const SettingManager = () => {
 
   //플레이스 이름 불러오기
   useEffect(() => {
-    if (!placeId) return;
-
-    (async () => {
+    const fetchPlaceInfo = async () => {
       try {
-        const res = await usePlaceApi.placeSearch(placeId); // ✅ API 호출
-        const payload = res?.data?.data;
-        const Name = payload?.placeName ?? '';
-
-        setPlaceName(Name); // ✅ 문자열로 세팅
-      } catch (error) {
-        console.error('플레이스 이름 불러오기 실패:', error);
+        const res = await usePlaceApi.placeSearch(placeId);
+        if (res.data.code === 20000) {
+          setPlaceName(res.data.data.placeName); // API 응답 구조에 맞게 수정
+        } else {
+          console.warn(`⚠️ 플레이스 정보 불러오기 실패: ${res.data.message}`);
+        }
+      } catch (error: any) {
+        console.error('❌ 플레이스 정보 API 호출 실패:', error);
       }
-    })();
+    };
+
+    if (placeId) {
+      fetchPlaceInfo();
+    }
   }, [placeId]);
 
   return (
@@ -67,7 +70,7 @@ const SettingManager = () => {
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
-          <div className='relative'>
+          <div className='flex flex-row bg-[#6982bc] rounded-[8px] py-[7px] px-[13px]'>
             <img
               src={PlaceName}
               alt='플레이스 이름'
@@ -76,11 +79,13 @@ const SettingManager = () => {
                 navigate('/myPlace');
               }}
             />
-            <span className='absolute inset-0 flex items-center justify-center text-white text-[12px] font-normal'>
+            <span className='text-white text-[12px] font-normal pl-2'>
               {placeName}
             </span>
           </div>
-          <div className='mx-auto text-[20px] font-400'>설정</div>
+          <div className='absolute left-[47%] mx-auto text-[20px] font-400'>
+            설정
+          </div>
         </div>
 
         {/* 유저 정보 카드 */}
