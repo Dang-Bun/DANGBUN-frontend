@@ -1,4 +1,3 @@
-// src/pages/F/ManagerHome.tsx
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
@@ -10,9 +9,12 @@ import BottomBar from '../../components/BottomBar';
 import CategoryChip from '../../components/home/CategoryChip';
 import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
 
+
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
 import toggle from '../../assets/home/toggleIcon.svg';
+
+// 카테고리 아이콘
 import BUILDING_IMG from '../../assets/placeIcon/buildingImg.svg';
 import CINEMA_IMG from '../../assets/placeIcon/cinemaImg.svg';
 import DORMITORY_IMG from '../../assets/placeIcon/dormitoryImg.svg';
@@ -23,7 +25,7 @@ import SCHOOL_IMG from '../../assets/placeIcon/schoolImg.svg';
 import CAFE_IMG from '../../assets/placeIcon/cafeSmallImg.svg';
 import HOME_IMG from '../../assets/placeIcon/homeImg.svg';
 
-// 당번 아이콘 이미지 import 경로 수정
+// 당번 아이콘
 import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
 import BUCKET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
 import BRUSH_PINK from '../../assets/cleanIcon/moppingImg_3.svg';
@@ -38,6 +40,9 @@ import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 
+/* ============================
+ * 상수/타입
+ * ============================ */
 const CATEGORY_ICON_SRC: Record<string, string> = {
   CAFE: CAFE_IMG,
   RESTAURANT: RESTAURANT_IMG,
@@ -50,44 +55,83 @@ const CATEGORY_ICON_SRC: Record<string, string> = {
   ETC: HOME_IMG,
 };
 
-// 당번 아이콘 맵
 const DUTY_ICON_SRC: Record<string, string> = {
-  FLOOR_BLUE: FLOOR_BLUE,
-  CLEANER_PINK: CLEANER_PINK,
-  BUCKET_PINK: BUCKET_PINK,
-  TOILET_PINK: TOILET_PINK,
-  TRASH_BLUE: TRASH_BLUE,
-  DISH_BLUE: DISH_BLUE,
-  BRUSH_PINK: BRUSH_PINK,
-  SPRAY_BLUE: SPRAY_BLUE,
+  FLOOR_BLUE,
+  CLEANER_PINK,
+  BUCKET_PINK,
+  TOILET_PINK,
+  TRASH_BLUE,
+  DISH_BLUE,
+  BRUSH_PINK,
+  SPRAY_BLUE,
 };
 
 type DutyIconKey =
-  | 'FLOOR_BLUE' | 'CLEANER_PINK' | 'BUCKET_PINK' | 'TOILET_PINK'
-  | 'TRASH_BLUE' | 'DISH_BLUE' | 'BRUSH_PINK' | 'SPRAY_BLUE';
+  | 'FLOOR_BLUE'
+  | 'CLEANER_PINK'
+  | 'BUCKET_PINK'
+  | 'TOILET_PINK'
+  | 'TRASH_BLUE'
+  | 'DISH_BLUE'
+  | 'BRUSH_PINK'
+  | 'SPRAY_BLUE';
 
+const VALID_DUTY_KEYS: DutyIconKey[] = [
+  'FLOOR_BLUE',
+  'CLEANER_PINK',
+  'BUCKET_PINK',
+  'TOILET_PINK',
+  'TRASH_BLUE',
+  'DISH_BLUE',
+  'BRUSH_PINK',
+  'SPRAY_BLUE',
+];
+
+const ICON_ALIASES: Record<string, DutyIconKey> = {
+  FLOOR: 'FLOOR_BLUE',
+  SWEEP: 'FLOOR_BLUE',
+  CLEANER: 'CLEANER_PINK',
+  BUCKET: 'BUCKET_PINK',
+  TOILET: 'TOILET_PINK',
+  TRASH: 'TRASH_BLUE',
+  DISH: 'DISH_BLUE',
+  BRUSH: 'BRUSH_PINK',
+  SPRAY: 'SPRAY_BLUE',
+};
+
+// API 응답 데이터가 배열이 아닐 경우 배열로 변환
 const toArray = (x: any): any[] =>
-  Array.isArray(x) ? x
-  : Array.isArray(x?.data?.data?.duties) ? x.data.data.duties
-  : Array.isArray(x?.data?.duties) ? x.data.duties
-  : Array.isArray(x?.data?.data?.tasks) ? x.data.data.tasks
-  : Array.isArray(x?.data?.tasks) ? x.data.tasks
-  : Array.isArray(x?.data?.data) ? x.data.data
-  : Array.isArray(x?.data) ? x.data
-  : [];
+  Array.isArray(x)
+    ? x
+    : Array.isArray(x?.data?.data?.duties)
+    ? x.data.data.duties
+    : Array.isArray(x?.data?.duties)
+    ? x.data.duties
+    : Array.isArray(x?.data?.data?.tasks)
+    ? x.data.data.tasks
+    : Array.isArray(x?.data?.tasks)
+    ? x.data.tasks
+    : Array.isArray(x?.data?.data)
+    ? x.data.data
+    : Array.isArray(x?.data)
+    ? x.data
+    : [];
 
-
+// ====== 여기부터 변경: TaskUI에 cleaningId/checklistId 분리 ======
 type TaskUI = {
-  id: number;
+  cleaningId: number;          // UI용(목록/키)
+  checklistId: number | null;  // 서버 액션/업로드용
   title: string;
   dueTime: string | null;
   members: string[];
+  memberCount: number;
   isCamera: boolean;
   isChecked: boolean;
   completedAt?: string | null;
   completedBy?: string | null;
   dutyId: number;
 };
+// ====== 변경 끝 ======
 
 type DutyUI = {
   id: number;
@@ -96,16 +140,24 @@ type DutyUI = {
   tasks: TaskUI[];
 };
 
+/* ============================
+ * 컴포넌트
+ * ============================ */
 const ManagerHome: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation() as {
-    state?: { placeId?: number; placeName?: string; placeIcon?: string; role?: string };
+    state?: {
+      placeId?: number;
+      placeName?: string;
+      placeIcon?: string;
+      role?: string;
+    };
   };
-  // 컨텍스트: state 우선, 없으면 localStorage
+
   const pid = Number(state?.placeId ?? localStorage.getItem('placeId') ?? 0);
   const placeName = state?.placeName ?? localStorage.getItem('placeName') ?? '플레이스';
-  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon') ?? 'ETC';
-  
+  const placeIconKey = state?.placeIcon ?? localStorage.getItem('placeIcon');
+
   useEffect(() => {
     if (pid) localStorage.setItem('placeId', String(pid));
     if (placeName) localStorage.setItem('placeName', placeName);
@@ -119,135 +171,173 @@ const ManagerHome: React.FC = () => {
   const [memberPopUp, setMemberPopUp] = useState(false);
   const [filter, setFilter] = useState<'all' | 'ing' | 'done'>('all');
 
-  // 업로드 팝업
+  // ====== 변경: 업로드 타겟 상태에 checklistId 포함 ======
   const [isUploadOpen, setUploadOpen] = useState(false);
-  const [uploadTaskId, setUploadTaskId] = useState<number | null>(null);
+  const [uploadTaskId, setUploadTaskId] = useState<{
+    dutyId: number;
+    cleaningId: number;
+    checklistId: number | null;
+  } | null>(null);
+  // ====== 변경 끝 ======
+
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
-  /* ---------- 데이터 로드 ---------- */
+  /* ---------- 데이터 로드 및 처리 로직 ---------- */
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
-      setLoading(true);
-      try {
-        if (!pid) return;
+    const fetchTaskData = async () => {
+      if (!pid) return [];
+      
+      const dutyRes = await useDutyApi.list(pid);
+      const dutyList = toArray(dutyRes);
 
-        // (선택) 내 멤버십 확인 - 실패해도 치명적 X
-        console.log('📡 [member] GET /places/%s/members/me', pid);
-        try {
-          const me = await useMemberApi.me(pid);
-          console.log('📥 [member] 응답:', me?.data);
-        } catch (e) {
-          console.warn('⚠️ [member] 조회 실패(무시):', e);
-        }
+      const dutyPromises = dutyList.map(async (d: any) => {
+        const dutyId = Number(d?.dutyId ?? d?.id);
+        if (!Number.isFinite(dutyId)) return null;
 
-        console.log('📡 [duties] GET /places/%s/duties', pid);
-        const dutyRes = await useDutyApi.list(pid);
-        console.log('📥 [duties] 원본 응답:', dutyRes?.data);
-        const dutyList = toArray(dutyRes);
-        console.log('✅ [duties] 개수:', dutyList.length);
+        // 각 당번별로 청소 정보 조회
+        const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
+        const taskList = toArray(infoRes);
 
-        const result: DutyUI[] = [];
+        // ====== 변경: 두 ID 모두 매핑 ======
+        const tasksPromises = taskList.map(async (t: any) => {
+          const cleaningId = Number(t.cleaningId ?? t.id ?? t.checklistId); // UI 키
+          const rawChecklist = Number(t.checklistId);
+          const checklistId = Number.isFinite(rawChecklist) ? rawChecklist : null;
 
-        for (const d of dutyList) {
-          const dutyId = Number(d?.dutyId ?? d?.id);
-          const dutyName = d?.dutyName ?? d?.name ?? '';
-          const iconKeyRaw = d?.iconKey ?? '';
+          // 디버깅용 로그 추가
+          console.log('🔍 [ManagerHome] Task 데이터:', {
+            cleaningId,
+            title: t.cleaningName ?? t.dutyName ?? t.name,
+            membersName: t.membersName,
+            displayedNames: t.displayedNames,
+            endTime: t.endTime,
+            needPhoto: t.needPhoto,
+          });
 
-          if (!Number.isFinite(dutyId)) {
-            console.warn('⛔️ dutyId 없음/비정상, 스킵:', d);
-            continue;
-          }
-
-          console.log('📡 [cleaning-info] GET /places/%s/duties/%s/cleaning-info', pid, dutyId);
-          const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
-          console.log('📥 [cleaning-info] 응답(%s):', dutyId, infoRes?.data);
-          const taskList = toArray(infoRes);
-          console.log('✅ [tasks] 개수(%s):', dutyId, taskList.length);
-
-          const tasks: TaskUI[] = taskList.map((t) => ({
-            id: t.id,
-            title: t.name ?? t.title ?? '',
-            dueTime: t.dueTime ?? null,
-            members: (t.members ?? t.assignees ?? []).map((m) => m?.name ?? m),
+          return {
+            cleaningId,
+            checklistId,
+            title: String(t.cleaningName ?? t.dutyName ?? t.name ?? ''),
+            dueTime: t.endTime ?? null,
+            members: Array.isArray(t.displayedNames) 
+              ? t.displayedNames.filter(Boolean).map(String)
+              : (typeof t.membersName === 'string' 
+                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean)
+                  : []),
+            memberCount: Array.isArray(t.displayedNames) 
+              ? t.displayedNames.filter(Boolean).length
+              : (typeof t.membersName === 'string' 
+                  ? t.membersName.split(',').map(s => s.trim()).filter(Boolean).length
+                  : 0),
             isCamera: !!t.needPhoto,
-            isChecked: !!t.completed,
+            isChecked: !!(t.completed ?? t.isChecked),
             completedAt: t.completedAt ?? null,
             completedBy: t.completedBy ?? null,
             dutyId,
-          }));
+          } as TaskUI;
+        });
+        // ====== 변경 끝 ======
 
-          const valid = ['FLOOR_BLUE','CLEANER_PINK','BUCKET_PINK','TOILET_PINK','TRASH_BLUE','DISH_BLUE','BRUSH_PINK','SPRAY_BLUE'];
-          const iconKey: DutyIconKey = (valid.includes(iconKeyRaw) ? iconKeyRaw : 'SPRAY_BLUE') as DutyIconKey;
+        const tasks = await Promise.all(tasksPromises);
 
-          result.push({ id: dutyId, name: dutyName, iconKey, tasks });
-        }
+        const iconRaw = String(d?.icon ?? '').toUpperCase();
+        const normalized = (ICON_ALIASES[iconRaw] ?? iconRaw) as string;
+        const iconKey: DutyIconKey = VALID_DUTY_KEYS.includes(normalized as DutyIconKey)
+          ? (normalized as DutyIconKey)
+          : 'FLOOR_BLUE';
 
-        if (mounted) setDuties(result);
-        console.log('🎯 duties 세팅 완료:', result.length);
+        return {
+          id: dutyId,
+          name: d?.name ?? d?.dutyName ?? '',
+          iconKey,
+          tasks,
+        };
+      });
+
+      return (await Promise.all(dutyPromises)).filter(Boolean) as DutyUI[];
+    };
+
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        await useMemberApi.me(pid).catch(() => {});
+        const resolvedDuties = await fetchTaskData();
+        if (mounted) setDuties(resolvedDuties);
       } catch (e) {
-        console.error('❌ ManagerHome 데이터 로드 실패:', e);
+        console.error('Data loading failed:', e);
         if (mounted) setDuties([]);
       } finally {
-        if (mounted) {
-          setLoading(false);
-          console.log('🏁 ManagerHome 로딩 종료');
-        }
+        if (mounted) setLoading(false);
       }
-    })();
+    };
 
+    loadData();
     return () => { mounted = false; };
   }, [pid]);
 
-    // 받은 알림 읽음 여부 확인
+  // 알림 확인 로직 - localStorage 기반으로 변경
   useEffect(() => {
     if (!pid) return;
     
-    const checkUnreadNotifications = async () => {
+    const checkUnreadNotifications = () => {
       try {
-        const res = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
-        const notifications = res?.data?.data || [];
-                 // 읽지 않은 알림이 있으면 mail 표시, 그 외에는 mailDefault 표시
-         const hasUnread = notifications.length > 0 && notifications.some((notification: any) => !notification.isRead);
-        setHasUnreadNotifications(hasUnread);
-      } catch (error) {
-        console.error('알림 읽음 여부 확인 실패:', error);
-        setHasUnreadNotifications(true); // 에러 시에도 mailDefault 표시
+        // localStorage에서 알림 목록 가져오기
+        const stored = localStorage.getItem(`notifications_${pid}`);
+        if (stored) {
+          const notifications = JSON.parse(stored);
+          const hasUnread = notifications.some((n: any) => !n.read);
+          setHasUnreadNotifications(hasUnread);
+        } else {
+          // localStorage에 없으면 API로 확인
+          useNotificationApi.listReceived(pid, { page: 0, size: 20 })
+            .then(res => {
+              const notifications = res?.data?.data || [];
+              const hasUnread = notifications.some((n: any) => !n.isRead);
+              setHasUnreadNotifications(hasUnread);
+            })
+            .catch(() => {
+              setHasUnreadNotifications(false);
+            });
+        }
+      } catch {
+        setHasUnreadNotifications(false);
       }
     };
-
+    
     checkUnreadNotifications();
-
-    // 페이지 포커스 시 알림 상태 다시 확인
-    const handleFocus = () => {
-      checkUnreadNotifications();
+    
+    // localStorage 변경 감지
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `notifications_${pid}`) {
+        checkUnreadNotifications();
+      }
     };
-
+    
+    // 페이지 포커스 시 확인
+    const handleFocus = () => checkUnreadNotifications();
+    
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('focus', handleFocus);
+    
+    return () => { 
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus); 
     };
   }, [pid]);
 
-  /* ---------- 파생 ---------- */
-  const allTasks = useMemo(() => duties.flatMap(d => d.tasks), [duties]);
+  /* ---------- 파생 상태 및 이벤트 핸들러 ---------- */
+  const allTasks = useMemo(() => duties.flatMap((d) => d.tasks), [duties]);
 
   const page = useMemo(() => {
-    const base = activePage === 0 ? allTasks : (duties[activePage - 1]?.tasks ?? []);
+    const base = activePage === 0 ? allTasks : duties[activePage - 1]?.tasks ?? [];
     const total = base.length;
-    const done = base.filter(t => t.isChecked).length;
+    const done = base.filter((t) => t.isChecked).length;
     const percent = total ? Math.round((done / total) * 100) : 0;
-    const name = activePage === 0 ? '플레이스 전체' : (duties[activePage - 1]?.name ?? '');
-    
-    // 아이콘 로직
-    const iconKeyForProgressBar = activePage === 0
-        ? placeIconKey
-        : (duties[activePage - 1]?.iconKey as string);
-    const icon = activePage === 0
-        ? (CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG)
-        : (DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG);
-
+    const name = activePage === 0 ? '플레이스 전체' : duties[activePage - 1]?.name ?? '';
+    const iconKeyForProgressBar = activePage === 0 ? placeIconKey : (duties[activePage - 1]?.iconKey as string);
+    const icon = activePage === 0 ? CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG : DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG;
     return { name, percent, tasks: base, icon };
   }, [activePage, allTasks, duties, placeIconKey]);
 
@@ -255,58 +345,90 @@ const ManagerHome: React.FC = () => {
 
   const visibleTasks = useMemo(() => {
     const base = page.tasks;
-    if (filter === 'ing') return base.filter(t => t.isChecked);
-    if (filter === 'done') return base.filter(t => !t.isChecked);
+    if (filter === 'ing') return base.filter((t) => !t.isChecked);
+    if (filter === 'done') return base.filter((t) => t.isChecked);
     return base;
   }, [page.tasks, filter]);
 
-  const notificationImage = hasUnreadNotifications ? mailDefault : mail;
-
+  const notificationImage = hasUnreadNotifications ? mail : mailDefault;
   const backgroundImage = useMemo(() => {
     if (page.percent <= 0) return '/bg/bg0.svg';
     if (page.percent >= 100) return '/bg/bg100.svg';
     return '/bg/bgMiddle.svg';
   }, [page.percent]);
 
-  /* ---------- 이벤트 ---------- */
-  const goToNotification = () => { if (pid) navigate(`/${pid}/alarm`); };
-
-  const patchLocal = useCallback((id: number, patch: Partial<TaskUI>) => {
-    setDuties(prev =>
-      prev.map(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, ...patch } : t) }))
-    );
-  }, []);
-
-  const toggleTask = async (taskId: number) => {
-    const t = page.tasks.find(x => x.id === taskId);
+  // ====== 변경: 토글 시 checklistId 사용, 로컬 패치 기준은 cleaningId ======
+  const toggleTask = async (dutyId: number, cleaningId: number) => {
+    const t = page.tasks.find((x) => x.cleaningId === cleaningId && x.dutyId === dutyId) as TaskUI | undefined;
     if (!t) return;
+
+    if (!t.checklistId) {
+      alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
+      return;
+    }
+
     try {
       if (t.isChecked) {
-        console.log('📡 incompleteChecklist(%s, %s)', pid, taskId);
-        await useChecklistApi.incompleteChecklist(pid, taskId);
-        patchLocal(taskId, { isChecked: false, completedAt: null, completedBy: null });
+        await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+        patchLocal(dutyId, cleaningId, { isChecked: false, completedAt: null, completedBy: null });
       } else {
-        console.log('📡 completeChecklist(%s, %s)', pid, taskId);
-        await useChecklistApi.completeChecklist(pid, taskId);
+        await useChecklistApi.completeChecklist(pid, t.checklistId);
         const now = new Date().toTimeString().slice(0, 5);
-        patchLocal(taskId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+        patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
       }
     } catch (e) {
-      console.error('❌ 체크 전환 실패:', e);
+      console.error('체크 전환 실패:', e);
       alert('체크 상태 변경 실패');
     }
   };
+  // ====== 변경 끝 ======
 
-  const openUploadFor = (id: number) => { setUploadTaskId(id); setUploadOpen(true); };
-  const closeUpload = () => { setUploadOpen(false); setUploadTaskId(null); };
+  // ====== 변경: cleaningId 기준으로 로컬 패치 ======
+  const patchLocal = useCallback(
+    (dutyId: number, cleaningId: number, patch: Partial<TaskUI>) => {
+      setDuties((prev) =>
+        prev.map((d) =>
+          d.id !== dutyId
+            ? d
+            : {
+                ...d,
+                tasks: d.tasks.map((t) => (t.cleaningId === cleaningId ? { ...t, ...patch } : t)),
+              }
+        )
+      );
+    },
+    []
+  );
+  // ====== 변경 끝 ======
+
+  // ====== 변경: 업로드용 open/close에 checklistId 포함 ======
+  const openUploadFor = useCallback((dutyId: number, cleaningId: number, checklistId: number | null) => {
+    setUploadTaskId({ dutyId, cleaningId, checklistId });
+    setUploadOpen(true);
+  }, []);
+
+  const closeUpload = useCallback(() => {
+    setUploadOpen(false);
+    setUploadTaskId(null);
+  }, []);
+  // ====== 변경 끝 ======
+
+  // ====== 변경: 사진 업로드 시 checklistId 사용 ======
   const confirmUpload = async (file: File) => {
-    if (uploadTaskId == null) return;
+    if (!uploadTaskId) return;
+    const { dutyId, cleaningId, checklistId } = uploadTaskId;
+
+    if (!checklistId) {
+      alert('체크리스트 ID가 없어 사진 업로드를 진행할 수 없습니다.');
+      closeUpload();
+      return;
+    }
+
     try {
-      console.log('📡 presigned url 요청:', uploadTaskId, file.name, file.type);
-      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(pid, uploadTaskId, {
-        originalFileName: file.name, contentType: file.type,
+      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
+        originalFileName: file.name,
+        contentType: file.type,
       });
-      console.log('📥 presign 응답:', presign);
 
       const put = await fetch(presign.uploadUrl, {
         method: 'PUT',
@@ -315,27 +437,37 @@ const ManagerHome: React.FC = () => {
       });
       if (!put.ok) throw new Error('S3 업로드 실패');
 
-      console.log('📡 업로드 완료 콜백:', presign.s3Key);
-      await useChecklistApi.completePhotoUpload(pid, uploadTaskId, { s3Key: presign.s3Key });
+      await useChecklistApi.completePhotoUpload(pid, checklistId, { s3Key: presign.s3Key });
 
       const now = new Date().toTimeString().slice(0, 5);
-      patchLocal(uploadTaskId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+      patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
     } catch (e) {
-      console.error('❌ 사진 업로드 실패:', e);
+      console.error('사진 업로드 실패:', e);
       alert('사진 업로드 실패');
     } finally {
       closeUpload();
     }
   };
+  // ====== 변경 끝 ======
 
-  // 스와이프
   const swipeHandlers = useSwipeable({
-    onSwipedLeft:  () => setActivePage(p => Math.min(p + 1, totalPages - 1)),
-    onSwipedRight: () => setActivePage(p => Math.max(p - 1, 0)),
+    onSwipedLeft: () => setActivePage((p) => Math.min(p + 1, totalPages - 1)),
+    onSwipedRight: () => setActivePage((p) => Math.max(p - 1, 0)),
     trackMouse: true,
   });
 
-  /* ---------- 렌더 ---------- */
+  const handleFilterSelect = useCallback((selectedFilter: 'all' | 'ing' | 'done') => {
+    setFilter(selectedFilter);
+    setMemberPopUp(false);
+  }, []);
+
+  const goToNotification = useCallback(() => {
+    if (pid) navigate(`/${pid}/alarm`);
+  }, [navigate, pid]);
+
+
+  
+  /* ---------- 렌더링 ---------- */
   if (loading) return <div className="p-6">로딩중…</div>;
   const hasChecklist = visibleTasks.length > 0;
 
@@ -344,25 +476,37 @@ const ManagerHome: React.FC = () => {
       {/* 배경 */}
       <div
         className="fixed top-0 left-0 w-full h-full z-0"
-        style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: '626px', backgroundPosition: 'center -200px', backgroundRepeat: 'no-repeat' }}
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: '626px',
+          backgroundPosition: 'center -200px',
+          backgroundRepeat: 'no-repeat',
+        }}
       />
       {/* 상단 */}
       <div {...swipeHandlers} className="relative z-10 px-5 pt-4 flex-shrink-0 ">
         <div className="flex flex-col items-center h-[420px]">
           <div className="flex items-center relative">
-            <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">당번</span>
+            <span className="font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2">
+              당번
+            </span>
             <div className="flex items-center gap-[210px]">
-              <PlaceNameCard 
-                place={placeName} 
-                type={page.percent >= 100 ? 'complete' : 'default'} 
+              <PlaceNameCard
+                place={placeName}
+                type={page.percent >= 100 ? 'complete' : 'default'}
                 onClick={() => navigate('/myplace')}
               />
-              <img src={notificationImage} alt="알림" className="w-[36px] cursor-pointer" onClick={goToNotification} />
+              <img
+                src={notificationImage}
+                alt="알림"
+                className="w-[36px] cursor-pointer"
+                onClick={goToNotification}
+              />
             </div>
           </div>
 
           <div className="mt-[66px] mb-[18px]">
-           <ProgressBar
+            <ProgressBar
               percentage={page.percent}
               iconSrc={page.icon}
               title={page.name}
@@ -371,10 +515,10 @@ const ManagerHome: React.FC = () => {
                   placeId: pid,
                   placeName,
                   percent: Math.min(100, Math.max(0, page.percent)),
-                  placeIconKey,              
-                  duties: duties.map(d => {
+                  placeIconKey,
+                  duties: duties.map((d) => {
                     const total = d.tasks.length;
-                    const done = d.tasks.filter(t => t.isChecked).length;
+                    const done = d.tasks.filter((t) => t.isChecked).length;
                     return {
                       id: d.id,
                       name: d.name,
@@ -383,7 +527,6 @@ const ManagerHome: React.FC = () => {
                     };
                   }),
                 };
-
                 sessionStorage.setItem('overviewPayload', JSON.stringify(payload));
                 navigate('/home/manager/overview', { state: payload });
               }}
@@ -397,39 +540,52 @@ const ManagerHome: React.FC = () => {
 
       {/* 목록 */}
       <main className="relative z-10 px-5 flex flex-col flex-grow min-h-0">
-        {hasChecklist ? (
-          <>
-            <div className="flex justify-between items-center mb-4">
-              <div className="relative flex items-center">
-                <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
-                  {filter === 'all' ? '전체 청소' : filter === 'ing' ? '달성 완료' : '달성 미완료'}
-                </h2>
-                <img src={toggle} alt="정렬" onClick={() => setMemberPopUp(!memberPopUp)} className="w-5 h-5 cursor-pointer" />
-                {memberPopUp && (
-                  <div className="absolute ml-5 top-[calc(100%+10px)] z-50">
-                    <CategoryChip onSelect={(v) => { setFilter(v); setMemberPopUp(false); }} />
-                  </div>
-                )}
-              </div>
-            </div>
+                 {/* 필터 섹션 - 항상 표시 */}
+         <div className="flex justify-between items-center mb-4">
+           <div className="relative flex items-center">
+             <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
+               {filter === 'all'
+                 ? '전체 청소'
+                 : filter === 'ing'
+                 ? '달성 미완료'
+                 : '달성 완료'}
+             </h2>
+             <img
+               src={toggle}
+               alt="정렬"
+               onClick={() => setMemberPopUp(!memberPopUp)}
+               className="w-5 h-5 cursor-pointer"
+             />
+             {memberPopUp && (
+               <div className="absolute ml-5 top-[calc(100%+10px)] z-50">
+                 <CategoryChip onSelect={handleFilterSelect} />
+               </div>
+             )}
+           </div>
+           
+         </div>
 
-            <div className="flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar">
-              {visibleTasks.map((t) => (
-                <TaskCard
-                  key={t.id}
-                  title={t.title}
-                  dueTime={t.dueTime ?? ''}
-                  members={t.members}
-                  isCamera={t.isCamera}
-                  isChecked={t.isChecked}
-                  completedAt={t.completedAt ?? undefined}
-                  completedBy={t.completedBy ?? undefined}
-                  onToggle={() => toggleTask(t.id)}
-                  onCameraClick={() => !t.isChecked && t.isCamera && openUploadFor(t.id)}
-                />
-              ))}
-            </div>
-          </>
+        {/* 체크리스트 카드 섹션 */}
+        {hasChecklist ? (
+          <div className="flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar">
+            {visibleTasks.map((t) => (
+              <TaskCard
+                key={`${t.dutyId}:${t.cleaningId}`}
+                title={t.title}
+                dueTime={t.dueTime ?? ''}
+                members={t.members}
+                memberCount={t.memberCount}
+                isCamera={t.isCamera}
+                isChecked={t.isChecked}
+                completedAt={t.completedAt ?? undefined}
+                completedBy={t.completedBy ?? undefined}
+                onToggle={() => toggleTask(t.dutyId, t.cleaningId)}
+                onCameraClick={() =>
+                  !t.isChecked && t.isCamera && openUploadFor(t.dutyId, t.cleaningId, t.checklistId)
+                }
+              />
+            ))}
+          </div>
         ) : (
           <section className="w-full mt-6 flex flex-col items-center text-center">
             <p className="text-[13px] text-[#99A2AE]">표시할 체크리스트가 없습니다.</p>
@@ -437,10 +593,17 @@ const ManagerHome: React.FC = () => {
         )}
       </main>
 
-      <div className="flex-shrink-0 z-10"><BottomBar /></div>
-      <UpLoadPopUp isOpen={isUploadOpen} onRequestClose={closeUpload} onConfirm={confirmUpload} />
-    </div>
-  );
-};
+      <div className="flex-shrink-0 z-10">
+        <BottomBar />
+      </div>
+             <UpLoadPopUp
+         isOpen={isUploadOpen}
+         onRequestClose={closeUpload}
+         onConfirm={confirmUpload}
+       />
+       
+     </div>
+   );
+ };
 
 export default ManagerHome;

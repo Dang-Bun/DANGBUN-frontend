@@ -29,12 +29,7 @@ const BottomBar = () => {
       <button 
         type="button" 
         onClick={() => {
-          const placeId = localStorage.getItem('placeId');
-          if (placeId) {
-            navigate('/calendar', { state: { placeId: Number(placeId) } });
-          } else {
-            navigate('/calendar');
-          }
+          navigate('/calendar');
         }}
       >
         <img src={isCalendar ? CalendarPressed : Calendar} alt="캘린더" />

@@ -22,6 +22,7 @@ import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
+import { useChecklistApi } from '../../hooks/useChecklistApi';
 
 dayjs.locale('ko');
 
@@ -43,7 +44,7 @@ const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
 const CalendarPage: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation() as {
-    state?: { placeId?: number };
+    state?: { role?: string };
   };
 
   const [checklists, setChecklists] = useState<TaskItem[]>([]);
@@ -76,12 +77,13 @@ const CalendarPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // state에서 placeId를 우선 가져오고, 없으면 localStorage에서 가져옴
-      const PLACE_ID = state?.placeId ?? localStorage.getItem('placeId');
+      // localStorage에서 placeId 가져오기
+      const PLACE_ID = localStorage.getItem('placeId');
       const accessToken = localStorage.getItem('accessToken');
 
-      console.log('Debug - PLACE_ID:', PLACE_ID);
-      console.log('Debug - accessToken exists:', !!accessToken);
+      console.log('🔍 [Calendar] API 요청 준비');
+      console.log('   📍 placeId:', PLACE_ID);
+      console.log('   🔑 accessToken 존재:', !!accessToken);
 
       if (!PLACE_ID || !accessToken) {
         setError('로그인이 필요합니다.');
@@ -90,16 +92,13 @@ const CalendarPage: React.FC = () => {
 
       const placeId = Number(PLACE_ID);
 
-      // localStorage에 placeId 저장 (state에서 온 경우)
-      if (state?.placeId) {
-        localStorage.setItem('placeId', String(placeId));
-      }
-
       const year = activeStartDate.getFullYear();
       const month = activeStartDate.getMonth() + 1;
-      const day = selectedDate.getDate();
 
-      console.log('Debug - API Request params:', { placeId, year, month, day });
+      console.log('📡 [Calendar] API 요청 파라미터');
+      console.log('   📍 placeId:', placeId);
+      console.log('   📅 year:', year, 'month:', month);
+      console.log('   📅 selectedDate:', dayjs(selectedDate).format('YYYY-MM-DD'));
 
       // 체크리스트 데이터 로드
       const checklistResponse = await useCalendarApi.getChecklistsByDate(
@@ -143,7 +142,7 @@ const CalendarPage: React.FC = () => {
       );
       setChecklists(parsedChecklists);
 
-      // 프로그레스 데이터를 체크리스트 데이터에서 계산
+      // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
       const progressMap = new Map<string, number>();
 
       // 날짜별로 체크리스트 그룹화
@@ -192,7 +191,7 @@ const CalendarPage: React.FC = () => {
       );
       setProgress(progressMap);
     } catch (err: unknown) {
-      console.error('API Error:', err);
+      console.error('❌ [Calendar] API 오류 발생:', err);
 
       // 403 에러 처리
       if (
@@ -221,12 +220,13 @@ const CalendarPage: React.FC = () => {
         // 토큰이 만료되었을 가능성이 높으므로 localStorage에서 토큰 제거
         localStorage.removeItem('accessToken');
       } else {
+        console.error('❌ [Calendar] 일반 오류:', err);
         setError('데이터를 불러오는 데 실패했습니다.');
       }
     } finally {
       setLoading(false);
     }
-  }, [activeStartDate, state?.placeId]);
+  }, [activeStartDate]);
 
   useEffect(() => {
     loadData();
@@ -272,9 +272,9 @@ const CalendarPage: React.FC = () => {
       setIsDeleteOpen(false);
 
       // 성공 메시지 (선택사항)
-      console.log(`[Delete] Successfully deleted checklist ${selectTask.id}`);
+      console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
     } catch (err) {
-      console.error('체크리스트 삭제 실패:', err);
+      console.error('❌ [Calendar] 체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
     }
   }, [selectTask, loadData]);
@@ -371,7 +371,7 @@ const CalendarPage: React.FC = () => {
 
       // 디버깅: progress 값 확인
       if (progressValue !== undefined) {
-        console.log(`Debug - Progress for ${ymd}: ${progressValue}%`);
+        console.log(`📊 [Calendar] ${ymd} 프로그레스: ${progressValue}%`);
       }
 
       if (progressValue === undefined)
@@ -561,6 +561,7 @@ const CalendarPage: React.FC = () => {
               displayedItems.map(({ dutyName, task }) => (
                 <SwipeableRow
                   key={task.id}
+                  disabled={!isManager}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
                   <div>

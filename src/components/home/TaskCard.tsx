@@ -1,4 +1,3 @@
-// src/components/home/TaskCard.tsx
 import React, { useMemo, useState } from 'react';
 import cameraGray from '../../assets/home/cameraGray.svg';
 import cameraDefault from '../../assets/home/cameraBlue.svg';
@@ -14,6 +13,7 @@ interface TaskCardProps {
   members: string[];
   isChecked: boolean;
   isCamera: boolean;
+  memberCount?: number;
   onToggle: () => void;
   completedAt?: string;    // API의 completeTime을 그대로 받음 (옵션)
   completedBy?: string;    // (선택) 있으면 표시하지 않고 보관만
@@ -33,6 +33,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   completedBy,
   disabled = false,
   onCameraClick,
+  memberCount
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -53,7 +54,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleCheck = () => onToggle();
   const handleToggle = () => setIsExpanded((prev) => !prev);
 
-  const memberLabel = isAllMembers ? '멤버 전체' : `멤버 ${sortedMembers.length}명`;
+  const effectiveMemberCount = useMemo(
+    () => (typeof memberCount === 'number' ? memberCount : sortedMembers.length),
+    [memberCount, sortedMembers.length]
+  );
+  const memberLabel = isAllMembers ? '멤버 전체' : `멤버 ${effectiveMemberCount}명`;
   const memberSummary = () => {
     if (isAllMembers) return '';
     if (sortedMembers.length === 0) return '';
