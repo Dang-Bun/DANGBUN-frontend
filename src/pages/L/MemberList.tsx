@@ -108,7 +108,11 @@ const MemberList: React.FC = () => {
           <div className='flex flex-col gap-0'>
             {members
               .slice()
-              .reverse()
+              .sort((a, b) => {
+                if (a.role === '매니저' && b.role !== '매니저') return -1;
+                if (a.role !== '매니저' && b.role === '매니저') return 1;
+                return 0;
+              })
               .map((m, idx) => {
                 const isManager = m.role === '매니저';
                 const badgeClass = isManager
