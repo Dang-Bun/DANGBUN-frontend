@@ -352,9 +352,9 @@ const ManagerHome: React.FC = () => {
     return '/bg/bgMiddle.svg';
   }, [page.percent]);
 
-  // ====== 변경: 토글 시 checklistId 사용, 로컬 패치 기준은 cleaningId ======
-  const toggleTask = async (dutyId: number, cleaningId: number) => {
-    const t = page.tasks.find((x) => x.cleaningId === cleaningId && x.dutyId === dutyId) as TaskUI | undefined;
+  // ====== 변경: 토글 시 checklistId 사용 ======
+  const toggleTask = async (dutyId: number, checklistId: number) => {
+    const t = page.tasks.find((x) => x.checklistId === checklistId && x.dutyId === dutyId) as TaskUI | undefined;
     if (!t) return;
 
     if (!t.checklistId) {
@@ -365,11 +365,11 @@ const ManagerHome: React.FC = () => {
     try {
       if (t.isChecked) {
         await useChecklistApi.incompleteChecklist(pid, t.checklistId);
-        patchLocal(dutyId, cleaningId, { isChecked: false, completedAt: null, completedBy: null });
+        patchLocal(dutyId, t.cleaningId, { isChecked: false, completedAt: null, completedBy: null });
       } else {
         await useChecklistApi.completeChecklist(pid, t.checklistId);
         const now = new Date().toTimeString().slice(0, 5);
-        patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+        patchLocal(dutyId, t.cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
       }
     } catch (e) {
       console.error('체크 전환 실패:', e);
@@ -397,10 +397,13 @@ const ManagerHome: React.FC = () => {
   // ====== 변경 끝 ======
 
   // ====== 변경: 업로드용 open/close에 checklistId 포함 ======
-  const openUploadFor = useCallback((dutyId: number, cleaningId: number, checklistId: number | null) => {
-    setUploadTaskId({ dutyId, cleaningId, checklistId });
-    setUploadOpen(true);
-  }, []);
+  const openUploadFor = useCallback((dutyId: number, checklistId: number | null) => {
+    const task = page.tasks.find((t) => t.checklistId === checklistId && t.dutyId === dutyId);
+    if (task) {
+      setUploadTaskId({ dutyId, cleaningId: task.cleaningId, checklistId });
+      setUploadOpen(true);
+    }
+  }, [page.tasks]);
 
   const closeUpload = useCallback(() => {
     setUploadOpen(false);
@@ -564,21 +567,21 @@ const ManagerHome: React.FC = () => {
         {hasChecklist ? (
           <div className="flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar">
             {visibleTasks.map((t) => (
-              <TaskCard
-                key={`${t.dutyId}:${t.cleaningId}`}
-                title={t.title}
-                dueTime={t.dueTime ?? ''}
-                members={t.members}
-                memberCount={t.memberCount}
-                isCamera={t.isCamera}
-                isChecked={t.isChecked}
-                completedAt={t.completedAt ?? undefined}
-                completedBy={t.completedBy ?? undefined}
-                onToggle={() => toggleTask(t.dutyId, t.cleaningId)}
-                onCameraClick={() =>
-                  !t.isChecked && t.isCamera && openUploadFor(t.dutyId, t.cleaningId, t.checklistId)
-                }
-              />
+                             <TaskCard
+                 key={`${t.dutyId}:${t.checklistId || t.cleaningId}`}
+                 title={t.title}
+                 dueTime={t.dueTime ?? ''}
+                 members={t.members}
+                 memberCount={t.memberCount}
+                 isCamera={t.isCamera}
+                 isChecked={t.isChecked}
+                 completedAt={t.completedAt ?? undefined}
+                 completedBy={t.completedBy ?? undefined}
+                 onToggle={() => toggleTask(t.dutyId, t.checklistId || 0)}
+                 onCameraClick={() =>
+                   !t.isChecked && t.isCamera && openUploadFor(t.dutyId, t.checklistId)
+                 }
+               />
             ))}
           </div>
         ) : (
