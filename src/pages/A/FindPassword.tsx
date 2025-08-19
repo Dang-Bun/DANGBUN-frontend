@@ -66,8 +66,8 @@ const FindPassword = () => {
       );
 
       if (response.data.code === 20000) {
-        console.log('✅ 인증번호가 이메일로 전송되었습니다.');
         setIsCooldown(true);
+        console.log('✅ 인증번호가 이메일로 전송되었습니다.');
         setTimeout(() => setIsCooldown(false), 60000);
       } else {
         alert(`⚠️ 실패: ${response.data.message}`);
