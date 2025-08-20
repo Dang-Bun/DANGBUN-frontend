@@ -306,9 +306,9 @@ const MemberHome: React.FC = () => {
             memberCount: names.length,
             isCamera: !!(t as Record<string, unknown>)?.needPhoto,
                          isChecked: !!(
-               (t as Record<string, unknown>)?.completeTime ??
                (t as Record<string, unknown>)?.completed ??
-               (t as Record<string, unknown>)?.isChecked
+               (t as Record<string, unknown>)?.isChecked ??
+               (t as Record<string, unknown>)?.completeTime
              ),
             completedAt: (t as Record<string, unknown>)?.completedAt ?? null,
             completedBy: (t as Record<string, unknown>)?.completedBy ?? null,
@@ -483,11 +483,13 @@ const MemberHome: React.FC = () => {
       return;
     }
 
-    if (!t.checklistId) {
-      console.log('❌ [MemberHome] checklistId가 없음');
-      alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
-      return;
-    }
+         if (!t.checklistId) {
+       console.log('❌ [MemberHome] checklistId가 없음');
+       alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
+       return;
+     }
+
+           // 이미 완료된 체크리스트는 해제할 수 있음 (매니저 홈과 동일)
 
          try {
        console.log('🔍 [MemberHome] API 호출 전 정보:', {
