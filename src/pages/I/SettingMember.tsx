@@ -88,7 +88,7 @@ const SettingMember = () => {
           <div
             className='flex items-center mb-4'
             onClick={() =>
-              navigate('/managerInfo', {
+              navigate('/managerInfomember', {
                 state: {
                   memberId: memberId,
                 },
