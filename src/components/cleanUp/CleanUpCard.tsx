@@ -30,6 +30,7 @@ interface CleanUpCardProps {
   placeId: number;
   members: string[];
   fMembers: number[];
+  onTotalCount?: (count: number) => void;
 }
 
 interface Cleaning {
@@ -57,6 +58,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   dutyId,
   members,
   fMembers,
+  onTotalCount,
 }) => {
   const [open, setOpen] = useState(false);
   const [specOpen, setSpecOpen] = useState(false);
@@ -70,6 +72,8 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   const [currentCleaning, setCurrentCleaning] = useState(0);
   const [clickedCleaning, setClickedCleaning] = useState(0);
   const iconSrc = ICON_MAP[icon] ?? icon;
+
+  const [dutyMembers, setDutyMembers] = useState<string[]>([]);
   const [clickedMembersMap, setClickedMembersMap] = useState<
     Record<number, string[]>
   >({});
@@ -87,9 +91,29 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
   };
 
   useEffect(() => {
+    const fetchDutyMembers = async () => {
+      try {
+        const res = await useDutyApi.getMembers(placeId, dutyId);
+        const arr = res.data.data;
+        const names = Array.isArray(arr)
+          ? arr
+              .map((m: any) => m.name)
+              .filter((v: any) => typeof v === 'string')
+          : [];
+        setDutyMembers(names);
+      } catch (e) {
+        console.error(e);
+        setDutyMembers([]);
+      }
+    };
+    fetchDutyMembers();
+  }, [placeId, dutyId]);
+
+  useEffect(() => {
     const getEffect = async () => {
       try {
         const res = await useDutyApi.getCleaningInfo(placeId, dutyId);
+        if (!Array.isArray(res?.data?.data)) return;
         const list = Array.isArray(res?.data?.data)
           ? res.data.data.map((d: any) => ({
               cleaningId: d.cleaningId,
@@ -99,6 +123,9 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
             }))
           : [];
         setCleaningList(list);
+
+        const totalCount = list.length;
+        if (onTotalCount) onTotalCount(totalCount);
       } catch (e) {
         console.error(e);
         setCleaningList([]);
@@ -321,7 +348,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
             </div>
           </div>
           <div className='flex flex-wrap gap-2 max-w-[353px] mt-5'>
-            {members
+            {dutyMembers
               .filter((name) => name.includes(search))
               .map((name, index) => {
                 const currentClicked = clickedMembersMap[clickedCleaning] || [];

@@ -33,6 +33,8 @@ const CleanUpList = () => {
   const [dangbunList, setDangbunList] = useState<DutyItem[]>([]);
   const [members, setMembers] = useState<string[]>([]);
   const [filteredMemberIds, setFilteredMemberIds] = useState<number[]>([]);
+  const [totalCleaningCount, setTotalCleaningCount] = useState(0);
+  const [counts, setCounts] = useState<Record<number, number>>({});
 
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
@@ -55,6 +57,12 @@ const CleanUpList = () => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     setContentMargin(headerHeight);
   });
+
+  useEffect(() => {
+    const sum = Object.values(counts).reduce((acc, cur) => acc + cur, 0);
+    setTotalCleaningCount(sum);
+  }, [counts]);
+
   useEffect(() => {
     if (!placeId) return;
 
@@ -137,7 +145,7 @@ const CleanUpList = () => {
         />
         <div className='flex flex-row justify-between mt-[52px] mb-3'>
           <p className='text-black text-sm font-normal leading-tight'>
-            총 {filteredDangbunList.length}개
+            총 {totalCleaningCount}개
           </p>
           <button
             className='flex flex-row gap-1 justify-center items-center cursor-pointer'
@@ -245,6 +253,9 @@ const CleanUpList = () => {
                 dutyId={duty.dutyId}
                 members={members}
                 fMembers={filteredMemberIds}
+                onTotalCount={(count) =>
+                  setCounts((prev) => ({ ...prev, [duty.dutyId]: count }))
+                }
               />
             ))
           )}
