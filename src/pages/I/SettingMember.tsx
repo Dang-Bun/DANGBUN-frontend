@@ -125,8 +125,8 @@ const SettingMember = () => {
             className='flex flex-col items-center flex-1 cursor-pointer'
             onClick={() => navigate('/management/member')}
           >
-            <img src={NameTag} alt='당번 관리' />
-            <div className='text-sm mt-1'>당번 관리</div>
+            <img src={NameTag} alt='당번 목록' />
+            <div className='text-sm mt-1'>당번 목록</div>
           </div>
 
           {/* 구분선 */}
@@ -139,8 +139,8 @@ const SettingMember = () => {
               navigate('/cleanuplistmember', { state: { data: { placeId } } })
             }
           >
-            <img src={Sweep} alt='청소 관리' className='w-[24px] h-[32.39px]' />
-            <div className='text-sm mt-1'>청소 관리</div>
+            <img src={Sweep} alt='청소 목록' className='w-[24px] h-[32.39px]' />
+            <div className='text-sm mt-1'>청소 목록</div>
           </div>
 
           {/* 구분선 */}
