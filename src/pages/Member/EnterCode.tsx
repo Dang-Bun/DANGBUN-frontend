@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import HeaderBar from '../../components/HeaderBar';
 import FreeButton from '../../components/button/FreeButton';
-import { usePlaceApi } from './../../hooks/usePlaceApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 import PopUpCard from '../../components/PopUp/PopUpCard';
 
 const EnterCode = () => {
