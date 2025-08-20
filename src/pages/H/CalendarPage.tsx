@@ -79,9 +79,7 @@ const CalendarPage: React.FC = () => {
       const PLACE_ID = localStorage.getItem('placeId');
       const accessToken = localStorage.getItem('accessToken');
 
-      console.log('🔍 [Calendar] API 요청 준비');
-      console.log('   📍 placeId:', PLACE_ID);
-      console.log('   🔑 accessToken 존재:', !!accessToken);
+
 
       if (!PLACE_ID || !accessToken) {
         setError('로그인이 필요합니다.');
@@ -93,17 +91,11 @@ const CalendarPage: React.FC = () => {
       const year = activeStartDate.getFullYear();
       const month = activeStartDate.getMonth() + 1;
 
-      console.log('📡 [Calendar] API 요청 파라미터');
-      console.log('   📍 placeId:', placeId);
-      console.log('   📅 year:', year, 'month:', month);
-      console.log(
-        '   📅 selectedDate:',
-        dayjs(selectedDate).format('YYYY-MM-DD')
-      );
+
 
       // 플레이스 조회 API 사용 (홈화면과 동일)
       const placeResponse = await usePlaceApi.placeSearch(placeId);
-      console.log('Debug - Place response:', placeResponse.data);
+
 
       // 프로그레스 데이터 로드
       const progressResponse = await useCalendarApi.getProgress(placeId, {
@@ -111,13 +103,12 @@ const CalendarPage: React.FC = () => {
         month: month,
       });
 
-      console.log('Debug - Progress response:', progressResponse.data);
+
 
              // 플레이스 데이터에서 체크리스트 추출
        const placeData = placeResponse?.data?.data || placeResponse?.data || {};
        const duties = placeData.duties || [];
-       console.log('🔍 [Calendar] 원본 duties 개수:', duties.length);
-       console.log('🔍 [Calendar] 원본 duties:', duties);
+
 
                      // 모든 체크리스트를 날짜별로 분류
         const checklistDataByDate: Map<string, Record<string, unknown>[]> = new Map();
@@ -133,11 +124,7 @@ const CalendarPage: React.FC = () => {
             }
             
                          const dutyName = duty.dutyName || duty.name || '당번';
-             console.log(`🔍 [Calendar] 체크리스트 처리:`, {
-               checklistName: checklist.cleaningName,
-               dutyName,
-               date: checklistDate
-             });
+
              
              checklistDataByDate.get(checklistDate)!.push({
                ...checklist,
@@ -166,8 +153,7 @@ const CalendarPage: React.FC = () => {
           });
         });
 
-               console.log('🔍 [Calendar] 최종 체크리스트 개수:', allChecklists.length);
-               console.log('🔍 [Calendar] 최종 체크리스트:', allChecklists);
+
         setChecklists(allChecklists);
 
        // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
@@ -190,9 +176,7 @@ const CalendarPage: React.FC = () => {
         const percentage =
           total > 0 ? Math.round((completed / total) * 100) : 0;
         progressMap.set(date, percentage);
-        console.log(
-          `Debug - Calculated progress for ${date}: ${completed}/${total} = ${percentage}%`
-        );
+
       });
 
       // API에서 받은 progress 데이터도 병합 (우선순위: API > 계산)
@@ -200,23 +184,18 @@ const CalendarPage: React.FC = () => {
         progressResponse.data?.data?.dailyProgress ||
         progressResponse.data?.dailyProgress ||
         [];
-      console.log('Debug - Raw progress data from API:', progressData);
+      
 
       progressData.forEach((item: Record<string, unknown>) => {
         if (item.date && item.endPercent !== undefined) {
           const date = item.date as string;
           const percent = item.endPercent as number;
           progressMap.set(date, percent);
-          console.log(
-            `Debug - Overriding progress for ${date}: ${percent}% (from API)`
-          );
+
         }
       });
 
-      console.log(
-        'Debug - Final progress map:',
-        Array.from(progressMap.entries())
-      );
+
       setProgress(progressMap);
     } catch (err: unknown) {
       console.error('❌ [Calendar] API 오류 발생:', err);
@@ -276,17 +255,11 @@ const CalendarPage: React.FC = () => {
           return;
         }
 
-        console.log('🔍 체크리스트 토글 시도:', {
-          taskId,
-          currentStatus: currentTask.task.isChecked,
-          placeId
-        });
+
 
         if (currentTask.task.isChecked) {
           // 완료된 상태면 취소
-          console.log('🔍 체크리스트 취소 시도...');
-          const response = await useChecklistApi.incompleteChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 취소 성공:', response.data);
+          await useChecklistApi.incompleteChecklist(placeId, taskId);
           
           // 취소 시 상태 즉시 업데이트
           setChecklists(prev => prev.map(item => {
@@ -305,13 +278,11 @@ const CalendarPage: React.FC = () => {
           }));
         } else {
           // 미완료 상태면 완료
-          console.log('🔍 체크리스트 완료 시도...');
           const response = await useChecklistApi.completeChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 완료 성공:', response.data);
           
           // API 응답에서 endTime과 memberName 추출
           const responseData = response.data?.data;
-          console.log('📄 API 응답 데이터:', responseData);
+
           
           if (responseData) {
             console.log('📅 endTime:', responseData.endTime);

@@ -209,20 +209,17 @@ const MemberHome: React.FC = () => {
 
       // 플레이스 조회 API 사용 (체크리스트 정보 포함)
       const placeRes = await usePlaceApi.placeSearch(pid);
-      console.log('🔍 멤버 홈 플레이스 조회 API 응답:', placeRes?.data);
+
       
       const placeData = placeRes?.data?.data || placeRes?.data || {};
       
       // duty 목록 조회 API 사용 (아이콘 정보 포함)
       const dutyRes = await useDutyApi.list(pid);
-      console.log('🔍 멤버 홈 duty 목록 API 응답:', dutyRes?.data);
-      
       const dutyList = dutyRes?.data?.data || dutyRes?.data || [];
-      console.log('🔍 멤버 홈 duty 목록:', dutyList);
       
       // 플레이스 조회에서 체크리스트 정보 가져오기
       const placeDuties = placeData.duties || [];
-      console.log('🔍 플레이스 조회의 duties (체크리스트 정보):', placeDuties);
+
       
       // dutyId로 체크리스트 정보를 매핑
       const checklistMap = new Map<number, unknown[]>();
@@ -231,7 +228,7 @@ const MemberHome: React.FC = () => {
         if (Number.isFinite(dutyId)) {
           const checkLists = (placeDuty.checkLists as unknown[]) || [];
           checklistMap.set(dutyId, checkLists);
-          console.log(`🔍 Duty ${dutyId}의 체크리스트 개수:`, checkLists.length);
+  
         }
       });
       
@@ -242,7 +239,7 @@ const MemberHome: React.FC = () => {
         
         // 해당 dutyId의 체크리스트 가져오기
         const checkLists = checklistMap.get(dutyId) || [];
-        console.log(`🔍 Duty ${dutyId} 매칭된 체크리스트:`, checkLists);
+
         
         // 체크리스트를 task로 변환
         const tasks = checkLists.map((t: unknown) => {
@@ -327,7 +324,7 @@ const MemberHome: React.FC = () => {
           iconKey = ICON_ALIASES[iconRaw];
         }
         
-        console.log('🔍 아이콘:', d.icon, '→', iconKey);
+
 
         return {
           id: dutyId,
@@ -453,7 +450,7 @@ const MemberHome: React.FC = () => {
 
   // 토글 시 checklistId 사용, 로컬 패치 기준은 cleaningId
   const toggleTask = async (dutyId: number, cleaningId: number) => {
-    console.log('🔍 [MemberHome] toggleTask 호출:', { dutyId, cleaningId });
+    
     
     const t = page.tasks.find(
       (x) => x.cleaningId === cleaningId && x.dutyId === dutyId
@@ -471,20 +468,17 @@ const MemberHome: React.FC = () => {
     });
     
     if (!t) {
-      console.log('❌ [MemberHome] Task를 찾을 수 없음');
+
       return;
     }
     
     if (!t.mine) {
-      console.log('❌ [MemberHome] 내가 담당자가 아님:', {
-        myName: userName,
-        taskMembers: t.members
-      });
+
       return;
     }
 
          if (!t.checklistId) {
-       console.log('❌ [MemberHome] checklistId가 없음');
+ 
        alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
        return;
      }
@@ -492,19 +486,12 @@ const MemberHome: React.FC = () => {
            // 이미 완료된 체크리스트는 해제할 수 있음 (매니저 홈과 동일)
 
          try {
-       console.log('🔍 [MemberHome] API 호출 전 정보:', {
-         placeId: pid,
-         checklistId: t.checklistId,
-         isChecked: t.isChecked,
-         taskTitle: t.title,
-         members: t.members,
-         myName: userName
-       });
+
        
        let response;
        if (t.isChecked) {
          response = await useChecklistApi.incompleteChecklist(pid, t.checklistId);
-         console.log('✅ 체크리스트 해제 성공:', response.data);
+         
          patchLocal(dutyId, cleaningId, {
            isChecked: false,
            completedAt: null,
@@ -512,15 +499,14 @@ const MemberHome: React.FC = () => {
          });
        } else {
          response = await useChecklistApi.completeChecklist(pid, t.checklistId);
-         console.log('✅ 체크리스트 완료 성공:', response.data);
+         
         
         // API 응답에서 endTime과 memberName 추출
         const responseData = response.data?.data || response.data;
-        console.log('📄 API 응답 데이터:', responseData);
+        
         
         if (responseData) {
-          console.log('📅 endTime:', responseData.endTime);
-          console.log('👤 memberName:', responseData.memberName);
+          
           
           patchLocal(dutyId, cleaningId, {
             isChecked: true,
@@ -607,7 +593,7 @@ const MemberHome: React.FC = () => {
       await useChecklistApi.completePhotoUpload(pid, checklistId, {
         s3Key: presign.s3Key,
       });
-      console.log('✅ 사진 업로드 완료');
+      
       
       // 사진 업로드는 기본값 사용 (API에서 endTime/memberName 반환하지 않음)
       const now = new Date().toTimeString().slice(0, 5);
