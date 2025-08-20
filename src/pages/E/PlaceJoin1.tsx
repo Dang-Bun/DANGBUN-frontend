@@ -54,9 +54,10 @@ const PlaceJoin = () => {
     }
   };
 
-  const searchCode = async () => {
+  const searchCode = async (inviteCode: string) => {
     try {
-      const res = await usePlaceApi.inviteCodeCheck({ inviteCode: code });
+      const res = await usePlaceApi.inviteCodeCheck({ inviteCode });
+      setCode(inviteCode);
 
       if (res?.data?.code === 20000) {
         const infoArray = res.data.data.information.map((label: string) => ({
@@ -96,8 +97,7 @@ const PlaceJoin = () => {
             height={56}
             maxWidth={77}
             onClick={() => {
-              setCode(inputValue);
-              searchCode();
+              searchCode(inputValue);
             }} // API request
           >
             확인
