@@ -60,7 +60,16 @@ const NotificationCreate: React.FC = () => {
 	};
 
 	const handleAddManualMember = (person: Person) => {
-		setManualMembers((prev) => (prev.find((p) => p.id === person.id) ? prev : [...prev, person]));
+		// 이미 당번에서 선택된 멤버인지 확인
+		const isAlreadyInDangbun = Object.values(dangbunSelections).some(ids => ids.includes(person.id));
+		
+		// 이미 수동으로 추가된 멤버인지 확인
+		const isAlreadyManual = manualMembers.find(p => p.id === person.id);
+		
+		// 둘 다 해당되지 않을 때만 추가
+		if (!isAlreadyInDangbun && !isAlreadyManual) {
+			setManualMembers((prev) => [...prev, person]);
+		}
 	};
 
 	// 나가기 확인 관련 핸들러들
@@ -166,9 +175,11 @@ const NotificationCreate: React.FC = () => {
 			setShowToast(true);
 			setTimeout(() => {
 				setShowToast(false);
-				// 서버 응답 데이터를 무시하고 항상 올바른 데이터 사용
+				
+				// 서버 응답에서 알림 데이터 추출
+				const serverData = res?.data?.data || res?.data;
 				const notificationData = {
-					id: Date.now(),
+					id: serverData?.id || serverData?.notificationId || Date.now(),
 					title: selectedCard === 'template' && selectedTemplateType 
 						? DEFAULT_MSG[selectedTemplateType] 
 						: customContent.trim(),
@@ -178,8 +189,8 @@ const NotificationCreate: React.FC = () => {
 					template: selectedCard === 'template' && selectedTemplateType 
 						? TEMPLATE_MAP[selectedTemplateType] 
 						: 'NONE',
-					createdAt: new Date().toISOString(),
-					senderName: currentUser?.name || '나', // 현재 로그인한 사용자 이름
+					createdAt: serverData?.createdAt || new Date().toISOString(),
+					senderName: currentUser?.name || '나',
 					receivers: manualMembers.length > 0 
 						? manualMembers.map(m => ({ id: m.id, name: m.name }))
 						: Object.values(dangbunSelections).flat().length > 0
@@ -191,8 +202,9 @@ const NotificationCreate: React.FC = () => {
 							}
 							return { id: memberId, name: '멤버' };
 						})
-						: [], // 기본값
+						: [],
 				};
+				
 				navigate(`/${placeId}/alarm`, {
 					state: {
 						tab: 'transmit',
@@ -305,21 +317,51 @@ const NotificationCreate: React.FC = () => {
 				<div className="flex items-center gap-[8px]">
 					<p className="text-base font-semibold">To:</p>
 					<p className="text-sm font-medium">
-						{[
-							...Object.entries(dangbunSelections)
-								.map(([idStr, ids]) => {
-									const dutyId = Number(idStr);
-									const duty = duties.find(d => d.id === dutyId);
-									const dutyName = duty?.name || `당번 ${dutyId}`;
-									const names =
-										(dutyMembers[dutyId] || [])
-											.filter((p) => ids.includes(p.id))
-											.map((p) => p.name);
-									return names.length ? `${dutyName} (${names.join(', ')})` : null;
+						{(() => {
+							// 모든 선택된 멤버를 중복 없이 수집
+							const allMembers = new Map<number, {name: string, source: string}>();
+							
+							// 당번 멤버들 추가
+							Object.entries(dangbunSelections).forEach(([dutyIdStr, memberIds]) => {
+								const dutyId = Number(dutyIdStr);
+								const duty = duties.find(d => d.id === dutyId);
+								const dutyName = duty?.name || `당번 ${dutyId}`;
+								
+								memberIds.forEach(memberId => {
+									const member = (dutyMembers[dutyId] || []).find(m => m.id === memberId);
+									if (member) {
+										allMembers.set(member.id, {name: member.name, source: dutyName});
+									}
+								});
+							});
+							
+							// 수동 추가 멤버들 추가 (당번에 없는 경우만)
+							manualMembers.forEach(member => {
+								if (!allMembers.has(member.id)) {
+									allMembers.set(member.id, {name: member.name, source: '직접 선택'});
+								}
+							});
+							
+							// 그룹별로 정리
+							const groupedMembers: Record<string, string[]> = {};
+							allMembers.forEach((member) => {
+								if (!groupedMembers[member.source]) {
+									groupedMembers[member.source] = [];
+								}
+								groupedMembers[member.source].push(member.name);
+							});
+							
+							// 표시 문자열 생성
+							return Object.entries(groupedMembers)
+								.map(([source, names]) => {
+									if (source === '직접 선택') {
+										return names.join(', ');
+									} else {
+										return `${source} (${names.join(', ')})`;
+									}
 								})
-								.filter(Boolean) as string[],
-							...manualMembers.map((m) => m.name),
-						].join(', ')}
+								.join(', ');
+						})()}
 					</p>
 
 					<div className="relative ml-2">

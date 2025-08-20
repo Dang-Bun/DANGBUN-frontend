@@ -26,6 +26,9 @@ const useNotificationApi = {
     api.get(`/places/${placeId}/notifications/recipients/recent-searches`, {
       params,
     }),
+  // 알림 읽음 처리
+  markAsRead: (placeId: number, notificationId: number) =>
+    api.patch(`/places/${placeId}/notifications/${notificationId}/read`),
 };
 
 export default useNotificationApi;

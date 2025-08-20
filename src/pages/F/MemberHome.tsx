@@ -349,37 +349,23 @@ const MemberHome: React.FC = () => {
     };
   }, [pid]);
 
-  // 알림 확인 로직 - localStorage 기반으로 변경
+  // 알림 확인 로직 - API 기반으로 변경
   useEffect(() => {
     if (!pid) return;
 
-    const checkUnreadNotifications = () => {
+    const checkUnreadNotifications = async () => {
       try {
-        // localStorage에서 알림 목록 가져오기
-        const stored = localStorage.getItem(`notifications_${pid}`);
-        if (stored) {
-          const notifications = JSON.parse(stored);
-          const hasAnyNotifications = notifications.length > 0;
-          const hasUnread = notifications.some((n: any) => !n.read);
-          setHasNotifications(hasAnyNotifications);
-          setHasUnreadNotifications(hasUnread);
-        } else {
-          // localStorage에 없으면 API로 확인
-          useNotificationApi
-            .listReceived(pid, { page: 0, size: 20 })
-            .then((res) => {
-              const notifications = res?.data?.data || [];
-              const hasAnyNotifications = notifications.length > 0;
-              const hasUnread = notifications.some((n: any) => !n.isRead);
-              setHasNotifications(hasAnyNotifications);
-              setHasUnreadNotifications(hasUnread);
-            })
-            .catch(() => {
-              setHasNotifications(false);
-              setHasUnreadNotifications(false);
-            });
-        }
-      } catch {
+        const response = await useNotificationApi.listReceived(pid, { page: 0, size: 20 });
+        const responseData = response?.data?.data || response?.data || {};
+        const notifications = Array.isArray(responseData) 
+          ? responseData 
+          : responseData?.notifications || responseData?.data || [];
+        const hasAnyNotifications = notifications.length > 0;
+        const hasUnread = notifications.some((n: Record<string, unknown>) => !(n.isRead || n.read));
+        setHasNotifications(hasAnyNotifications);
+        setHasUnreadNotifications(hasUnread);
+      } catch (error) {
+        console.error('알림 확인 실패:', error);
         setHasNotifications(false);
         setHasUnreadNotifications(false);
       }
@@ -387,22 +373,22 @@ const MemberHome: React.FC = () => {
 
     checkUnreadNotifications();
 
-    // localStorage 변경 감지
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === `notifications_${pid}`) {
-        checkUnreadNotifications();
-      }
-    };
-
     // 페이지 포커스 시 확인
     const handleFocus = () => checkUnreadNotifications();
-
-    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleFocus);
+    
+    // 알림 읽음 이벤트 감지
+    const handleNotificationRead = (event: CustomEvent) => {
+      if (event.detail.placeId === pid) {
+        // 알림이 읽혔으므로 읽지 않은 알림 상태를 false로 설정
+        setHasUnreadNotifications(false);
+      }
+    };
+    window.addEventListener('notificationRead', handleNotificationRead as EventListener);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('notificationRead', handleNotificationRead as EventListener);
     };
   }, [pid]);
 

@@ -24,16 +24,18 @@ const SearchModal = forwardRef<SearchHandler, Props>(({ placeId, onSelectMember 
   }));
 
   const run = async (raw: string) => {
-    const q = raw.normalize('NFC').trim();
+    const searchname = raw.normalize('NFC').trim();
     setMsg(null);
     if (!Number.isFinite(placeId)) { setMsg('오류'); setRows([]); return; }
-    if (q.length < 2 || hasJamo(q)) { setRows([]); return; }
+    
+    // 빈 값일 때는 전체 멤버를 가져오기 위해 빈 문자열로 검색
+    if (hasJamo(searchname)) { setRows([]); return; }
 
-    console.log('🔍 [SearchModal] 검색 시작:', { placeId, query: q });
+    console.log('🔍 [SearchModal] 검색 시작:', { placeId, searchname });
 
     try {
       setLoading(true);
-      const res = await useNotificationApi.searchRecipients(placeId, { q, size: 20 });
+      const res = await useNotificationApi.searchRecipients(placeId, { searchname, size: 20 });
       console.log('📥 [SearchModal] API 응답:', res);
       
       const responseData = res?.data?.data ?? res?.data ?? {};
@@ -69,7 +71,11 @@ const SearchModal = forwardRef<SearchHandler, Props>(({ placeId, onSelectMember 
   };
 
   useEffect(() => {
-    const t = setTimeout(() => { if (visible && !composing.current) void run(term); }, 250);
+    const t = setTimeout(() => { 
+      if (visible && !composing.current) {
+        void run(term); 
+      }
+    }, 250);
     return () => clearTimeout(t);
   }, [visible, term]);
 
@@ -92,7 +98,13 @@ const SearchModal = forwardRef<SearchHandler, Props>(({ placeId, onSelectMember 
               onChange={(e) => setTerm(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !composing.current) void run(term); }}
               onCompositionStart={() => { composing.current = true; }}
-              onCompositionEnd={(e) => { composing.current = false; const v = (e.target as HTMLInputElement).value; setTerm(v); void run(v); }}
+              onCompositionEnd={(e) => { 
+                composing.current = false; 
+                const v = (e.target as HTMLInputElement).value; 
+                setTerm(v); 
+                // 조합이 끝난 후 약간의 지연을 두고 검색 실행
+                setTimeout(() => void run(v), 100); 
+              }}
               className="bg-transparent outline-none text-[#333] w-full"
             />
           </div>

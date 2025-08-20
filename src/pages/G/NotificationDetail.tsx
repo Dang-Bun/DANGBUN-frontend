@@ -5,6 +5,7 @@ import WritingChip from '../../components/notification/WritingChip';
 import ScrollToTop from '../../components/notification/ScrollToTop';
 import BottomBar from '../../components/BottomBar';
 import useNotificationApi from '../../hooks/useNotificationApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 type NotificationDetailType = {
   id: number;
@@ -28,34 +29,11 @@ const NotificationDetail = () => {
         setLoading(false);
         return;
       }
-      
-      // location.state에서 전달받은 알림 데이터 확인
-      const passedNotification = (location.state as any)?.notification;
-      
-      if (passedNotification) {
-        // 제목을 첫 번째 마침표까지만 표시
-        const titleWithFirstPeriod = passedNotification.title.includes('.') 
-          ? passedNotification.title.split('.')[0] + '.'
-          : passedNotification.title;
-        
-        // 전달받은 데이터가 있으면 사용
-        const parsed: NotificationDetailType = {
-          id: Number(passedNotification.id),
-          title: titleWithFirstPeriod,
-          sender: passedNotification.senderName || '나', // 실제 발신자 이름 사용
-          receivers: passedNotification.receivers || [], // 실제 수신자 정보 사용
-          time: passedNotification.timeAgo,
-          content: passedNotification.descript,
-        };
-        setNotification(parsed);
-        setLoading(false);
-        return;
-      }
 
-      // 전달받은 데이터가 없으면 API 호출
+      // 항상 API 호출
       try {
         const res = await useNotificationApi.detail(Number(placeId), notificationId);
-        const data = res?.data;
+        const data = res?.data?.data || res?.data;
 
         // 제목을 첫 번째 마침표까지만 표시
         const apiTitle = data?.title ?? '';
@@ -63,17 +41,43 @@ const NotificationDetail = () => {
           ? apiTitle.split('.')[0] + '.'
           : apiTitle;
         
+        // 받는 사람 정보 파싱
+        let receivers: { id: number; name: string }[] = [];
+        
+        if (Array.isArray(data?.receiverNames) && data.receiverNames.length > 0) {
+          receivers = data.receiverNames.map((name: string, index: number) => ({
+            id: index + 1,
+            name: String(name || '멤버')
+          }));
+        }
+        
+        // 날짜 형식 변환
+        const formatDate = (dateStr: string) => {
+          try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours < 12 ? '오전' : '오후';
+            const displayHours = hours < 12 ? hours : hours - 12;
+            const displayHoursStr = displayHours === 0 ? '12' : String(displayHours);
+            
+            return `${year}.${month}.${day} ${ampm} ${displayHoursStr}:${minutes}`;
+          } catch {
+            return dateStr;
+          }
+        };
+
         const parsed: NotificationDetailType = {
           id: Number(data?.id ?? data?.notificationId),
           title: apiTitleWithFirstPeriod,
           sender: data?.senderName ?? '알 수 없음',
-          receivers: Array.isArray(data?.receivers)
-            ? data.receivers.map((r: any) => ({
-                id: Number(r?.id ?? r?.memberId),
-                name: r?.name ?? r?.memberName ?? '멤버',
-              }))
-            : [],
-          time: data?.createdAt ?? '',
+          receivers: receivers,
+          time: formatDate(data?.createdAt ?? data?.createdTime ?? ''),
           content: data?.content ?? data?.message ?? '',
         };
 
@@ -87,7 +91,7 @@ const NotificationDetail = () => {
     };
     
     fetchDetail();
-  }, [placeId, notificationId, location.state]);
+  }, [placeId, notificationId]);
 
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (!notification) return <div className="p-4">존재하지 않는 알림입니다.</div>;
