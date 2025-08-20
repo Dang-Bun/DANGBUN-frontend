@@ -39,6 +39,7 @@ import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
+import { useDutyApi } from '../../hooks/useDutyApi';
 
 /* ============================
  * 상수/타입
@@ -99,23 +100,33 @@ const ICON_ALIASES: Record<string, DutyIconKey> = {
   SPRAY: 'SPRAY_BLUE',
 };
 
-// API 응답 데이터가 배열이 아닐 경우 배열로 변환
-const toArray = (x: any): any[] =>
-  Array.isArray(x)
-    ? x
-    : Array.isArray(x?.data?.data?.duties)
-    ? x.data.data.duties
-    : Array.isArray(x?.data?.duties)
-    ? x.data.duties
-    : Array.isArray(x?.data?.data?.tasks)
-    ? x.data.data.tasks
-    : Array.isArray(x?.data?.tasks)
-    ? x.data.tasks
-    : Array.isArray(x?.data?.data)
-    ? x.data.data
-    : Array.isArray(x?.data)
-    ? x.data
-    : [];
+// API 응답 데이터가 배열이 아닐 경우 배열로 변환 (멤버 홈과 동일)
+const toArray = (x: unknown): unknown[] => {
+  if (Array.isArray(x)) return x;
+
+  const xObj = x as Record<string, any>; // Using 'any' to handle various API response structures
+  if (Array.isArray(xObj?.data?.data?.duties)) {
+    return (xObj.data?.data?.duties as unknown[]) || [];
+  }
+  if (Array.isArray(xObj?.data?.duties)) {
+    return (xObj.data?.duties as unknown[]) || [];
+  }
+  if (Array.isArray(xObj?.data?.data?.tasks)) {
+    return (xObj.data?.data?.tasks as unknown[]) || [];
+  }
+  if (Array.isArray(xObj?.data?.tasks)) {
+    return (xObj.data?.tasks as unknown[]) || [];
+  }
+  if (Array.isArray(xObj?.data?.data)) {
+    return (xObj.data?.data as unknown[]) || [];
+  }
+  if (Array.isArray(xObj?.data)) {
+    return (xObj.data as unknown[]) || [];
+  }
+  return [];
+};
+
+
 
 // ====== 여기부터 변경: TaskUI에 cleaningId/checklistId 분리 ======
 type TaskUI = {
@@ -188,128 +199,144 @@ const ManagerHome: React.FC = () => {
   useEffect(() => {
     let mounted = true;
 
-    const fetchTaskData = async () => {
-      if (!pid) return [];
-      
-      // 플레이스 조회 API 사용
-      const placeRes = await usePlaceApi.placeSearch(pid);
-      console.log('🔍 매니저 홈 플레이스 조회 API 응답:', placeRes?.data);
-      
-      const placeData = placeRes?.data?.data || placeRes?.data || {};
-      
-      // 플레이스 정보 설정
-      if (mounted) {
-        setPlaceInfo({
-          placeName: placeData.placeName || '플레이스',
-          placeIconKey: placeData.category || 'CAFE'
+                                   const fetchTaskData = async () => {
+        if (!pid) return [];
+        
+        // 플레이스 조회 API 사용 (체크리스트 정보 포함)
+        const placeRes = await usePlaceApi.placeSearch(pid);
+        console.log('🔍 매니저 홈 플레이스 조회 API 응답:', placeRes?.data);
+        
+        const placeData = placeRes?.data?.data || placeRes?.data || {};
+        
+        // 플레이스 정보 설정
+        if (mounted) {
+          setPlaceInfo({
+            placeName: placeData.placeName || '플레이스',
+            placeIconKey: placeData.category || 'CAFE'
+          });
+        }
+        
+        // duty 목록 조회 API 사용 (아이콘 정보 포함)
+        const dutyRes = await useDutyApi.list(pid);
+        console.log('🔍 매니저 홈 duty 목록 API 응답:', dutyRes?.data);
+        
+        const dutyList = dutyRes?.data?.data || dutyRes?.data || [];
+        console.log('🔍 매니저 홈 duty 목록:', dutyList);
+        
+        // 플레이스 조회에서 체크리스트 정보 가져오기
+        const placeDuties = placeData.duties || [];
+        console.log('🔍 플레이스 조회의 duties (체크리스트 정보):', placeDuties);
+        
+        // dutyId로 체크리스트 정보를 매핑
+        const checklistMap = new Map<number, unknown[]>();
+        placeDuties.forEach((placeDuty: Record<string, unknown>) => {
+          const dutyId = Number(placeDuty.dutyId);
+          if (Number.isFinite(dutyId)) {
+            const checkLists = (placeDuty.checkLists as unknown[]) || [];
+            checklistMap.set(dutyId, checkLists);
+            console.log(`🔍 Duty ${dutyId}의 체크리스트 개수:`, checkLists.length);
+          }
         });
-      }
-      
-      const duties = placeData.duties || [];
-      console.log('🔍 매니저 홈 duties:', duties);
+        
+        // duty API에서 가져온 duty와 체크리스트 매칭
+        const dutyPromises = dutyList.map(async (d: Record<string, unknown>) => {
+          const dutyId = Number(d.dutyId || d.id);
+          if (!Number.isFinite(dutyId)) return null;
+          
+          // 해당 dutyId의 체크리스트 가져오기
+          const checkLists = checklistMap.get(dutyId) || [];
+          console.log(`🔍 Duty ${dutyId} 매칭된 체크리스트:`, checkLists);
+          
+          // 체크리스트를 task로 변환
+          const tasks = checkLists.map((t: unknown) => {
+            const cleaningId = Number(
+              (t as Record<string, unknown>)?.cleaningId ??
+                (t as Record<string, unknown>)?.id ??
+                (t as Record<string, unknown>)?.checkListId
+            );
+            const rawChecklist = Number(
+              (t as Record<string, unknown>)?.checkListId
+            );
+            const checklistId = Number.isFinite(rawChecklist)
+              ? rawChecklist
+              : null;
 
-             // duty 중복 제거를 위해 Map 사용 (더 안전한 방법)
-       const uniqueDuties = new Map();
-       
-       duties.forEach((d: any, index: number) => {
-         // dutyId를 우선적으로 사용하고, 없으면 index 사용
-         const dutyId = Number(d.dutyId || d.id || index);
-         
-         if (Number.isFinite(dutyId)) {
-           // 같은 dutyId가 있으면 덮어쓰기 (마지막 것이 우선)
-           uniqueDuties.set(dutyId, d);
-         } else {
-           // dutyId가 없으면 index를 사용
-           uniqueDuties.set(index, d);
-         }
-       });
-       
-       const dutyPromises = Array.from(uniqueDuties.values()).map(async (d: any, index: number) => {
-         const dutyId = Number(d.dutyId || d.id || index);
-         if (!Number.isFinite(dutyId)) return null;
+            // 멤버 목록 파싱 (placeSearch API 응답에 맞게)
+            let names: string[] = [];
+            const members = (t as Record<string, unknown>)?.members;
 
-        // 홈화면 API 구조에 맞게 처리
-        const checkLists = d.checkLists || [];
-        console.log(`🔍 Duty ${dutyId} checkLists:`, checkLists);
+            if (Array.isArray(members)) {
+              names = members
+                .map((m) => {
+                  if (typeof m === 'string') return m;
+                  if (typeof m === 'object' && m && 'memberName' in m) {
+                    return String((m as { memberName?: unknown }).memberName ?? '');
+                  }
+                  if (typeof m === 'object' && m && 'name' in m) {
+                    return String((m as { name?: unknown }).name ?? '');
+                  }
+                  return '';
+                })
+                .filter(Boolean);
+            }
 
-        // ====== 변경: 실제 API 응답 구조에 맞게 수정 ======
-        const tasksPromises = checkLists.map(async (t: any) => {
-          // API 응답 구조에 맞게 필드명 수정 (예시 응답 기준)
-          const cleaningId = Number(t.checkListId || t.cleaningId || t.id); // UI 키로 checkListId 사용
-          const checklistId = Number.isFinite(Number(t.checkListId)) ? Number(t.checkListId) : null;
+            // 디버깅용 로그 추가
+            console.log('🔍 [ManagerHome] Task 데이터 (placeSearch):', {
+              cleaningId,
+              checklistId,
+              title: (t as Record<string, unknown>)?.cleaningName,
+              members: (t as Record<string, unknown>)?.members,
+              parsedNames: names,
+              completeTime: (t as Record<string, unknown>)?.completeTime,
+              needPhoto: (t as Record<string, unknown>)?.needPhoto,
+            });
 
-                     // 멤버 목록 파싱 - members 배열에서 멤버 이름 추출 (중복 제거)
-           let names: string[] = [];
-           const members = t.members || [];
-
-           if (Array.isArray(members)) {
-             const allNames = members
-               .map((m: any) => {
-                 if (typeof m === 'string') return m;
-                 if (typeof m === 'object' && m && 'memberName' in m) {
-                   return String(m.memberName || '');
-                 }
-                 if (typeof m === 'object' && m && 'name' in m) {
-                   return String(m.name || '');
-                 }
-                 return '';
-               })
-               .filter(Boolean);
-             
-             // 중복 제거
-             names = [...new Set(allNames)];
-           }
-
-          // 완료 상태 확인 - completeTime이 있으면 완료된 것으로 간주
-          const isCompleted = !!(t.completeTime || t.completedAt || t.completed);
-
-          // 디버깅용 로그 추가
-          console.log('🔍 [ManagerHome] Task 데이터:', {
-            cleaningId,
-            checklistId,
-            title: t.cleaningName,
-            members: t.members,
-            parsedNames: names,
-            completeTime: t.completeTime,
-            isCompleted,
-            needPhoto: t.needPhoto,
-            endTime: t.endTime,
+            return {
+              cleaningId,
+              checklistId,
+              title: String(
+                (t as Record<string, unknown>)?.cleaningName ??
+                  (t as Record<string, unknown>)?.dutyName ??
+                  (t as Record<string, unknown>)?.name ??
+                  ''
+              ),
+              dueTime: (t as Record<string, unknown>)?.endTime ?? null,
+              members: names,
+              memberCount: names.length,
+              isCamera: !!(t as Record<string, unknown>)?.needPhoto,
+              isChecked: !!(
+                (t as Record<string, unknown>)?.completeTime ??
+                (t as Record<string, unknown>)?.completed ??
+                (t as Record<string, unknown>)?.isChecked
+              ),
+              completedAt: (t as Record<string, unknown>)?.completeTime ?? null,
+              completedBy: (t as Record<string, unknown>)?.completedBy ?? null,
+              dutyId,
+            } as TaskUI;
           });
 
+          // 아이콘 변환 로직 (duty API에서 가져온 정보 사용)
+          const iconRaw = String(d.icon || '').toUpperCase();
+          let iconKey: DutyIconKey = 'FLOOR_BLUE'; // 기본값
+          
+          if (VALID_DUTY_KEYS.includes(iconRaw as DutyIconKey)) {
+            iconKey = iconRaw as DutyIconKey;
+          } else if (ICON_ALIASES[iconRaw]) {
+            iconKey = ICON_ALIASES[iconRaw];
+          }
+          
+          console.log('🔍 아이콘:', d.icon, '→', iconKey);
+
           return {
-            cleaningId,
-            checklistId,
-            title: String(t.cleaningName || ''),
-            dueTime: t.endTime || t.dueTime || null,
-            members: names,
-            memberCount: names.length,
-            isCamera: !!(t.needPhoto || t.isCamera || t.n), // n 필드도 확인
-            isChecked: isCompleted,
-            completedAt: t.completeTime || t.completedAt || null,
-            completedBy: t.completedBy || null,
-            dutyId,
-          } as TaskUI;
+            id: dutyId,
+            name: d.dutyName || d.name || '',
+            iconKey,
+            tasks,
+          };
         });
-        // ====== 변경 끝 ======
 
-        const tasks = await Promise.all(tasksPromises);
-
-        const iconRaw = String(d.icon || '').toUpperCase();
-        const normalized = (ICON_ALIASES[iconRaw] ?? iconRaw) as string;
-        const iconKey: DutyIconKey = VALID_DUTY_KEYS.includes(normalized as DutyIconKey)
-          ? (normalized as DutyIconKey)
-          : 'FLOOR_BLUE';
-
-        return {
-          id: dutyId,
-          name: d.dutyName || d.name || '', // dutyName을 우선적으로 사용
-          iconKey,
-          tasks,
-        };
-      });
-
-      return (await Promise.all(dutyPromises)).filter(Boolean) as DutyUI[];
-    };
+        return (await Promise.all(dutyPromises)).filter(Boolean) as DutyUI[];
+      };
 
          const loadData = async () => {
        setLoading(true);
@@ -387,6 +414,10 @@ const ManagerHome: React.FC = () => {
     const name = activePage === 0 ? '플레이스 전체' : duties[activePage - 1]?.name ?? '';
     const iconKeyForProgressBar = activePage === 0 ? placeInfo.placeIconKey : (duties[activePage - 1]?.iconKey as string);
     const icon = activePage === 0 ? CATEGORY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG : DUTY_ICON_SRC[iconKeyForProgressBar] ?? HOME_IMG;
+    
+         // 진행률 로그
+     console.log('🔍 진행률:', name, `${done}/${total} (${percent}%)`);
+    
     return { name, percent, tasks: base, icon };
   }, [activePage, allTasks, duties, placeInfo.placeIconKey]);
 
@@ -427,17 +458,35 @@ const ManagerHome: React.FC = () => {
      });
 
      try {
+       let response;
        if (t.isChecked) {
          console.log('🔍 체크리스트 해제 시도...');
-         await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+         response = await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+         console.log('✅ 체크리스트 해제 성공:', response.data);
          patchLocal(dutyId, t.cleaningId, { isChecked: false, completedAt: null, completedBy: null });
-         console.log('✅ 체크리스트 해제 성공');
        } else {
          console.log('🔍 체크리스트 완료 시도...');
-         await useChecklistApi.completeChecklist(pid, t.checklistId);
-         const now = new Date().toTimeString().slice(0, 5);
-         patchLocal(dutyId, t.cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
-         console.log('✅ 체크리스트 완료 성공');
+         response = await useChecklistApi.completeChecklist(pid, t.checklistId);
+         console.log('✅ 체크리스트 완료 성공:', response.data);
+         
+         // API 응답에서 endTime과 memberName 추출
+         const responseData = response.data?.data || response.data;
+         console.log('📄 API 응답 데이터:', responseData);
+         
+         if (responseData) {
+           console.log('📅 endTime:', responseData.endTime);
+           console.log('👤 memberName:', responseData.memberName);
+           
+           patchLocal(dutyId, t.cleaningId, { 
+             isChecked: true, 
+             completedAt: responseData.endTime ? String(responseData.endTime) : new Date().toTimeString().slice(0, 5), 
+             completedBy: responseData.memberName || 'manager' 
+           });
+         } else {
+           // API 응답이 없는 경우 기본값 사용
+           const now = new Date().toTimeString().slice(0, 5);
+           patchLocal(dutyId, t.cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
+         }
        }
      } catch (e) {
        console.error('❌ 체크 전환 실패:', e);
@@ -509,7 +558,9 @@ const ManagerHome: React.FC = () => {
       if (!put.ok) throw new Error('S3 업로드 실패');
 
       await useChecklistApi.completePhotoUpload(pid, checklistId, { s3Key: presign.s3Key });
-
+      console.log('✅ 사진 업로드 완료');
+      
+      // 사진 업로드는 기본값 사용 (API에서 endTime/memberName 반환하지 않음)
       const now = new Date().toTimeString().slice(0, 5);
       patchLocal(dutyId, cleaningId, { isChecked: true, completedAt: now, completedBy: 'manager' });
     } catch (e) {
