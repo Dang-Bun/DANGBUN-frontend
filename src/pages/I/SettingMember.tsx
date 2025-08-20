@@ -62,19 +62,19 @@ const SettingMember = () => {
   }, [placeId]);
 
   return (
-    <div className='flex flex-col justify-between pt-3 py-4'>
+    <div className='flex flex-col justify-between pt-3 px-4'>
       {/* 상단 */}
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
           <div
-            className='relative'
+            className='flex flex-row bg-[#6982bc] rounded-[8px] py-[7px] px-[13px]'
             onClick={() => {
               navigate('/myPlace');
             }}
           >
             <img src={PlaceName} alt='플레이스 이름' />
-            <span className='absolute inset-0 flex items-center justify-center text-white text-[12px] font-normal'>
+            <span className='text-white text-[12px] font-normal pl-2'>
               {placeName}
             </span>
           </div>

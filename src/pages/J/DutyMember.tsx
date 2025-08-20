@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDutyApi } from '../../hooks/useDutyApi';
+import { useMemberApi } from '../../hooks/useMemberApi';
 
 import left_chevron from '../../assets/chevron/white_left_chevronImg.svg';
-import plus from '../../assets/dangbun/plus.svg';
-import PopUpCard from '../../components/PopUp/PopUpCard';
 
 type DutyMember = { memberId: number; role: string; name: string };
 type Cleaning = { cleaningId: number; name: string };
@@ -44,15 +43,12 @@ const DutyMember = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // 맴버 역할 분담 모달 오픈
-  const [rolepickerOpen, setRolePickerOpen] = useState(false);
-
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
 
   // 안전장치
   useEffect(() => {
-    if (!placeId || !dutyId) navigate('/management/manager');
+    if (!placeId || !dutyId) navigate('/management/member');
   }, [placeId, dutyId, navigate]);
 
   // 멤버 불러오기
@@ -64,11 +60,12 @@ const DutyMember = () => {
         setLoading(true);
         setErr(null);
         const res = await useDutyApi.getMembers(placeId, dutyId);
-        const list: DutyMember[] = res.data?.data ?? [];
-        setAllMembers(list);
+        const list: DutyMember[] = Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
 
-        // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
-        // setSelectedMemberIds(list.map(m => m.memberId)); // 예: 모두 선택
+        setAllMembers(list); // ✅ 이 줄 추가
+        setSelectedMemberIds(list.map((m) => m.memberId)); // 선택 상태 초기화(필요 시)
       } catch (e: any) {
         setErr(
           e?.response?.data?.message ?? e?.message ?? '맴버 불러오기 실패'
@@ -127,7 +124,7 @@ const DutyMember = () => {
           src={left_chevron}
           alt='뒤로가기'
           className='cursor-pointer'
-          onClick={() => navigate('/management/manager')}
+          onClick={() => navigate('/management/member')}
         />
       </div>
 

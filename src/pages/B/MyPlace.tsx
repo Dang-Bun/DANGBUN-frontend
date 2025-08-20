@@ -151,7 +151,7 @@ const MyPlace: React.FC = () => {
   }
 
   return (
-    <div className='px-4 pt-3'>
+    <div className='relative px-4 pt-3 pb-24'>
       {Header}
 
       {/* 남은 청소 안내 배지 */}
@@ -262,7 +262,7 @@ const MyPlace: React.FC = () => {
       </div>
 
       {/* 하단 CTA */}
-      <div className='absolute bottom-0 w-full mt-8 mb-8'>
+      <div className='fixed absolute w-full bottom-4 left-8'>
         <CTAButton onClick={handleAdd}>플레이스 추가</CTAButton>
       </div>
     </div>
