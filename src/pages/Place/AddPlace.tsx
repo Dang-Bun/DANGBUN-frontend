@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import CTAButton from '../../components/button/CTAButton';
-import SelectableRoleCard from './../../components/place/SelectableRollCard';
+import SelectableRoleCard from '../../components/place/SelectableRollCard';
 import type { RoleType } from '../../components/place/SelectableRollCard';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/HeaderBar';
