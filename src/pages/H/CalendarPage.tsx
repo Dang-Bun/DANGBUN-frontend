@@ -44,6 +44,7 @@ const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
 // API 응답 1개
 type ApiChecklist = {
   checklistId: number;
+  cleaningName: string;
   dutyName: string;
   isComplete: boolean;
   memberName: string;
@@ -70,7 +71,7 @@ const toUIItem = (c: ApiChecklist): UIItem => ({
   dutyName: c.dutyName,
   task: {
     id: c.checklistId,
-    title: '', // 예: "홍길동"
+    title: c.cleaningName, // 예: "홍길동"
     isChecked: c.isComplete, // 완료 여부
     isCamera: c.needPhoto, // 사진 필요 여부
     completedAt: c.isComplete ? c.endTime : null, // "11:30"  (미완료면 null)
@@ -387,7 +388,7 @@ const CalendarPage: React.FC = () => {
         const placeId = parseInt(PLACE_ID, 10);
 
         // 현재 task의 상태 확인
-        const currentTask = checklists.find((item) => item.task.id === taskId);
+        const currentTask = items.find((item) => item.task.id === taskId);
         if (!currentTask) {
           console.error('Task not found:', taskId);
           return;
@@ -409,7 +410,7 @@ const CalendarPage: React.FC = () => {
           console.log('✅ 체크리스트 취소 성공:', response.data);
 
           // 취소 시 상태 즉시 업데이트
-          setChecklists((prev) =>
+          setItems((prev) =>
             prev.map((item) => {
               if (item.task.id === taskId) {
                 return {
@@ -443,7 +444,7 @@ const CalendarPage: React.FC = () => {
             console.log('👤 membersName:', responseData.membersName);
 
             // 캘린더 상태 즉시 업데이트
-            setChecklists((prev) =>
+            setItems((prev) =>
               prev.map((item) => {
                 if (item.task.id === taskId) {
                   return {
