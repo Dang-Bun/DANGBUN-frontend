@@ -347,7 +347,14 @@ const CleanAdd = () => {
         <div className='w-[353px] h-fit py-5 flex justify-center items-center mt-4 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)'>
           <Calendar
             className='w-80'
-            onChange={(value) => handleDateClick(value as Date)}
+            onClickDay={handleDateClick}
+            value={null}
+            // tileContent={({ date }) => (
+            //   <div
+            //     onPointerUp={() => handleDateClick(date)}
+            //     style={{ width: '100%', height: '100%' }}
+            //   />
+            // )}
             tileClassName={({ date, view, activeStartDate }) => {
               if (view === 'month') {
                 const isSameMonth =
