@@ -23,6 +23,7 @@ import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 dayjs.locale('ko');
 
@@ -36,7 +37,7 @@ type Task = {
   date: string; // YYYY-MM-DD
 };
 
-type TaskItem = { dutyId: number; dutyName: string; task: Task };
+type TaskItem = { dutyId: number; task: Task };
 type FilterValue = 'all' | 'done' | 'undone';
 
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
@@ -101,13 +102,9 @@ const CalendarPage: React.FC = () => {
         dayjs(selectedDate).format('YYYY-MM-DD')
       );
 
-      // 체크리스트 데이터 로드
-      const checklistResponse = await useCalendarApi.getChecklistsByDate(
-        placeId,
-        dateStr
-      );
-
-      console.log('Debug - Checklist response:', checklistResponse.data);
+      // 플레이스 조회 API 사용 (홈화면과 동일)
+      const placeResponse = await usePlaceApi.placeSearch(placeId);
+      console.log('Debug - Place response:', placeResponse.data);
 
       // 프로그레스 데이터 로드
       const progressResponse = await useCalendarApi.getProgress(placeId, {
@@ -117,44 +114,66 @@ const CalendarPage: React.FC = () => {
 
       console.log('Debug - Progress response:', progressResponse.data);
 
-      // 체크리스트 데이터 파싱
-      const checklistData =
-        checklistResponse.data?.data?.checklists ||
-        checklistResponse.data?.checklists ||
-        [];
-      console.log('Debug - Raw checklist data:', checklistData);
+      // 플레이스 데이터에서 체크리스트 추출
+      const placeData = placeResponse?.data?.data || placeResponse?.data || {};
+      const duties = placeData.duties || [];
+      console.log('Debug - Duties from place API:', duties);
 
-      const parsedChecklists: TaskItem[] = checklistData.map(
-        (item: Record<string, unknown>) => ({
-          dutyId: item.checklistId as number,
-          dutyName: item.dutyName as string,
-          task: {
-            id: item.checklistId as number,
-            title: item.dutyName as string,
-            isChecked: item.isComplete as boolean,
-            isCamera: item.needPhoto as boolean,
-            completedAt: item.endTime
-              ? `${item.date}T${item.endTime}:00Z`
-              : null,
-            completedBy: item.memberName as string,
-            date: item.date as string,
-          },
-        })
-      );
-      setChecklists(parsedChecklists);
+             // 모든 체크리스트를 날짜별로 분류
+       const checklistDataByDate: Map<string, any[]> = new Map();
+       
+       duties.forEach((duty: any) => {
+         const checkLists = duty.checkLists || [];
+         checkLists.forEach((checklist: any) => {
+           // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
+           const checklistDate = checklist.date || selectedYMD; // 날짜 정보가 없으면 선택된 날짜 사용
+           
+           if (!checklistDataByDate.has(checklistDate)) {
+             checklistDataByDate.set(checklistDate, []);
+           }
+           
+                       checklistDataByDate.get(checklistDate)!.push({
+              ...checklist,
+              dutyId: duty.dutyId || duty.id
+            });
+         });
+       });
 
-      // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
-      const progressMap = new Map<string, number>();
+              // 모든 날짜의 체크리스트를 하나의 배열로 변환
+       const allChecklists: TaskItem[] = [];
+       
+               checklistDataByDate.forEach((checklists, date) => {
+          checklists.forEach((item: Record<string, unknown>) => {
+            allChecklists.push({
+              dutyId: item.dutyId as number,
+              task: {
+                id: item.checkListId as number,
+                title: item.cleaningName as string,
+                isChecked: !!(item.completeTime || item.completedAt || item.completed),
+                isCamera: !!(item.needPhoto || item.isCamera),
+                completedAt: item.completeTime || item.completedAt ? String(item.completeTime || item.completedAt) : null,
+                completedBy: item.completedBy as string || null,
+                date: date, // 실제 날짜 사용
+              },
+            });
+          });
+        });
 
-      // 날짜별로 체크리스트 그룹화
-      const tasksByDate = new Map<string, TaskItem[]>();
-      parsedChecklists.forEach((item) => {
-        const date = item.task.date;
-        if (!tasksByDate.has(date)) {
-          tasksByDate.set(date, []);
-        }
-        tasksByDate.get(date)!.push(item);
-      });
+              console.log('Debug - All checklists with dates:', allChecklists);
+       setChecklists(allChecklists);
+
+       // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
+       const progressMap = new Map<string, number>();
+
+       // 날짜별로 체크리스트 그룹화
+       const tasksByDate = new Map<string, TaskItem[]>();
+       allChecklists.forEach((item) => {
+         const date = item.task.date;
+         if (!tasksByDate.has(date)) {
+           tasksByDate.set(date, []);
+         }
+         tasksByDate.get(date)!.push(item);
+       });
 
       // 각 날짜별 완료율 계산
       tasksByDate.forEach((tasks, date) => {
@@ -227,13 +246,13 @@ const CalendarPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeStartDate]);
+  }, [activeStartDate, selectedDate]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // 체크리스트 토글 함수
+  // 체크리스트 토글 함수 - 완료/취소 모두 처리
   const handleToggleChecklist = useCallback(
     async (taskId: number) => {
       try {
@@ -241,16 +260,45 @@ const CalendarPage: React.FC = () => {
         if (!PLACE_ID) return;
 
         const placeId = parseInt(PLACE_ID, 10);
-        await useCalendarApi.completeChecklist(placeId, taskId);
+        
+        // 현재 task의 상태 확인
+        const currentTask = checklists.find(item => item.task.id === taskId);
+        if (!currentTask) {
+          console.error('Task not found:', taskId);
+          return;
+        }
+
+        console.log('🔍 체크리스트 토글 시도:', {
+          taskId,
+          currentStatus: currentTask.task.isChecked,
+          placeId
+        });
+
+        if (currentTask.task.isChecked) {
+          // 완료된 상태면 취소
+          console.log('🔍 체크리스트 취소 시도...');
+          await useChecklistApi.incompleteChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 취소 성공');
+        } else {
+          // 미완료 상태면 완료
+          console.log('🔍 체크리스트 완료 시도...');
+          await useChecklistApi.completeChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 완료 성공');
+        }
 
         // 성공 시 데이터 다시 로드
         await loadData();
       } catch (err) {
-        console.error('체크리스트 토글 실패:', err);
+        console.error('❌ 체크리스트 토글 실패:', err);
+        console.error('❌ 에러 상세:', {
+          message: err.message,
+          status: err.response?.status,
+          data: err.response?.data
+        });
         setError('체크리스트 상태 변경에 실패했습니다.');
       }
     },
-    [loadData]
+    [loadData, checklists]
   );
 
   // 체크리스트 삭제 함수
@@ -559,28 +607,28 @@ const CalendarPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              displayedItems.map(({ dutyName, task }) => (
-                <SwipeableRow
-                  key={task.id}
-                  // disabled={!isManager}
-                  onToggle={() => handleToggleChecklist(task.id)}
-                >
-                  <div>
-                    <CalendarTaskCard
-                      title={task.title}
-                      dangbun={dutyName}
-                      isChecked={task.isChecked}
-                      isCamera={task.isCamera}
-                      completedAt={task.completedAt}
-                      completedBy={task.completedBy}
-                      onMenuClick={() => {
-                        setSelectTask(task);
-                        setIsSelectOpen(true);
-                      }}
-                    />
-                  </div>
-                </SwipeableRow>
-              ))
+                             displayedItems.map(({ dutyId, task }) => (
+                 <SwipeableRow
+                   key={task.id}
+                   // disabled={!isManager}
+                   onToggle={() => handleToggleChecklist(task.id)}
+                 >
+                   <div>
+                     <CalendarTaskCard
+                       title={task.title}
+                       dangbun={String(dutyId)}
+                       isChecked={task.isChecked}
+                       isCamera={task.isCamera}
+                       completedAt={task.completedAt}
+                       completedBy={task.completedBy}
+                       onMenuClick={() => {
+                         setSelectTask(task);
+                         setIsSelectOpen(true);
+                       }}
+                     />
+                   </div>
+                 </SwipeableRow>
+               ))
             )}
           </div>
         </div>
@@ -618,10 +666,10 @@ const CalendarPage: React.FC = () => {
                 placeId:
                   state?.placeId ?? Number(localStorage.getItem('placeId')),
                 checklistId: checklistId,
-                taskTitle: selectTask.title,
-                dutyName:
-                  displayedItems.find((item) => item.task.id === selectTask.id)
-                    ?.dutyName || '',
+                                 taskTitle: selectTask.title,
+                 dutyId:
+                   displayedItems.find((item) => item.task.id === selectTask.id)
+                     ?.dutyId || 0,
               },
             });
           }}
@@ -654,10 +702,10 @@ const CalendarPage: React.FC = () => {
         onRequestClose={() => setIsPhotoOpen(false)}
         hasPhoto={selectTask?.isCamera || false}
         taskTitle={selectTask?.title || '청소'}
-        dutyName={
-          displayedItems.find((item) => item.task.id === selectTask?.id)
-            ?.dutyName || '당번'
-        }
+                 dutyName={
+           String(displayedItems.find((item) => item.task.id === selectTask?.id)
+             ?.dutyId || '당번')
+         }
         photoUrl={
           selectTask?.isCamera
             ? 'https://via.placeholder.com/264x196/4D83FD/FFFFFF?text=청소+사진'
