@@ -166,7 +166,7 @@ const CalendarPage: React.FC = () => {
           });
         });
 
-                             console.log('🔍 [Calendar] 최종 체크리스트 개수:', allChecklists.length);
+               console.log('🔍 [Calendar] 최종 체크리스트 개수:', allChecklists.length);
                console.log('🔍 [Calendar] 최종 체크리스트:', allChecklists);
         setChecklists(allChecklists);
 
@@ -282,19 +282,61 @@ const CalendarPage: React.FC = () => {
           placeId
         });
 
+        let response;
         if (currentTask.task.isChecked) {
           // 완료된 상태면 취소
           console.log('🔍 체크리스트 취소 시도...');
-          await useChecklistApi.incompleteChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 취소 성공');
+          response = await useChecklistApi.incompleteChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 취소 성공:', response.data);
+          
+          // 취소 시 상태 즉시 업데이트
+          setChecklists(prev => prev.map(item => {
+            if (item.task.id === taskId) {
+              return {
+                ...item,
+                task: {
+                  ...item.task,
+                  isChecked: false,
+                  completedAt: null,
+                  completedBy: null
+                }
+              };
+            }
+            return item;
+          }));
         } else {
           // 미완료 상태면 완료
           console.log('🔍 체크리스트 완료 시도...');
-          await useChecklistApi.completeChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 완료 성공');
+          response = await useChecklistApi.completeChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 완료 성공:', response.data);
+          
+          // API 응답에서 endTime과 memberName 추출
+          const responseData = response.data?.data || response.data;
+          console.log('📄 API 응답 데이터:', responseData);
+          
+          if (responseData) {
+            console.log('📅 endTime:', responseData.endTime);
+            console.log('👤 memberName:', responseData.memberName);
+            
+            // 캘린더 상태 즉시 업데이트
+            setChecklists(prev => prev.map(item => {
+              if (item.task.id === taskId) {
+                return {
+                  ...item,
+                  task: {
+                    ...item.task,
+                    isChecked: true,
+                    completedAt: responseData.endTime ? String(responseData.endTime) : new Date().toISOString(),
+                    completedBy: responseData.memberName || '알 수 없음'
+                  }
+                };
+              }
+              return item;
+            }));
+          }
         }
 
-        // 성공 시 데이터 다시 로드
+        // 성공 시 데이터 다시 로드 (서버 상태 동기화)
         await loadData();
       } catch (err) {
         console.error('❌ 체크리스트 토글 실패:', err);
