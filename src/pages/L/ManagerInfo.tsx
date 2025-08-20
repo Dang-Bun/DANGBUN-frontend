@@ -7,7 +7,6 @@ import grayPlus from '../../assets/header/GrayPlus.svg';
 import DangbunList from '../../components/cleanUp/DangbunList2';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
-import { useDutyApi } from './../../hooks/useDutyApi';
 
 type MemberInfoResp = {
   member: {
@@ -98,26 +97,17 @@ const ManagerInfo: React.FC = () => {
   const duties = data?.duties ?? [];
   const informations = data?.member?.information ?? {};
 
-  const handleAssignToDuty = async (dutyId: number) => {
-    if (!placeId || !dutyId || !memberId) return;
+  const handleAssignToDuty = async (dutyId: number): Promise<boolean> => {
+    if (!placeId || !dutyId || !memberId) return false;
     try {
       setAssignLoading(true);
-      // payload는 문서 예시대로 { memberIds: [1,2,3] }
-      const payload = { memberIds: [memberId] };
-      const res = await useDutyApi.addMember(placeId, dutyId, payload);
-
-      if (res.data?.code === 20000) {
-        alert('멤버를 당번에 추가했어요.');
-        // 필요하다면 재조회
-        // const refreshed = await useMemberApi.get(placeId, memberId);
-        // setData(refreshed.data?.data ?? null);
-      } else {
-        alert(res.data?.message ?? '추가에 실패했어요.');
-      }
+      const res = await useMemberApi.setDangbun(placeId, memberId, dutyId);
+      return res?.data?.code === 20000;
     } catch (e: any) {
-      alert(
-        e?.response?.data?.message ?? e?.message ?? '추가 중 오류가 발생했어요.'
-      );
+      const msg = e?.response?.data?.message ?? e?.message;
+      // ✅ 문자열 비교는 이렇게!
+      alert(msg ?? '추가 중 오류가 발생했어요.');
+      return false;
     } finally {
       setAssignLoading(false);
     }
@@ -215,16 +205,25 @@ const ManagerInfo: React.FC = () => {
           <DangbunList
             key={index}
             placeId={placeId}
-            value={value} // ✅ 미리 선택
-            onSelectDuty={(dutyId) => {
-              // ✅ 선택 변경 시 반영 + (선택적으로) API 호출
-              setSelectedDutyIds((prev) => {
-                const next = [...prev];
+            value={value} // ✅ 컨트롤드 value
+            onSelectDuty={async (dutyId) => {
+              const prev = selectedDutyIds[index] ?? null; // 🔸 이전 선택 보관
+              // 낙관적 업데이트
+              setSelectedDutyIds((prevArr) => {
+                const next = [...prevArr];
                 next[index] = dutyId;
                 return next;
               });
-              // 이미 배정 API를 바로 칠 거면 유지
-              handleAssignToDuty(dutyId);
+
+              const ok = await handleAssignToDuty(dutyId);
+              if (!ok) {
+                // 🔁 실패/중복이면 이전 선택으로 롤백
+                setSelectedDutyIds((prevArr) => {
+                  const next = [...prevArr];
+                  next[index] = prev;
+                  return next;
+                });
+              }
             }}
           />
         ))}
