@@ -34,11 +34,11 @@ import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
 import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
 import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 
-import useDutyApi from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
-import useCalendarApi from '../../hooks/useCalendarApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
+import { useDutyApi } from '../../hooks/useDutyApi';
 
 /* ============================
  * 상수/타입
@@ -207,72 +207,84 @@ const MemberHome: React.FC = () => {
       );
       setUserName(myName);
 
+      // 플레이스 조회 API 사용 (체크리스트 정보 포함)
+      const placeRes = await usePlaceApi.placeSearch(pid);
+      console.log('🔍 멤버 홈 플레이스 조회 API 응답:', placeRes?.data);
+      
+      const placeData = placeRes?.data?.data || placeRes?.data || {};
+      
+      // duty 목록 조회 API 사용 (아이콘 정보 포함)
       const dutyRes = await useDutyApi.list(pid);
-      const dutyList = toArray(dutyRes);
-
-      const dutyPromises = dutyList.map(async (d: unknown) => {
-        const dutyId = Number(
-          (d as Record<string, unknown>)?.dutyId ??
-            (d as Record<string, unknown>)?.id
-        );
+      console.log('🔍 멤버 홈 duty 목록 API 응답:', dutyRes?.data);
+      
+      const dutyList = dutyRes?.data?.data || dutyRes?.data || [];
+      console.log('🔍 멤버 홈 duty 목록:', dutyList);
+      
+      // 플레이스 조회에서 체크리스트 정보 가져오기
+      const placeDuties = placeData.duties || [];
+      console.log('🔍 플레이스 조회의 duties (체크리스트 정보):', placeDuties);
+      
+      // dutyId로 체크리스트 정보를 매핑
+      const checklistMap = new Map<number, unknown[]>();
+      placeDuties.forEach((placeDuty: Record<string, unknown>) => {
+        const dutyId = Number(placeDuty.dutyId);
+        if (Number.isFinite(dutyId)) {
+          const checkLists = (placeDuty.checkLists as unknown[]) || [];
+          checklistMap.set(dutyId, checkLists);
+          console.log(`🔍 Duty ${dutyId}의 체크리스트 개수:`, checkLists.length);
+        }
+      });
+      
+      // duty API에서 가져온 duty와 체크리스트 매칭
+      const dutyPromises = dutyList.map(async (d: Record<string, unknown>) => {
+        const dutyId = Number(d.dutyId || d.id);
         if (!Number.isFinite(dutyId)) return null;
-
-        // 각 당번별로 청소 정보 조회
-        const infoRes = await useDutyApi.getCleaningInfo(pid, dutyId);
-        const taskList = toArray(infoRes);
-
-        // 두 ID 모두 매핑 + 멤버홈 전용 mine 필드 추가
-        const tasksPromises = taskList.map(async (t: unknown) => {
+        
+        // 해당 dutyId의 체크리스트 가져오기
+        const checkLists = checklistMap.get(dutyId) || [];
+        console.log(`🔍 Duty ${dutyId} 매칭된 체크리스트:`, checkLists);
+        
+        // 체크리스트를 task로 변환
+        const tasks = checkLists.map((t: unknown) => {
           const cleaningId = Number(
             (t as Record<string, unknown>)?.cleaningId ??
               (t as Record<string, unknown>)?.id ??
-              (t as Record<string, unknown>)?.checklistId
+              (t as Record<string, unknown>)?.checkListId
           );
           const rawChecklist = Number(
-            (t as Record<string, unknown>)?.checklistId
+            (t as Record<string, unknown>)?.checkListId
           );
           const checklistId = Number.isFinite(rawChecklist)
             ? rawChecklist
             : null;
 
-          // 멤버 목록 파싱
+          // 멤버 목록 파싱 (placeSearch API 응답에 맞게)
           let names: string[] = [];
-
-          const members =
-            (t as Record<string, unknown>)?.members ??
-            (t as Record<string, unknown>)?.assignees;
+          const members = (t as Record<string, unknown>)?.members;
 
           if (Array.isArray(members)) {
             names = members
               .map((m) => {
                 if (typeof m === 'string') return m;
+                if (typeof m === 'object' && m && 'memberName' in m) {
+                  return String((m as { memberName?: unknown }).memberName ?? '');
+                }
                 if (typeof m === 'object' && m && 'name' in m) {
                   return String((m as { name?: unknown }).name ?? '');
                 }
                 return '';
               })
               .filter(Boolean);
-          } else if (
-            typeof (t as Record<string, unknown>)?.membersName === 'string'
-          ) {
-            names = String((t as Record<string, unknown>).membersName)
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean);
           }
 
           // 디버깅용 로그 추가
-          console.log('🔍 [MemberHome] Task 데이터:', {
+          console.log('🔍 [MemberHome] Task 데이터 (placeSearch):', {
             cleaningId,
-            title:
-              (t as Record<string, unknown>)?.cleaningName ??
-              (t as Record<string, unknown>)?.dutyName ??
-              (t as Record<string, unknown>)?.name,
-            membersName: (t as Record<string, unknown>)?.membersName,
+            checklistId,
+            title: (t as Record<string, unknown>)?.cleaningName,
             members: (t as Record<string, unknown>)?.members,
-            assignees: (t as Record<string, unknown>)?.assignees,
             parsedNames: names,
-            endTime: (t as Record<string, unknown>)?.endTime,
+            completeTime: (t as Record<string, unknown>)?.completeTime,
             needPhoto: (t as Record<string, unknown>)?.needPhoto,
           });
 
@@ -293,10 +305,11 @@ const MemberHome: React.FC = () => {
             members: names,
             memberCount: names.length,
             isCamera: !!(t as Record<string, unknown>)?.needPhoto,
-            isChecked: !!(
-              (t as Record<string, unknown>)?.completed ??
-              (t as Record<string, unknown>)?.isChecked
-            ),
+                         isChecked: !!(
+               (t as Record<string, unknown>)?.completeTime ??
+               (t as Record<string, unknown>)?.completed ??
+               (t as Record<string, unknown>)?.isChecked
+             ),
             completedAt: (t as Record<string, unknown>)?.completedAt ?? null,
             completedBy: (t as Record<string, unknown>)?.completedBy ?? null,
             dutyId,
@@ -304,24 +317,21 @@ const MemberHome: React.FC = () => {
           } as TaskUI;
         });
 
-        const tasks = await Promise.all(tasksPromises);
-
-        const iconRaw = String(
-          (d as Record<string, unknown>)?.icon ?? ''
-        ).toUpperCase();
-        const normalized = (ICON_ALIASES[iconRaw] ?? iconRaw) as string;
-        const iconKey: DutyIconKey = VALID_DUTY_KEYS.includes(
-          normalized as DutyIconKey
-        )
-          ? (normalized as DutyIconKey)
-          : 'FLOOR_BLUE';
+        // 아이콘 변환 로직 (duty API에서 가져온 정보 사용)
+        const iconRaw = String(d.icon || '').toUpperCase();
+        let iconKey: DutyIconKey = 'FLOOR_BLUE'; // 기본값
+        
+        if (VALID_DUTY_KEYS.includes(iconRaw as DutyIconKey)) {
+          iconKey = iconRaw as DutyIconKey;
+        } else if (ICON_ALIASES[iconRaw]) {
+          iconKey = ICON_ALIASES[iconRaw];
+        }
+        
+        console.log('🔍 아이콘:', d.icon, '→', iconKey);
 
         return {
           id: dutyId,
-          name:
-            (d as Record<string, unknown>)?.name ??
-            (d as Record<string, unknown>)?.dutyName ??
-            '',
+          name: d.dutyName || d.name || '',
           iconKey,
           tasks,
         };
@@ -443,32 +453,87 @@ const MemberHome: React.FC = () => {
 
   // 토글 시 checklistId 사용, 로컬 패치 기준은 cleaningId
   const toggleTask = async (dutyId: number, cleaningId: number) => {
+    console.log('🔍 [MemberHome] toggleTask 호출:', { dutyId, cleaningId });
+    
     const t = page.tasks.find(
       (x) => x.cleaningId === cleaningId && x.dutyId === dutyId
     ) as TaskUI | undefined;
-    if (!t || !t.mine) return; // 멤버홈 전용: 내가 담당자가 아니면 토글 불가
+    
+    console.log('🔍 [MemberHome] 찾은 task:', {
+      found: !!t,
+      task: t ? {
+        title: t.title,
+        mine: t.mine,
+        checklistId: t.checklistId,
+        isChecked: t.isChecked,
+        members: t.members
+      } : null
+    });
+    
+    if (!t) {
+      console.log('❌ [MemberHome] Task를 찾을 수 없음');
+      return;
+    }
+    
+    if (!t.mine) {
+      console.log('❌ [MemberHome] 내가 담당자가 아님:', {
+        myName: userName,
+        taskMembers: t.members
+      });
+      return;
+    }
 
     if (!t.checklistId) {
+      console.log('❌ [MemberHome] checklistId가 없음');
       alert('체크리스트 ID가 없어 상태를 변경할 수 없습니다.');
       return;
     }
 
-    try {
-      if (t.isChecked) {
-        await useChecklistApi.incompleteChecklist(pid, t.checklistId);
-        patchLocal(dutyId, cleaningId, {
-          isChecked: false,
-          completedAt: null,
-          completedBy: null,
-        });
-      } else {
-        await useCalendarApi.completeChecklist(pid, t.checklistId);
-        const now = new Date().toTimeString().slice(0, 5);
-        patchLocal(dutyId, cleaningId, {
-          isChecked: true,
-          completedAt: now,
-          completedBy: userName,
-        });
+         try {
+       console.log('🔍 [MemberHome] API 호출 전 정보:', {
+         placeId: pid,
+         checklistId: t.checklistId,
+         isChecked: t.isChecked,
+         taskTitle: t.title,
+         members: t.members,
+         myName: userName
+       });
+       
+       let response;
+       if (t.isChecked) {
+         response = await useChecklistApi.incompleteChecklist(pid, t.checklistId);
+         console.log('✅ 체크리스트 해제 성공:', response.data);
+         patchLocal(dutyId, cleaningId, {
+           isChecked: false,
+           completedAt: null,
+           completedBy: null,
+         });
+       } else {
+         response = await useChecklistApi.completeChecklist(pid, t.checklistId);
+         console.log('✅ 체크리스트 완료 성공:', response.data);
+        
+        // API 응답에서 endTime과 memberName 추출
+        const responseData = response.data?.data || response.data;
+        console.log('📄 API 응답 데이터:', responseData);
+        
+        if (responseData) {
+          console.log('📅 endTime:', responseData.endTime);
+          console.log('👤 memberName:', responseData.memberName);
+          
+          patchLocal(dutyId, cleaningId, {
+            isChecked: true,
+            completedAt: responseData.endTime ? String(responseData.endTime) : new Date().toTimeString().slice(0, 5),
+            completedBy: responseData.memberName || userName,
+          });
+        } else {
+          // API 응답이 없는 경우 기본값 사용
+          const now = new Date().toTimeString().slice(0, 5);
+          patchLocal(dutyId, cleaningId, {
+            isChecked: true,
+            completedAt: now,
+            completedBy: userName,
+          });
+        }
       }
     } catch (e) {
       console.error('체크 전환 실패:', e);
@@ -540,7 +605,9 @@ const MemberHome: React.FC = () => {
       await useChecklistApi.completePhotoUpload(pid, checklistId, {
         s3Key: presign.s3Key,
       });
-
+      console.log('✅ 사진 업로드 완료');
+      
+      // 사진 업로드는 기본값 사용 (API에서 endTime/memberName 반환하지 않음)
       const now = new Date().toTimeString().slice(0, 5);
       patchLocal(dutyId, cleaningId, {
         isChecked: true,
