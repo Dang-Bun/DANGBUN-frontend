@@ -130,7 +130,12 @@ const PlaceMake2 = () => {
         }}
       />
       <CTAButton
-        variant='blue'
+        variant={
+          name.trim() !== '' &&
+          infoList.every((item) => item.value.trim() !== '')
+            ? 'blue'
+            : 'gray'
+        }
         style={{ position: 'fixed', bottom: '42px' }}
         onClick={handleNext}
       >

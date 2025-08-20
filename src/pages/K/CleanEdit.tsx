@@ -196,6 +196,10 @@ const CleanEdit = () => {
     }
   };
 
+  const deleteHandle = () => {
+    setIsModalOpen1(true);
+  };
+
   const handleMake = async () => {
     try {
       const data = {
@@ -353,7 +357,7 @@ const CleanEdit = () => {
         <div className='w-[353px] h-fit py-5 flex justify-center items-center mt-4 bg-stone-50 rounded-2xl shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)'>
           <Calendar
             className='w-80'
-            onClickDay={handleDateClick}
+            onChange={(value) => handleDateClick(value as Date)}
             tileClassName={({ date, view, activeStartDate }) => {
               if (view === 'month') {
                 const isSameMonth =
@@ -576,10 +580,18 @@ const CleanEdit = () => {
 
       <CTAButton
         variant={name ? 'blue' : 'gray'}
-        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
+        style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
         onClick={name ? confirmHandle : () => {}}
       >
         완료
+      </CTAButton>
+
+      <CTAButton
+        variant={'gray'}
+        style={{ marginBottom: '40px', cursor: 'pointer' }}
+        onClick={deleteHandle}
+      >
+        삭제하기
       </CTAButton>
     </div>
   );

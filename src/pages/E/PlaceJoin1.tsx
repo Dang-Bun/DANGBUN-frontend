@@ -17,6 +17,7 @@ const PlaceJoin = () => {
   const [inputValue, setInputValue] = React.useState('');
   const [placeId, setPlaceId] = useState(0);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isModalOpen2, setIsModalOpen2] = React.useState(false);
 
   const handleNext = async () => {
     try {
@@ -54,10 +55,10 @@ const PlaceJoin = () => {
     }
   };
 
-  const searchCode = async () => {
-    setCode(inputValue);
+  const searchCode = async (inviteCode: string) => {
     try {
-      const res = await usePlaceApi.inviteCodeCheck({ inviteCode: code });
+      const res = await usePlaceApi.inviteCodeCheck({ inviteCode });
+      setCode(inviteCode);
 
       if (res?.data?.code === 20000) {
         const infoArray = res.data.data.information.map((label: string) => ({
@@ -71,6 +72,7 @@ const PlaceJoin = () => {
         setIsModalOpen(true);
       }
     } catch (e) {
+      setIsModalOpen2(true);
       console.error('code matching error', e);
     }
   };
@@ -96,7 +98,9 @@ const PlaceJoin = () => {
             fontSize={16}
             height={56}
             maxWidth={77}
-            onClick={searchCode} // API request
+            onClick={() => {
+              searchCode(inputValue);
+            }} // API request
           >
             확인
           </FreeButton>
@@ -163,8 +167,30 @@ const PlaceJoin = () => {
         }}
       ></PopupCard>
 
+      <PopupCard
+        isOpen={isModalOpen2}
+        onRequestClose={() => setIsModalOpen2(false)}
+        title={
+          <>
+            <p className='font-normal text-center'>
+              이미 가입하였거나, <br />
+              가입을 신청한 사용자입니다.
+            </p>
+          </>
+        }
+        descript=''
+        input={false}
+        placeholder=''
+        second='확인'
+        onSecondClick={() => {
+          setIsModalOpen2(false);
+        }}
+      ></PopupCard>
+
       <CTAButton
         variant={
+          name.trim() !== '' &&
+          code.trim() !== '' &&
           infoList.every((item) => item.value.trim() !== '')
             ? 'blue'
             : 'thickGray'

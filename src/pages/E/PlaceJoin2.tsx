@@ -84,10 +84,10 @@ const PlaceJoin2 = () => {
         onRequestClose={() => setIsModalOpenCopy(false)}
         title={
           <>
-            <h2 className='font-normal text-center'>
+            <p className='font-normal text-center'>
               <span className='font-bold'>"{placeName}"</span>
               <br /> 참여취소가 완료 되었습니다.
-            </h2>
+            </p>
           </>
         }
         descript=''
