@@ -196,6 +196,10 @@ const CleanEdit = () => {
     }
   };
 
+  const deleteHandle = () => {
+    setIsModalOpen1(true);
+  };
+
   const handleMake = async () => {
     try {
       const data = {
@@ -576,10 +580,18 @@ const CleanEdit = () => {
 
       <CTAButton
         variant={name ? 'blue' : 'gray'}
-        style={{ marginBottom: '40px', cursor: name ? 'pointer' : 'default' }}
+        style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
         onClick={name ? confirmHandle : () => {}}
       >
         완료
+      </CTAButton>
+
+      <CTAButton
+        variant={'gray'}
+        style={{ marginBottom: '40px', cursor: 'pointer' }}
+        onClick={deleteHandle}
+      >
+        삭제하기
       </CTAButton>
     </div>
   );
