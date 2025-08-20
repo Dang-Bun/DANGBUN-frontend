@@ -13,7 +13,7 @@ import send_notification from '../../assets/setting/send_notifivation.svg';
 import danger_zone from '../../assets/setting/danger_zone.svg';
 import { useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
-import { usePlaceApi } from './../../hooks/usePlaceApi';
+import { usePlaceApi } from '../../hooks/usePlaceApi';
 
 const SettingManager = () => {
   const navigate = useNavigate();

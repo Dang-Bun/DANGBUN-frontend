@@ -152,20 +152,15 @@ const CalendarPage: React.FC = () => {
         month: month,
       });
 
-      console.log('🔍 [Calendar] Progress API 응답:', progressResponse.data);
-
       // 플레이스 데이터에서 체크리스트 추출
       const placeData = placeResponse?.data?.data || placeResponse?.data || {};
       const duties = placeData.duties || [];
-      console.log('🔍 [Calendar] 원본 duties 개수:', duties.length);
-      console.log('🔍 [Calendar] 원본 duties:', duties);
 
       // 모든 체크리스트를 날짜별로 분류
       const checklistDataByDate: Map<string, Record<string, unknown>[]> =
         new Map();
 
       duties.forEach((duty: Record<string, unknown>, dutyIndex: number) => {
-        console.log(`🔍 [Calendar] Duty ${dutyIndex} 처리:`, duty);
         const checkLists = (duty.checkLists as Record<string, unknown>[]) || [];
         console.log(
           `🔍 [Calendar] Duty ${dutyIndex}의 checkLists 개수:`,
@@ -601,12 +596,7 @@ const CalendarPage: React.FC = () => {
     ({ date, view }: { date: Date; view: string }) => {
       if (view !== 'month') return null;
       const ymd = toYMD(date);
-      const progressValue = progress.get(ymd);
-
-      // 디버깅: progress 값 확인
-      if (progressValue !== undefined) {
-        console.log(`📊 [Calendar] ${ymd} 프로그레스: ${progressValue}%`);
-      }
+      const progressValue = progress.get(ymd) ?? -1;
 
       if (progressValue === undefined)
         return <span className='text-base'>{date.getDate()}</span>;
@@ -621,28 +611,30 @@ const CalendarPage: React.FC = () => {
       return (
         <div className='w-[36px] h-[36px] relative flex items-center justify-center'>
           <svg width={size} height={size} className='absolute top-0 left-0'>
-            <g transform={`rotate(-90 ${center} ${center})`}>
-              <circle
-                cx={center}
-                cy={center}
-                r={ringRadius}
-                fill='none'
-                stroke='#E5E7EB'
-                strokeWidth={strokeWidth}
-              />
-              <circle
-                cx={center}
-                cy={center}
-                r={ringRadius}
-                fill='none'
-                stroke='#4D83FD'
-                strokeWidth={strokeWidth}
-                strokeLinecap='round'
-                strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
-                style={{ transition: 'stroke-dashoffset 0.2s ease' }}
-              />
-            </g>
+            {progressValue > 0 && (
+              <g transform={`rotate(-90 ${center} ${center})`}>
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={ringRadius}
+                  fill='none'
+                  stroke='#E5E7EB'
+                  strokeWidth={strokeWidth}
+                />
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={ringRadius}
+                  fill='none'
+                  stroke='#4D83FD'
+                  strokeWidth={strokeWidth}
+                  strokeLinecap='round'
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
+                  style={{ transition: 'stroke-dashoffset 0.2s ease' }}
+                />
+              </g>
+            )}
           </svg>
           <span className='text-base relative z-10'>{date.getDate()}</span>
         </div>
@@ -740,6 +732,7 @@ const CalendarPage: React.FC = () => {
               navigationLabel={() => null}
               locale='ko-KR'
               calendarType='gregory'
+              maxDate={new Date()}
             />
           </div>
         </div>
