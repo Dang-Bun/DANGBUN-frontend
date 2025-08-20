@@ -235,7 +235,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
                     key={m.memberId}
                     onClick={() => toggleOne(m.memberId)}
                     className={`px-4 py-2 rounded-[8px] text-[14px] font-medium transition
-                    ${selected ? 'bg-[#00dd7c] text-white shadow-sm' : 'bg-[#e5e5e5] text-white'}`}
+                      ${selected ? 'bg-[#00dd7c] text-white shadow-sm' : 'bg-[#e5e5e5] text-white'}`}
                   >
                     {m.name}
                   </button>
@@ -269,6 +269,8 @@ const DutyManagement = () => {
   const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
   const [allMembers, setAllMembers] = useState<DutyMember[]>([]);
   const [cleanings, setCleanings] = useState<Cleaning[]>([]);
+  // ⭐ 당번에 배정된 멤버
+  const [assignedMembers, setAssignedMembers] = useState<DutyMember[]>([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -323,15 +325,24 @@ const DutyManagement = () => {
     null
   );
 
-  // 현재 역할 배정하려는 cleaningId의 초기 선택 id들
+  // 이름 -> id 매핑 (역할 배정에서 사용할 전용 매핑)
+  const assignedNameToId = useMemo(
+    () =>
+      Object.fromEntries(
+        assignedMembers.map((m) => [m.name, m.memberId] as const)
+      ),
+    [assignedMembers]
+  );
+
+  // 현재 역할 배정하려는 cleaningId의 초기 선택 id들 (당번 지정 멤버만 대상으로 계산)
   const roleInitialIds = useMemo(() => {
     if (!currentCleaningId) return [];
     const item = roleItems.find((i) => i.cleaningId === currentCleaningId);
     if (!item) return [];
     return item.displayedNames
-      .map((nm) => nameToId[nm])
+      .map((nm) => assignedNameToId[nm])
       .filter((v): v is number => typeof v === 'number');
-  }, [roleItems, currentCleaningId, nameToId]);
+  }, [roleItems, currentCleaningId, assignedNameToId]);
 
   const [cleaningsLoading, setCleaningsLoading] = useState(false);
   const [cleaningsErr, setCleaningsErr] = useState<string | null>(null);
@@ -378,7 +389,7 @@ const DutyManagement = () => {
         const res = await useDutyApi.getMembers(placeId, dutyId);
         const list: DutyMember[] = res.data?.data ?? [];
 
-        // 최초 진입 시 이미 선택된 값(있다면) 세팅을 원하면 여기서 setSelectedMemberIds(...)
+        setAssignedMembers(list);
         setSelectedMemberIds(list.map((m) => m.memberId));
       } catch (e: any) {
         setErr(
@@ -504,7 +515,7 @@ const DutyManagement = () => {
       {/* 내용 카드 */}
       <div className='bg-white rounded-[12px] flex-1 px-4 pt-[80px] mt-[1px] shadow-md'>
         {/* 탭 */}
-        <div className='flex bg-[#f6f6f6] mt-4 h-[46px] w-[353px] rounded-[8px]'>
+        <div className='flex bg-[#f6f6f6] mt-4 h-[46px] w-[353px] rounded-[8px] mx-auto'>
           <button
             className={`flex-1 py-2 text-center font-semibold mt-[4px] ${
               activeTab === 'info'
@@ -776,7 +787,7 @@ const DutyManagement = () => {
       {/* 멤버 역할 분담 모달 */}
       <MembersPickerModal
         open={rolepickerOpen}
-        allMembers={allMembers}
+        allMembers={assignedMembers}
         initialSelectedIds={roleInitialIds} // ✅ 역할 모달은 역할 기준으로!
         dutyId={dutyId}
         placeId={placeId}
