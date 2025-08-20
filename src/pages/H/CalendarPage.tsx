@@ -67,8 +67,7 @@ const CalendarPage: React.FC = () => {
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
 
-  const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
-  const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
+     const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
 
   // API 데이터 로드
   const loadData = useCallback(async () => {
@@ -119,20 +118,20 @@ const CalendarPage: React.FC = () => {
       const duties = placeData.duties || [];
       console.log('Debug - Duties from place API:', duties);
 
-             // 모든 체크리스트를 날짜별로 분류
-       const checklistDataByDate: Map<string, any[]> = new Map();
-       
-       duties.forEach((duty: any) => {
-         const checkLists = duty.checkLists || [];
-         checkLists.forEach((checklist: any) => {
-           // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
-           const checklistDate = checklist.date || selectedYMD; // 날짜 정보가 없으면 선택된 날짜 사용
-           
-           if (!checklistDataByDate.has(checklistDate)) {
-             checklistDataByDate.set(checklistDate, []);
-           }
-           
-                       checklistDataByDate.get(checklistDate)!.push({
+                     // 모든 체크리스트를 날짜별로 분류
+        const checklistDataByDate: Map<string, Record<string, unknown>[]> = new Map();
+        
+        duties.forEach((duty: Record<string, unknown>) => {
+          const checkLists = (duty.checkLists as Record<string, unknown>[]) || [];
+          checkLists.forEach((checklist: Record<string, unknown>) => {
+                       // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
+            const checklistDate = String(checklist.date || selectedYMD); // 날짜 정보가 없으면 선택된 날짜 사용
+            
+            if (!checklistDataByDate.has(checklistDate)) {
+              checklistDataByDate.set(checklistDate, []);
+            }
+            
+            checklistDataByDate.get(checklistDate)!.push({
               ...checklist,
               dutyId: duty.dutyId || duty.id
             });
