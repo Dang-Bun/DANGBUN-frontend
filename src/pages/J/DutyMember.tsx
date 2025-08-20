@@ -147,7 +147,7 @@ const DutyMember = () => {
       {/* 내용 카드 */}
       <div className='bg-white rounded-[12px] flex-1 px-4 pt-[80px] mt-[1px] shadow-md'>
         {/* 탭 */}
-        <div className='flex bg-[#f6f6f6] mt-4 h-[46px] w-[353px] rounded-[8px]'>
+        <div className='flex bg-[#f6f6f6] mt-4 h-[46px] w-[353px] rounded-[8px] mx-auto'>
           <button
             className={`flex-1 py-2 text-center font-semibold mt-[4px] ${
               activeTab === 'info'
