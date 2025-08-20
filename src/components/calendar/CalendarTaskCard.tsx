@@ -30,7 +30,7 @@ const CalendarTaskCard: React.FC<Props> = ({
   const titleColor = isChecked ? "text-[#5A5D62]" : "text-[#111827]";
   const subColor = "text-[#8E8E8E]";
 
-  const timeText = completedAt ? ` / ${dayjs(completedAt).format("H:mm")}` : "";
+  const timeText = completedAt ? ` / ${typeof completedAt === 'string' ? completedAt : dayjs(completedAt).format("H:mm")}` : "";
 
   return (
     <div
