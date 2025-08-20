@@ -70,15 +70,13 @@ const SettingManager = () => {
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
-          <div className='flex flex-row bg-[#6982bc] rounded-[8px] py-[7px] px-[13px]'>
-            <img
-              src={PlaceName}
-              alt='플레이스 이름'
-              className='cursor-pointer'
-              onClick={() => {
-                navigate('/myPlace');
-              }}
-            />
+          <div
+            className='flex flex-row bg-[#6982bc] rounded-[8px] py-[7px] px-[13px]'
+            onClick={() => {
+              navigate('/myPlace');
+            }}
+          >
+            <img src={PlaceName} alt='플레이스 이름' />
             <span className='text-white text-[12px] font-normal pl-2'>
               {placeName}
             </span>

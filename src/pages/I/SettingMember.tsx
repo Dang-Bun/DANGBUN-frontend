@@ -67,15 +67,13 @@ const SettingMember = () => {
       <div>
         {/* 플레이스 이름 & 설정 */}
         <div className='relative flex items-center mb-4'>
-          <div className='relative'>
-            <img
-              src={PlaceName}
-              alt='플레이스 이름'
-              className='cursor-pointer'
-              onClick={() => {
-                navigate('/myPlace');
-              }}
-            />
+          <div
+            className='relative'
+            onClick={() => {
+              navigate('/myPlace');
+            }}
+          >
+            <img src={PlaceName} alt='플레이스 이름' />
             <span className='absolute inset-0 flex items-center justify-center text-white text-[12px] font-normal'>
               {placeName}
             </span>
