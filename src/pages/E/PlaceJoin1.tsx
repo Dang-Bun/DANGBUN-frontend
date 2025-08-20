@@ -55,7 +55,6 @@ const PlaceJoin = () => {
   };
 
   const searchCode = async () => {
-    setCode(inputValue);
     try {
       const res = await usePlaceApi.inviteCodeCheck({ inviteCode: code });
 
@@ -96,7 +95,10 @@ const PlaceJoin = () => {
             fontSize={16}
             height={56}
             maxWidth={77}
-            onClick={searchCode} // API request
+            onClick={() => {
+              setCode(inputValue);
+              searchCode();
+            }} // API request
           >
             확인
           </FreeButton>
