@@ -23,6 +23,7 @@ import arrowBack from '../../assets/nav/arrowBack.svg';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import useCleaningApi from '../../hooks/useCleaningApi';
 import HeaderBar from '../../components/HeaderBar';
+import useDutyApi from '../../hooks/useDutyApi';
 
 const DAILY_MAP: Record<string, string> = {
   매일: 'DAILY',
@@ -149,21 +150,25 @@ const CleanAdd = () => {
     if (!placeId) return;
     const run = async () => {
       try {
-        const res = await useMemberApi.list(placeId);
-        const memberspay = res?.data?.data?.members ?? [];
-        const names = Array.isArray(memberspay)
-          ? memberspay
-              .map((m: any) => m?.name)
-              .filter((v: any) => typeof v === 'string')
-          : [];
-        setMembers(names);
+        if (placeId && selectedDutyId) {
+          const res = await useDutyApi.getMembers(placeId, selectedDutyId);
+          const memberspay = res?.data?.data ?? [];
+          const names = Array.isArray(memberspay)
+            ? memberspay
+                .map((m) => m?.name)
+                .filter((v) => typeof v === 'string')
+            : [];
+          setMembers(names);
+        } else {
+          setMembers([]);
+        }
       } catch (e) {
         console.error(e);
         setMembers([]);
       }
     };
     run();
-  }, [placeId, useMemberApi]);
+  }, [placeId, selectedDutyId]);
 
   const confirmHandle = () => {
     if (dangbun.length === 0) {
