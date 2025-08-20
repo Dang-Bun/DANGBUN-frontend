@@ -28,15 +28,18 @@ import DutyManagement from '../pages/J/DutyManagement';
 import ModifyDuty from '../pages/J/ModifyDuty';
 import AddClean from '../pages/J/AddClean';
 import CleanUpList from '../pages/K/CleanUpList';
-import CleanUpCard from '../components/cleanUp/CleanUpCard';
 import CleanAdd from '../pages/K/CleanAdd';
 import CleanEdit from '../pages/K/CleanEdit';
 import UnDangbun from '../pages/K/UnDangbun';
 import CleanInfo from '../pages/K/CleanInfo';
+import CleanUpList_Member from '../pages/K/CleanUpList_Member';
+import UnDangbun_Member from '../pages/K/UnDangbun_Member';
 import ManagerInfo from '../pages/L/ManagerInfo';
 import MemberConfirm from '../pages/L/MemberConfirm';
 import MemberList from '../pages/L/MemberList';
 import EnterCode from '../pages/L/EnterCode';
+import MemberList_Member from '../pages/L/MemberList_Member';
+import ManagerInfo_Member from '../pages/L/ManagerInfo_Member';
 import PlaceDetailed from '../pages/M/PlaceDetailed';
 import DangerZoneManager from '../pages/N/DangerZoneManager';
 import DangerZoneMember from '../pages/N/DangerZoneMember';
@@ -181,6 +184,10 @@ const router = createBrowserRouter([
     element: <CleanUpList />,
   },
   {
+    path: '/cleanuplistmember',
+    element: <CleanUpList_Member />,
+  },
+  {
     path: '/cleanadd',
     element: <CleanAdd />,
   },
@@ -191,6 +198,10 @@ const router = createBrowserRouter([
   {
     path: '/undangbun',
     element: <UnDangbun />,
+  },
+  {
+    path: '/undangbunmember',
+    element: <UnDangbun_Member />,
   },
   {
     path: '/cleaninfo',
@@ -213,12 +224,20 @@ const router = createBrowserRouter([
     element: <MemberList />,
   },
   {
+    path: '/memberlistmember',
+    element: <MemberList_Member />,
+  },
+  {
     path: '/memberconfirm',
     element: <MemberConfirm />,
   },
   {
     path: '/managerinfo',
     element: <ManagerInfo />,
+  },
+  {
+    path: '/managerinfomember',
+    element: <ManagerInfo_Member />,
   },
   {
     path: '/memberlist/entercode',
