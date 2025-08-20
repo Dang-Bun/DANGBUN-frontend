@@ -64,12 +64,9 @@ export default function DatePicker({
         <div className='px-5 pb-5'>
           <Picker
             value={value}
-            onChange={(val, key) =>
-              setValue((prev) => ({
-                ...prev,
-                [key]: val, // year 또는 month 중 하나만 업데이트
-              }))
-            }
+            onChange={(newValue) => {
+              setValue(newValue as { year: number; month: number });
+            }}
             wheelMode='normal'
             className='custom-picker flex justify-between gap-2 pb-2'
           >
