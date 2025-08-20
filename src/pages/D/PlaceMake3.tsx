@@ -28,9 +28,10 @@ const toRoleType = (value: unknown): RoleType => {
 const PlaceMake3 = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isModalOpenCopy, setIsModalOpenCopy] = React.useState(false);
-  const { placeName, role, placeId } = location.state || {};
 
   const location = useLocation();
+  const { placeName, role, placeId } = location.state || {};
+
   const navigate = useNavigate();
 
   const [code, setCode] = useState('');
