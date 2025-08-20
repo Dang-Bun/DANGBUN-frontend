@@ -26,7 +26,7 @@ const ICON_MAP: Record<string, string> = {
 
 interface DangbunListProps {
   placeId: number;
-  onChange: (value: string) => void;
+  onChange: (value: { dutyId: number; dutyName: string } | string) => void;
 }
 
 interface DangbunOption {
@@ -59,7 +59,11 @@ const DangbunList = ({ placeId, onChange }: DangbunListProps) => {
   }, []);
 
   const handleChange = (option: DangbunOption | null) => {
-    onChange(option?.name ?? '');
+    if (option) {
+      onChange({ dutyId: option.value, dutyName: option.name });
+    } else {
+      onChange(''); // 선택 해제 시
+    }
   };
 
   const custom = ({ data }: any) => (

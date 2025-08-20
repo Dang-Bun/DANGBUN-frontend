@@ -42,6 +42,7 @@ const CleanEdit = () => {
   //switch
   const [checked1, setChecked1] = useState(false);
   const [checked2, setChecked2] = useState(false);
+  const [selectedDutyId, setSelectedDutyId] = useState<number | null>(null);
   const pictureChange = (nextChecked: boolean) => {
     setChecked1(nextChecked);
   };
@@ -199,7 +200,7 @@ const CleanEdit = () => {
     try {
       const data = {
         cleaningName: name,
-        dutyName: dangbun,
+        dutyId: selectedDutyId,
         members: filteredMembers,
         needPhoto: checked1,
         repeatType: DAILY_MAP[selectedCycle],
@@ -390,7 +391,15 @@ const CleanEdit = () => {
         <p className='text-lg font-normal leading-relaxed'>당번 지정</p>
         <DangbunList
           placeId={placeId}
-          onChange={(value) => setDangbun(value)}
+          onChange={(value) => {
+            if (typeof value === 'string') {
+              setDangbun(value);
+              setSelectedDutyId(null);
+            } else {
+              setDangbun(value.dutyName);
+              setSelectedDutyId(value.dutyId);
+            }
+          }}
         />
       </div>
       <div

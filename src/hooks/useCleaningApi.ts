@@ -7,6 +7,7 @@ type Id = number;
 export type CreateCleaningPayload = {
   cleaningName: string;
   dutyName: string; // 어떤 당번에 속하는 청소인지
+  dutyId: number;
   members: string[]; // 참여 멤버 id 배열 (필요 시)
   needPhoto: boolean; // 사진 필요 여부
   repeatType: 'NONE' | 'WEEKLY' | 'MONTHLY' | string;
