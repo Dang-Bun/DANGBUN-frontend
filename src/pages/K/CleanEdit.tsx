@@ -34,10 +34,7 @@ const CleanEdit = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { name: named = '', placeId } = (location.state ?? {}) as {
-    name?: string;
-    placeId?: number;
-  };
+  const { cleaningId, cleaningName, placeId } = location.state || {};
 
   //switch
   const [checked1, setChecked1] = useState(false);
@@ -90,7 +87,7 @@ const CleanEdit = () => {
     const start = dayjs().startOf('day');
     const end = dayjs().add(5, 'month').endOf('month');
 
-    setName(named);
+    setName(cleaningName);
 
     if (selectedCycle === '매일') {
       const dates: Date[] = [];
@@ -147,6 +144,7 @@ const CleanEdit = () => {
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isModalOpen3, setIsModalOpen3] = useState(false);
+  const [isModalOpen4, setIsModalOpen4] = useState(false);
 
   useEffect(() => {
     if (!placeId) return;
@@ -197,7 +195,17 @@ const CleanEdit = () => {
   };
 
   const deleteHandle = () => {
-    setIsModalOpen1(true);
+    setIsModalOpen4(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const res = await useCleaningApi.deleteCleaning(placeId, cleaningId);
+      console.log(res.data);
+      navigate('/undangbun', { state: { placeId } });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleMake = async () => {
@@ -578,9 +586,31 @@ const CleanEdit = () => {
         }}
       />
 
+      <PopUpCard
+        isOpen={isModalOpen4}
+        onRequestClose={() => setIsModalOpen4(false)}
+        title={
+          <>
+            <p className='font-normal text-center'>
+              정말 <span className='font-semibold'>"{name}"</span> 청소를
+              <br />
+              <span className='text-blue-500'>삭제</span>할까요?
+              <br />
+            </p>
+          </>
+        }
+        descript={''}
+        input={false}
+        placeholder=''
+        first='아니오'
+        second='네'
+        onFirstClick={() => {}}
+        onSecondClick={confirmDelete}
+      />
+
       <CTAButton
         variant={name ? 'blue' : 'gray'}
-        style={{ marginBottom: '8px', cursor: name ? 'pointer' : 'default' }}
+        style={{ marginBottom: '3px', cursor: name ? 'pointer' : 'default' }}
         onClick={name ? confirmHandle : () => {}}
       >
         완료
