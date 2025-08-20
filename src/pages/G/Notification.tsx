@@ -95,30 +95,8 @@ const Notification: React.FC = () => {
 				
 				const uniqueId = String(itemId);
 				
-				// 날짜 처리 개선
-				const dateStr = item.createdAt || item.sentAt || item.createdTime || item.sentTime;
-				let timeAgo = '방금 전';
-				if (dateStr) {
-					try {
-						const date = new Date(String(dateStr));
-						if (!isNaN(date.getTime())) {
-							const now = new Date();
-							const diffMs = now.getTime() - date.getTime();
-							const diffMins = Math.floor(diffMs / (1000 * 60));
-							const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-							const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-							
-							if (diffMins < 1) timeAgo = '방금 전';
-							else if (diffMins < 60) timeAgo = `${diffMins}분 전`;
-							else if (diffHours < 24) timeAgo = `${diffHours}시간 전`;
-							else if (diffDays < 7) timeAgo = `${diffDays}일 전`;
-							else timeAgo = date.toLocaleDateString('ko-KR');
-						}
-					} catch (e) {
-						console.warn('날짜 파싱 실패:', dateStr, e);
-						timeAgo = '방금 전';
-					}
-				}
+				// 날짜 처리 - API에서 이미 상대적 시간을 제공하므로 그대로 사용
+				const timeAgo = String(item.createdAt || '방금 전');
 				
 				// 보낸 알림과 받은 알림 구분
 				let senderName = '알 수 없음';
