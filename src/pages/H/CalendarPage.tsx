@@ -15,7 +15,6 @@ import SwipeableRow from '../../components/calendar/SwipeableRow';
 import CalendarSort from '../../components/calendar/CalendarSort';
 import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
-import SelectBottom from '../../components/calendar/SelectBottom';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 
@@ -810,7 +809,7 @@ const CalendarPage: React.FC = () => {
                     completedAt={task.completedAt} // 현재 null (API에 없으니)
                     completedBy={task.completedBy} // memberName에서 세팅됨
                     onMenuClick={() => {
-                      setSelectTask(task);
+                      setSelectTask({ ...task, date: selectedYMD });
                       setIsSelectOpen(true);
                     }}
                   />
