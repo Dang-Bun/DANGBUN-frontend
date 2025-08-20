@@ -133,7 +133,12 @@ const SettingMember = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 청소 관리 */}
-          <div className='flex flex-col items-center flex-1 cursor-pointer'>
+          <div
+            className='flex flex-col items-center flex-1 cursor-pointer'
+            onClick={() =>
+              navigate('/cleanuplist', { state: { data: { placeId } } })
+            }
+          >
             <img src={Sweep} alt='청소 관리' className='w-[24px] h-[32.39px]' />
             <div className='text-sm mt-1'>청소 관리</div>
           </div>
@@ -142,7 +147,10 @@ const SettingMember = () => {
           <div className='w-px h-[40px] bg-[#D9E4FF] mx-2' />
 
           {/* 멤버 목록 */}
-          <div className='flex flex-col items-center flex-1 cursor-pointer'>
+          <div
+            className='flex flex-col items-center flex-1 cursor-pointer'
+            onClick={() => navigate('/memberlist')}
+          >
             <img
               src={Member}
               alt='멤버 목록'
@@ -156,7 +164,7 @@ const SettingMember = () => {
         <div className='flex flex-col gap-[12px] cursor-pointer'>
           <div
             className='bg-white rounded-xl p-4 flex justify-between items-center shadow-sm h-[56px]'
-            onClick={() => navigate('/alarm')}
+            onClick={() => navigate(`/${placeId}/alarm/create`)}
           >
             <div className='flex items-center gap-3'>
               <div className='relative w-[34px] h-[34px] flex items-center justify-center'>
