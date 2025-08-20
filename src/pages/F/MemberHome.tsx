@@ -310,7 +310,7 @@ const MemberHome: React.FC = () => {
                (t as Record<string, unknown>)?.isChecked ??
                (t as Record<string, unknown>)?.completeTime
              ),
-                         completedAt: (t as Record<string, unknown>)?.completeTime ?? null,
+            completedAt: (t as Record<string, unknown>)?.completedAt ?? null,
             completedBy: (t as Record<string, unknown>)?.completedBy ?? null,
             dutyId,
             mine,

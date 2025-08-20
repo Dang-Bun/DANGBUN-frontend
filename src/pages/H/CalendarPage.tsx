@@ -282,11 +282,10 @@ const CalendarPage: React.FC = () => {
           placeId
         });
 
-        let response;
         if (currentTask.task.isChecked) {
           // 완료된 상태면 취소
           console.log('🔍 체크리스트 취소 시도...');
-          response = await useChecklistApi.incompleteChecklist(placeId, taskId);
+          const response = await useChecklistApi.incompleteChecklist(placeId, taskId);
           console.log('✅ 체크리스트 취소 성공:', response.data);
           
           // 취소 시 상태 즉시 업데이트
@@ -307,16 +306,16 @@ const CalendarPage: React.FC = () => {
         } else {
           // 미완료 상태면 완료
           console.log('🔍 체크리스트 완료 시도...');
-          response = await useChecklistApi.completeChecklist(placeId, taskId);
+          const response = await useChecklistApi.completeChecklist(placeId, taskId);
           console.log('✅ 체크리스트 완료 성공:', response.data);
           
           // API 응답에서 endTime과 memberName 추출
-          const responseData = response.data?.data || response.data;
+          const responseData = response.data?.data;
           console.log('📄 API 응답 데이터:', responseData);
           
           if (responseData) {
             console.log('📅 endTime:', responseData.endTime);
-            console.log('👤 memberName:', responseData.memberName);
+            console.log('👤 membersName:', responseData.membersName);
             
             // 캘린더 상태 즉시 업데이트
             setChecklists(prev => prev.map(item => {
@@ -327,7 +326,7 @@ const CalendarPage: React.FC = () => {
                     ...item.task,
                     isChecked: true,
                     completedAt: responseData.endTime ? String(responseData.endTime) : new Date().toISOString(),
-                    completedBy: responseData.memberName || '알 수 없음'
+                    completedBy: responseData.membersName || '알 수 없음'
                   }
                 };
               }
@@ -338,12 +337,12 @@ const CalendarPage: React.FC = () => {
 
         // 성공 시 데이터 다시 로드 (서버 상태 동기화)
         await loadData();
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('❌ 체크리스트 토글 실패:', err);
         console.error('❌ 에러 상세:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data
+          message: err instanceof Error ? err.message : 'Unknown error',
+          status: (err as any)?.response?.status,
+          data: (err as any)?.response?.data
         });
         setError('체크리스트 상태 변경에 실패했습니다.');
       }
@@ -372,7 +371,7 @@ const CalendarPage: React.FC = () => {
 
       // 성공 메시지 (선택사항)
       console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('❌ [Calendar] 체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
     }
