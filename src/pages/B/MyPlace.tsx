@@ -262,8 +262,10 @@ const MyPlace: React.FC = () => {
       </div>
 
       {/* 하단 CTA */}
-      <div className='fixed absolute w-full bottom-4 left-8'>
-        <CTAButton onClick={handleAdd}>플레이스 추가</CTAButton>
+      <div className='fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] left-1/2 -translate-x-1/2'>
+        <div className='w-[353px]'>
+          <CTAButton onClick={handleAdd}>플레이스 추가</CTAButton>
+        </div>
       </div>
     </div>
   );

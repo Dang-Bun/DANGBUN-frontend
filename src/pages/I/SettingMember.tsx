@@ -136,7 +136,7 @@ const SettingMember = () => {
           <div
             className='flex flex-col items-center flex-1 cursor-pointer'
             onClick={() =>
-              navigate('/cleanuplist', { state: { data: { placeId } } })
+              navigate('/cleanuplistmember', { state: { data: { placeId } } })
             }
           >
             <img src={Sweep} alt='청소 관리' className='w-[24px] h-[32.39px]' />
@@ -149,7 +149,7 @@ const SettingMember = () => {
           {/* 멤버 목록 */}
           <div
             className='flex flex-col items-center flex-1 cursor-pointer'
-            onClick={() => navigate('/memberlist')}
+            onClick={() => navigate('/memberlistmember')}
           >
             <img
               src={Member}
