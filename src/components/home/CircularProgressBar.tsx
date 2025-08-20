@@ -1,15 +1,27 @@
 import React from "react";
 import dotActive from '../../assets/home/dotIndicatorBlue.svg';
 import dotDefault from '../../assets/home/dotIndicator.svg';
-import buildingImg from '../../assets/placeIcon/buildingImg.svg';
-import cinemaImg from '../../assets/placeIcon/cinemaImg.svg';
-import dormitoryImg from '../../assets/placeIcon/dormitoryImg.svg';
-import gymImg from '../../assets/placeIcon/gymImg.svg';
-import officeImg from '../../assets/placeIcon/officeImg.svg';
-import restaurantImg from '../../assets/placeIcon/restaurantImg.svg';
-import schoolImg from '../../assets/placeIcon/schoolImg.svg';
-import cafeSmallImg from '../../assets/placeIcon/cafeSmallImg.svg';
-import homeImg from '../../assets/placeIcon/homeImg.svg';
+
+// 카테고리 아이콘 (ManagerHome과 동일)
+import BUILDING_IMG from '../../assets/placeIcon/buildingImg.svg';
+import CINEMA_IMG from '../../assets/placeIcon/cinemaImg.svg';
+import DORMITORY_IMG from '../../assets/placeIcon/dormitoryImg.svg';
+import GYM_IMG from '../../assets/placeIcon/gymImg.svg';
+import OFFICE_IMG from '../../assets/placeIcon/officeImg.svg';
+import RESTAURANT_IMG from '../../assets/placeIcon/restaurantImg.svg';
+import SCHOOL_IMG from '../../assets/placeIcon/schoolImg.svg';
+import CAFE_IMG from '../../assets/placeIcon/cafeSmallImg.svg';
+import HOME_IMG from '../../assets/placeIcon/homeImg.svg';
+
+// 당번 아이콘 (ManagerHome과 동일)
+import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
+import BUCKET_PINK from '../../assets/cleanIcon/cupWashingImg.svg';
+import BRUSH_PINK from '../../assets/cleanIcon/moppingImg_3.svg';
+import DISH_BLUE from '../../assets/cleanIcon/polishImg.svg';
+import SPRAY_BLUE from '../../assets/cleanIcon/sprayerImg.svg';
+import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
+import TOILET_PINK from '../../assets/cleanIcon/toiletImg.svg';
+import TRASH_BLUE from '../../assets/cleanIcon/trashImg_2.svg';
 
 
 type Category =
@@ -23,16 +35,27 @@ type Category =
   | 'GYM'
   | 'ETC';
   
-const categoryIcon: Record<Category, string> = {
-  CAFE: cafeSmallImg,
-  RESTAURANT: restaurantImg,
-  THEATER: cinemaImg,
-  DORMITORY: dormitoryImg,
-  BUILDING: buildingImg,
-  OFFICE: officeImg,
-  SCHOOL: schoolImg,
-  GYM: gymImg,
-  ETC: homeImg,
+const CATEGORY_ICON_SRC: Record<string, string> = {
+  CAFE: CAFE_IMG,
+  RESTAURANT: RESTAURANT_IMG,
+  THEATER: CINEMA_IMG,
+  DORMITORY: DORMITORY_IMG,
+  BUILDING: BUILDING_IMG,
+  OFFICE: OFFICE_IMG,
+  SCHOOL: SCHOOL_IMG,
+  GYM: GYM_IMG,
+  ETC: HOME_IMG,
+};
+
+const DUTY_ICON_SRC: Record<string, string> = {
+  FLOOR_BLUE,
+  CLEANER_PINK,
+  BUCKET_PINK,
+  TOILET_PINK,
+  TRASH_BLUE,
+  DISH_BLUE,
+  BRUSH_PINK,
+  SPRAY_BLUE,
 };
 
 interface ProgressBarProps {

@@ -37,7 +37,7 @@ type Task = {
   date: string; // YYYY-MM-DD
 };
 
-type TaskItem = { dutyId: number; task: Task };
+type TaskItem = { dutyName: string; task: Task };
 type FilterValue = 'all' | 'done' | 'undone';
 
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
@@ -67,8 +67,7 @@ const CalendarPage: React.FC = () => {
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
 
-  const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
-  const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
+     const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
 
   // API 데이터 로드
   const loadData = useCallback(async () => {
@@ -114,28 +113,36 @@ const CalendarPage: React.FC = () => {
 
       console.log('Debug - Progress response:', progressResponse.data);
 
-      // 플레이스 데이터에서 체크리스트 추출
-      const placeData = placeResponse?.data?.data || placeResponse?.data || {};
-      const duties = placeData.duties || [];
-      console.log('Debug - Duties from place API:', duties);
+             // 플레이스 데이터에서 체크리스트 추출
+       const placeData = placeResponse?.data?.data || placeResponse?.data || {};
+       const duties = placeData.duties || [];
+       console.log('🔍 [Calendar] 원본 duties 개수:', duties.length);
+       console.log('🔍 [Calendar] 원본 duties:', duties);
 
-             // 모든 체크리스트를 날짜별로 분류
-       const checklistDataByDate: Map<string, any[]> = new Map();
-       
-       duties.forEach((duty: any) => {
-         const checkLists = duty.checkLists || [];
-         checkLists.forEach((checklist: any) => {
-           // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
-           const checklistDate = checklist.date || selectedYMD; // 날짜 정보가 없으면 선택된 날짜 사용
-           
-           if (!checklistDataByDate.has(checklistDate)) {
-             checklistDataByDate.set(checklistDate, []);
-           }
-           
-                       checklistDataByDate.get(checklistDate)!.push({
-              ...checklist,
-              dutyId: duty.dutyId || duty.id
-            });
+                     // 모든 체크리스트를 날짜별로 분류
+        const checklistDataByDate: Map<string, Record<string, unknown>[]> = new Map();
+        
+        duties.forEach((duty: Record<string, unknown>) => {
+          const checkLists = (duty.checkLists as Record<string, unknown>[]) || [];
+          checkLists.forEach((checklist: Record<string, unknown>) => {
+                       // 각 체크리스트의 실제 날짜를 사용 (API에서 제공하는 날짜 정보 활용)
+            const checklistDate = String(checklist.date || selectedYMD); // 날짜 정보가 없으면 선택된 날짜 사용
+            
+            if (!checklistDataByDate.has(checklistDate)) {
+              checklistDataByDate.set(checklistDate, []);
+            }
+            
+                         const dutyName = duty.dutyName || duty.name || '당번';
+             console.log(`🔍 [Calendar] 체크리스트 처리:`, {
+               checklistName: checklist.cleaningName,
+               dutyName,
+               date: checklistDate
+             });
+             
+             checklistDataByDate.get(checklistDate)!.push({
+               ...checklist,
+               dutyName
+             });
          });
        });
 
@@ -144,9 +151,9 @@ const CalendarPage: React.FC = () => {
        
                checklistDataByDate.forEach((checklists, date) => {
           checklists.forEach((item: Record<string, unknown>) => {
-            allChecklists.push({
-              dutyId: item.dutyId as number,
-              task: {
+                         allChecklists.push({
+               dutyName: item.dutyName as string,
+               task: {
                 id: item.checkListId as number,
                 title: item.cleaningName as string,
                 isChecked: !!(item.completeTime || item.completedAt || item.completed),
@@ -159,8 +166,9 @@ const CalendarPage: React.FC = () => {
           });
         });
 
-              console.log('Debug - All checklists with dates:', allChecklists);
-       setChecklists(allChecklists);
+               console.log('🔍 [Calendar] 최종 체크리스트 개수:', allChecklists.length);
+               console.log('🔍 [Calendar] 최종 체크리스트:', allChecklists);
+        setChecklists(allChecklists);
 
        // 프로그레스 데이터를 체크리스트 데이터에서 계산 - 역할에 따라 다르게
        const progressMap = new Map<string, number>();
@@ -277,23 +285,64 @@ const CalendarPage: React.FC = () => {
         if (currentTask.task.isChecked) {
           // 완료된 상태면 취소
           console.log('🔍 체크리스트 취소 시도...');
-          await useChecklistApi.incompleteChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 취소 성공');
+          const response = await useChecklistApi.incompleteChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 취소 성공:', response.data);
+          
+          // 취소 시 상태 즉시 업데이트
+          setChecklists(prev => prev.map(item => {
+            if (item.task.id === taskId) {
+              return {
+                ...item,
+                task: {
+                  ...item.task,
+                  isChecked: false,
+                  completedAt: null,
+                  completedBy: null
+                }
+              };
+            }
+            return item;
+          }));
         } else {
           // 미완료 상태면 완료
           console.log('🔍 체크리스트 완료 시도...');
-          await useChecklistApi.completeChecklist(placeId, taskId);
-          console.log('✅ 체크리스트 완료 성공');
+          const response = await useChecklistApi.completeChecklist(placeId, taskId);
+          console.log('✅ 체크리스트 완료 성공:', response.data);
+          
+          // API 응답에서 endTime과 memberName 추출
+          const responseData = response.data?.data;
+          console.log('📄 API 응답 데이터:', responseData);
+          
+          if (responseData) {
+            console.log('📅 endTime:', responseData.endTime);
+            console.log('👤 membersName:', responseData.membersName);
+            
+            // 캘린더 상태 즉시 업데이트
+            setChecklists(prev => prev.map(item => {
+              if (item.task.id === taskId) {
+                return {
+                  ...item,
+                  task: {
+                    ...item.task,
+                    isChecked: true,
+                    completedAt: responseData.endTime ? String(responseData.endTime) : new Date().toISOString(),
+                    completedBy: responseData.membersName || '알 수 없음'
+                  }
+                };
+              }
+              return item;
+            }));
+          }
         }
 
-        // 성공 시 데이터 다시 로드
+        // 성공 시 데이터 다시 로드 (서버 상태 동기화)
         await loadData();
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('❌ 체크리스트 토글 실패:', err);
         console.error('❌ 에러 상세:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data
+          message: err instanceof Error ? err.message : 'Unknown error',
+          status: (err as any)?.response?.status,
+          data: (err as any)?.response?.data
         });
         setError('체크리스트 상태 변경에 실패했습니다.');
       }
@@ -322,7 +371,7 @@ const CalendarPage: React.FC = () => {
 
       // 성공 메시지 (선택사항)
       console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('❌ [Calendar] 체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
     }
@@ -606,30 +655,30 @@ const CalendarPage: React.FC = () => {
                   해당 날짜에 청소 일정이 없습니다.
                 </p>
               </div>
-            ) : (
-                             displayedItems.map(({ dutyId, task }) => (
-                 <SwipeableRow
-                   key={task.id}
-                   // disabled={!isManager}
-                   onToggle={() => handleToggleChecklist(task.id)}
-                 >
-                   <div>
-                     <CalendarTaskCard
-                       title={task.title}
-                       dangbun={String(dutyId)}
-                       isChecked={task.isChecked}
-                       isCamera={task.isCamera}
-                       completedAt={task.completedAt}
-                       completedBy={task.completedBy}
-                       onMenuClick={() => {
-                         setSelectTask(task);
-                         setIsSelectOpen(true);
-                       }}
-                     />
-                   </div>
-                 </SwipeableRow>
-               ))
-            )}
+                         ) : (
+                              displayedItems.map(({ dutyName, task }) => (
+                  <SwipeableRow
+                    key={task.id}
+                    // disabled={!isManager}
+                    onToggle={() => handleToggleChecklist(task.id)}
+                  >
+                    <div>
+                      <CalendarTaskCard
+                        title={task.title}
+                        dangbun={dutyName}
+                        isChecked={task.isChecked}
+                        isCamera={task.isCamera}
+                        completedAt={task.completedAt}
+                        completedBy={task.completedBy}
+                        onMenuClick={() => {
+                          setSelectTask(task);
+                          setIsSelectOpen(true);
+                        }}
+                      />
+                    </div>
+                  </SwipeableRow>
+                ))
+             )}
           </div>
         </div>
       </div>
@@ -665,11 +714,11 @@ const CalendarPage: React.FC = () => {
               state: {
                 placeId:
                   state?.placeId ?? Number(localStorage.getItem('placeId')),
-                checklistId: checklistId,
-                                 taskTitle: selectTask.title,
-                 dutyId:
-                   displayedItems.find((item) => item.task.id === selectTask.id)
-                     ?.dutyId || 0,
+                                 checklistId: checklistId,
+                                  taskTitle: selectTask.title,
+                  dutyName:
+                    displayedItems.find((item) => item.task.id === selectTask.id)
+                      ?.dutyName || '당번',
               },
             });
           }}
@@ -702,10 +751,10 @@ const CalendarPage: React.FC = () => {
         onRequestClose={() => setIsPhotoOpen(false)}
         hasPhoto={selectTask?.isCamera || false}
         taskTitle={selectTask?.title || '청소'}
-                 dutyName={
-           String(displayedItems.find((item) => item.task.id === selectTask?.id)
-             ?.dutyId || '당번')
-         }
+                          dutyName={
+            displayedItems.find((item) => item.task.id === selectTask?.id)
+              ?.dutyName || '당번'
+          }
         photoUrl={
           selectTask?.isCamera
             ? 'https://via.placeholder.com/264x196/4D83FD/FFFFFF?text=청소+사진'
