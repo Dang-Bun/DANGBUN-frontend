@@ -151,7 +151,7 @@ const Join = () => {
                     fontSize={16}
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
-                    maxLength={15}
+                    maxLength={10}
                   />
                 ) : (
                   <Dropdown

@@ -106,61 +106,54 @@ const MemberList: React.FC = () => {
 
         {!loading && !err && members.length > 0 && (
           <div className='flex flex-col gap-0'>
-            {members
-              .slice()
-              .sort((a, b) => {
-                if (a.role === '매니저' && b.role !== '매니저') return -1;
-                if (a.role !== '매니저' && b.role === '매니저') return 1;
-                return 0;
-              })
-              .map((m, idx) => {
-                const isManager = m.role === '매니저';
-                const badgeClass = isManager
-                  ? 'bg-indigo-100 text-blue-500'
-                  : 'bg-[#ebfff6] text-[#00dc7b]';
-                const badgeText = isManager ? '매니저' : '멤버';
-                const firstDuty = m.dutyName?.[0] ?? '미지정';
+            {members.map((m, idx) => {
+              const isManager = m.role === '매니저';
+              const badgeClass = isManager
+                ? 'bg-indigo-100 text-blue-500'
+                : 'bg-[#ebfff6] text-[#00dc7b]';
+              const badgeText = isManager ? '매니저' : '멤버';
+              const firstDuty = m.dutyName?.[0] ?? '미지정';
 
-                return (
+              return (
+                <div
+                  key={m.memberId}
+                  className='flex flex-row gap-4.5 cursor-pointer'
+                  onClick={() =>
+                    navigate('/managerInfo', {
+                      state: {
+                        memberId: m.memberId,
+                      },
+                    })
+                  }
+                >
+                  {/* 역할 배지 */}
                   <div
-                    key={m.memberId}
-                    className='flex flex-row gap-4.5 cursor-pointer'
-                    onClick={() =>
-                      navigate('/managerInfo', {
-                        state: {
-                          memberId: m.memberId,
-                        },
-                      })
-                    }
+                    className={`flex w-[61px] h-7 my-4 rounded-lg justify-center items-center text-sm font-semibold ${badgeClass}`}
                   >
-                    {/* 역할 배지 */}
-                    <div
-                      className={`flex w-[61px] h-7 my-4 rounded-lg justify-center items-center text-sm font-semibold ${badgeClass}`}
-                    >
-                      {badgeText}
-                    </div>
-
-                    {/* 멤버 한 줄 */}
-                    <div className='flex-1'>
-                      <div className='flex flex-row justify-between items-center w-[271px] my-4'>
-                        <p className='text-base font-semibold'>{m.name}</p>
-                        <button className='flex flex-row items-center justify-center gap-4.5 cursor-pointer'>
-                          <p className='text-zinc-500 text-sm'>{firstDuty}</p>
-                          <img
-                            src={rightArrow}
-                            alt='더보기'
-                            className='w-1.5 h-3'
-                          />
-                        </button>
-                      </div>
-                      {/* 구분선 (마지막 아이템 제외하고 표시하려면 idx 체크) */}
-                      {idx < members.length - 1 && (
-                        <img src={GrayLine} alt='구분선' />
-                      )}
-                    </div>
+                    {badgeText}
                   </div>
-                );
-              })}
+
+                  {/* 멤버 한 줄 */}
+                  <div className='flex-1'>
+                    <div className='flex flex-row justify-between items-center w-[271px] my-4'>
+                      <p className='text-base font-semibold'>{m.name}</p>
+                      <button className='flex flex-row items-center justify-center gap-4.5 cursor-pointer'>
+                        <p className='text-zinc-500 text-sm'>{firstDuty}</p>
+                        <img
+                          src={rightArrow}
+                          alt='더보기'
+                          className='w-1.5 h-3'
+                        />
+                      </button>
+                    </div>
+                    {/* 구분선 (마지막 아이템 제외하고 표시하려면 idx 체크) */}
+                    {idx < members.length - 1 && (
+                      <img src={GrayLine} alt='구분선' />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -7,8 +7,6 @@ import grayPlus from '../../assets/header/GrayPlus.svg';
 import DangbunList from '../../components/cleanUp/DangbunList2';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
-import { useDutyApi } from './../../hooks/useDutyApi';
-import { div } from 'framer-motion/client';
 
 type MemberInfoResp = {
   member: {
@@ -33,6 +31,17 @@ const ManagerInfo: React.FC = () => {
   // 당번 설정(기존 UI용)
   const [count, setCount] = useState(1);
   const [myId, setMyId] = useState<number[]>([]);
+  // 선택된 dutyId 목록 (빈 슬롯은 null)
+  const [selectedDutyIds, setSelectedDutyIds] = useState<Array<number | null>>(
+    []
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    const ids = (data.duties ?? []).map((d) => d.dutyId);
+    // 최소 1행은 보이도록
+    setSelectedDutyIds(ids.length ? ids : [null]);
+  }, [data]);
 
   useEffect(() => {
     const effecthandle = async () => {
@@ -88,26 +97,17 @@ const ManagerInfo: React.FC = () => {
   const duties = data?.duties ?? [];
   const informations = data?.member?.information ?? {};
 
-  const handleAssignToDuty = async (dutyId: number) => {
-    if (!placeId || !dutyId || !memberId) return;
+  const handleAssignToDuty = async (dutyId: number): Promise<boolean> => {
+    if (!placeId || !dutyId || !memberId) return false;
     try {
       setAssignLoading(true);
-      // payload는 문서 예시대로 { memberIds: [1,2,3] }
-      const payload = { memberIds: [memberId] };
-      const res = await useDutyApi.addMember(placeId, dutyId, payload);
-
-      if (res.data?.code === 20000) {
-        alert('멤버를 당번에 추가했어요.');
-        // 필요하다면 재조회
-        // const refreshed = await useMemberApi.get(placeId, memberId);
-        // setData(refreshed.data?.data ?? null);
-      } else {
-        alert(res.data?.message ?? '추가에 실패했어요.');
-      }
+      const res = await useMemberApi.setDangbun(placeId, memberId, dutyId);
+      return res?.data?.code === 20000;
     } catch (e: any) {
-      alert(
-        e?.response?.data?.message ?? e?.message ?? '추가 중 오류가 발생했어요.'
-      );
+      const msg = e?.response?.data?.message ?? e?.message;
+      // ✅ 문자열 비교는 이렇게!
+      alert(msg ?? '추가 중 오류가 발생했어요.');
+      return false;
     } finally {
       setAssignLoading(false);
     }
@@ -201,20 +201,39 @@ const ManagerInfo: React.FC = () => {
       <div className='w-full max-w-[353px] flex flex-col gap-3'>
         <p className='text-xl font-normal'>당번 지정</p>
 
-        {Array.from({ length: count }, (_, index) => (
+        {selectedDutyIds.map((value, index) => (
           <DangbunList
             key={index}
             placeId={placeId}
-            // 🔽 DangbunList가 선택한 dutyId를 넘겨주도록 연결
-            onSelectDuty={(dutyId) => handleAssignToDuty(dutyId)}
+            value={value} // ✅ 컨트롤드 value
+            onSelectDuty={async (dutyId) => {
+              const prev = selectedDutyIds[index] ?? null; // 🔸 이전 선택 보관
+              // 낙관적 업데이트
+              setSelectedDutyIds((prevArr) => {
+                const next = [...prevArr];
+                next[index] = dutyId;
+                return next;
+              });
+
+              const ok = await handleAssignToDuty(dutyId);
+              if (!ok) {
+                // 🔁 실패/중복이면 이전 선택으로 롤백
+                setSelectedDutyIds((prevArr) => {
+                  const next = [...prevArr];
+                  next[index] = prev;
+                  return next;
+                });
+              }
+            }}
           />
         ))}
 
         <div className='relative'>
           <button
             className='cursor-pointer h-14 w-[353px] rounded-lg outline-1 outline-dashed outline-offset-[-1px] outline-neutral-200'
-            onClick={() => setCount((c) => c + 1)}
+            onClick={() => setSelectedDutyIds((prev) => [...prev, null])}
           />
+
           <img src={grayPlus} alt='추가' className='absolute top-3.5 left-40' />
         </div>
       </div>
