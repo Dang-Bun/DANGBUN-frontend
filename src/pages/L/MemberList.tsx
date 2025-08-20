@@ -112,7 +112,7 @@ const MemberList: React.FC = () => {
                 ? 'bg-indigo-100 text-blue-500'
                 : 'bg-[#ebfff6] text-[#00dc7b]';
               const badgeText = isManager ? '매니저' : '멤버';
-              const firstDuty = m.dutyName?.[0] ?? '-';
+              const firstDuty = m.dutyName?.[0] ?? '미지정';
 
               return (
                 <div
