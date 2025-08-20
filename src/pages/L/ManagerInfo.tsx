@@ -8,7 +8,6 @@ import DangbunList from '../../components/cleanUp/DangbunList2';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from './../../hooks/useDutyApi';
-import { div } from 'framer-motion/client';
 
 type MemberInfoResp = {
   member: {
@@ -33,6 +32,17 @@ const ManagerInfo: React.FC = () => {
   // 당번 설정(기존 UI용)
   const [count, setCount] = useState(1);
   const [myId, setMyId] = useState<number[]>([]);
+  // 선택된 dutyId 목록 (빈 슬롯은 null)
+  const [selectedDutyIds, setSelectedDutyIds] = useState<Array<number | null>>(
+    []
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    const ids = (data.duties ?? []).map((d) => d.dutyId);
+    // 최소 1행은 보이도록
+    setSelectedDutyIds(ids.length ? ids : [null]);
+  }, [data]);
 
   useEffect(() => {
     const effecthandle = async () => {
@@ -201,20 +211,30 @@ const ManagerInfo: React.FC = () => {
       <div className='w-full max-w-[353px] flex flex-col gap-3'>
         <p className='text-xl font-normal'>당번 지정</p>
 
-        {Array.from({ length: count }, (_, index) => (
+        {selectedDutyIds.map((value, index) => (
           <DangbunList
             key={index}
             placeId={placeId}
-            // 🔽 DangbunList가 선택한 dutyId를 넘겨주도록 연결
-            onSelectDuty={(dutyId) => handleAssignToDuty(dutyId)}
+            value={value} // ✅ 미리 선택
+            onSelectDuty={(dutyId) => {
+              // ✅ 선택 변경 시 반영 + (선택적으로) API 호출
+              setSelectedDutyIds((prev) => {
+                const next = [...prev];
+                next[index] = dutyId;
+                return next;
+              });
+              // 이미 배정 API를 바로 칠 거면 유지
+              handleAssignToDuty(dutyId);
+            }}
           />
         ))}
 
         <div className='relative'>
           <button
             className='cursor-pointer h-14 w-[353px] rounded-lg outline-1 outline-dashed outline-offset-[-1px] outline-neutral-200'
-            onClick={() => setCount((c) => c + 1)}
+            onClick={() => setSelectedDutyIds((prev) => [...prev, null])}
           />
+
           <img src={grayPlus} alt='추가' className='absolute top-3.5 left-40' />
         </div>
       </div>
