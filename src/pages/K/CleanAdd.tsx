@@ -132,6 +132,7 @@ const CleanAdd = () => {
   //dangbun
 
   const [dangbun, setDangbun] = useState('');
+  const [selectedDutyId, setSelectedDutyId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
@@ -195,7 +196,7 @@ const CleanAdd = () => {
     try {
       const data = {
         cleaningName: name,
-        dutyName: dangbun,
+        dutyId: selectedDutyId,
         members: filteredMembers,
         needPhoto: checked1,
         repeatType: DAILY_MAP[selectedCycle],
@@ -386,7 +387,15 @@ const CleanAdd = () => {
         <p className='text-lg font-normal leading-relaxed'>당번 지정</p>
         <DangbunList
           placeId={placeId}
-          onChange={(value) => setDangbun(value)}
+          onChange={(value) => {
+            if (typeof value === 'string') {
+              setDangbun(value);
+              setSelectedDutyId(null);
+            } else {
+              setDangbun(value.dutyName);
+              setSelectedDutyId(value.dutyId);
+            }
+          }}
         />
       </div>
       <div
