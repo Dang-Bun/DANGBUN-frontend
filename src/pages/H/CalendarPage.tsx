@@ -37,7 +37,7 @@ type Task = {
   date: string; // YYYY-MM-DD
 };
 
-type TaskItem = { dutyId: number; dutyName: string; task: Task };
+type TaskItem = { dutyId: number; task: Task };
 type FilterValue = 'all' | 'done' | 'undone';
 
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
@@ -132,34 +132,32 @@ const CalendarPage: React.FC = () => {
              checklistDataByDate.set(checklistDate, []);
            }
            
-           checklistDataByDate.get(checklistDate)!.push({
-             ...checklist,
-             dutyName: duty.dutyName || duty.name,
-             dutyId: duty.dutyId || duty.id
-           });
+                       checklistDataByDate.get(checklistDate)!.push({
+              ...checklist,
+              dutyId: duty.dutyId || duty.id
+            });
          });
        });
 
               // 모든 날짜의 체크리스트를 하나의 배열로 변환
        const allChecklists: TaskItem[] = [];
        
-       checklistDataByDate.forEach((checklists, date) => {
-         checklists.forEach((item: Record<string, unknown>) => {
-           allChecklists.push({
-             dutyId: item.dutyId as number,
-             dutyName: item.dutyName as string,
-             task: {
-               id: item.checkListId as number,
-               title: item.cleaningName as string,
-               isChecked: !!(item.completeTime || item.completedAt || item.completed),
-               isCamera: !!(item.needPhoto || item.isCamera),
-               completedAt: item.completeTime || item.completedAt || null,
-               completedBy: item.completedBy as string || null,
-               date: date, // 실제 날짜 사용
-             },
-           });
-         });
-       });
+               checklistDataByDate.forEach((checklists, date) => {
+          checklists.forEach((item: Record<string, unknown>) => {
+            allChecklists.push({
+              dutyId: item.dutyId as number,
+              task: {
+                id: item.checkListId as number,
+                title: item.cleaningName as string,
+                isChecked: !!(item.completeTime || item.completedAt || item.completed),
+                isCamera: !!(item.needPhoto || item.isCamera),
+                completedAt: item.completeTime || item.completedAt ? String(item.completeTime || item.completedAt) : null,
+                completedBy: item.completedBy as string || null,
+                date: date, // 실제 날짜 사용
+              },
+            });
+          });
+        });
 
               console.log('Debug - All checklists with dates:', allChecklists);
        setChecklists(allChecklists);
@@ -609,28 +607,28 @@ const CalendarPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              displayedItems.map(({ dutyName, task }) => (
-                <SwipeableRow
-                  key={task.id}
-                  // disabled={!isManager}
-                  onToggle={() => handleToggleChecklist(task.id)}
-                >
-                  <div>
-                    <CalendarTaskCard
-                      title={task.title}
-                      dangbun={dutyName}
-                      isChecked={task.isChecked}
-                      isCamera={task.isCamera}
-                      completedAt={task.completedAt}
-                      completedBy={task.completedBy}
-                      onMenuClick={() => {
-                        setSelectTask(task);
-                        setIsSelectOpen(true);
-                      }}
-                    />
-                  </div>
-                </SwipeableRow>
-              ))
+                             displayedItems.map(({ dutyId, task }) => (
+                 <SwipeableRow
+                   key={task.id}
+                   // disabled={!isManager}
+                   onToggle={() => handleToggleChecklist(task.id)}
+                 >
+                   <div>
+                     <CalendarTaskCard
+                       title={task.title}
+                       dangbun={String(dutyId)}
+                       isChecked={task.isChecked}
+                       isCamera={task.isCamera}
+                       completedAt={task.completedAt}
+                       completedBy={task.completedBy}
+                       onMenuClick={() => {
+                         setSelectTask(task);
+                         setIsSelectOpen(true);
+                       }}
+                     />
+                   </div>
+                 </SwipeableRow>
+               ))
             )}
           </div>
         </div>
@@ -668,10 +666,10 @@ const CalendarPage: React.FC = () => {
                 placeId:
                   state?.placeId ?? Number(localStorage.getItem('placeId')),
                 checklistId: checklistId,
-                taskTitle: selectTask.title,
-                dutyName:
-                  displayedItems.find((item) => item.task.id === selectTask.id)
-                    ?.dutyName || '',
+                                 taskTitle: selectTask.title,
+                 dutyId:
+                   displayedItems.find((item) => item.task.id === selectTask.id)
+                     ?.dutyId || 0,
               },
             });
           }}
@@ -704,10 +702,10 @@ const CalendarPage: React.FC = () => {
         onRequestClose={() => setIsPhotoOpen(false)}
         hasPhoto={selectTask?.isCamera || false}
         taskTitle={selectTask?.title || '청소'}
-        dutyName={
-          displayedItems.find((item) => item.task.id === selectTask?.id)
-            ?.dutyName || '당번'
-        }
+                 dutyName={
+           String(displayedItems.find((item) => item.task.id === selectTask?.id)
+             ?.dutyId || '당번')
+         }
         photoUrl={
           selectTask?.isCamera
             ? 'https://via.placeholder.com/264x196/4D83FD/FFFFFF?text=청소+사진'

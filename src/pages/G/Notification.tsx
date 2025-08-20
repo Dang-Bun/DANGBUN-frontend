@@ -73,17 +73,19 @@ const Notification: React.FC = () => {
 				return;
 			}
 			
-			const notifications: NotificationItem[] = data.map((item: Record<string, unknown>, index: number) => {
+			const notifications: NotificationItem[] = (Array.isArray(data) ? data : []).map((item: Record<string, unknown>) => {
 				// 서버에서 가져온 ID 사용
 				let itemId: string | number | undefined;
 				
 				if (tab === 'inbox') {
 					// 받은 알림: notificationReceiverId.notificationId 사용
 					const notificationReceiverId = item.notificationReceiverId as Record<string, unknown> | undefined;
-					itemId = notificationReceiverId?.notificationId as string | number | undefined;
+					const notificationId = notificationReceiverId?.notificationId;
+					itemId = notificationId ? String(notificationId) : undefined;
 				} else {
 					// 보낸 알림: 직접 id 또는 notificationId 사용
-					itemId = item.id || item.notificationId;
+					const id = item.id || item.notificationId;
+					itemId = id ? String(id) : undefined;
 				}
 				
 				if (!itemId) {
@@ -126,8 +128,9 @@ const Notification: React.FC = () => {
 					// 보낸 알림: 현재 사용자가 보낸 사람
 					senderName = currentUser?.name || '나';
 					// 받는 사람들 정보
-					if (Array.isArray(item.receivers || item.recipients)) {
-						receivers = (item.receivers || item.recipients).map((r: unknown) => ({
+					const receiversData = item.receivers || item.recipients;
+					if (Array.isArray(receiversData)) {
+						receivers = receiversData.map((r: unknown) => ({
 							id: Number((r as Record<string, unknown>)?.id || 0),
 							name: String((r as Record<string, unknown>)?.name || '')
 						}));
@@ -248,12 +251,12 @@ const Notification: React.FC = () => {
 			const optimistic: NotificationItem = {
 				id: String(jc.id ?? jc.notificationId ?? Date.now()),
 				type: 'transmit',
-				title: jc.title ?? (jc.template ? getTitle(jc.template) : '알림'),
-				descript: jc.content ?? jc.message ?? '',
-				timeAgo: jc.createdAt ?? new Date().toISOString(),
+				title: String(jc.title ?? (jc.template ? getTitle(String(jc.template)) : '알림')),
+				descript: String(jc.content ?? jc.message ?? ''),
+				timeAgo: String(jc.createdAt ?? new Date().toISOString()),
 				read: false,
-				senderName: jc.senderName || '나',
-				receivers: jc.receivers || [],
+				senderName: String(jc.senderName || '나'),
+				receivers: Array.isArray(jc.receivers) ? jc.receivers : [],
 			};
 			
 			// 보낸 알림 탭에만 추가
