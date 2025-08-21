@@ -1,4 +1,9 @@
 import { useChecklistApi } from '../../hooks/useChecklistApi';
+import type {
+  ApiEnvelope,
+  PhotoAccessData,
+  CreateUploadUrlResponse,
+} from '../../hooks/useChecklistApi';
 
 /** 체크박스 토글 (완료/해제) */
 export async function toggleChecklistRemote(
@@ -27,63 +32,46 @@ export async function uploadChecklistPhotoRemote(
   checklistId: number,
   file: File
 ) {
-  // 1) presigned URL 발급 (Envelope 대응)
+  // 1) presign
   const {
-    data: { data: presignRaw },
-  } = await useChecklistApi.createPhotoUploadUrl(placeId, checklistId, {
-    originalFileName: file.name,
-    contentType: file.type || 'application/octet-stream',
-  });
-  const presign = presignRaw ?? {}; // { uploadUrl, s3Key }
+    data: { data: presign },
+  }: { data: ApiEnvelope<CreateUploadUrlResponse> } =
+    await useChecklistApi.createPhotoUploadUrl(placeId, checklistId, {
+      originalFileName: file.name,
+      contentType: file.type || 'application/octet-stream',
+    });
 
-  // 기본 검증
-  if (!presign.uploadUrl) throw new Error('presign.uploadUrl가 비어 있습니다.');
-  let presignUrl: URL;
-  try {
-    presignUrl = new URL(presign.uploadUrl);
-  } catch {
-    throw new Error(
-      `presign.uploadUrl가 절대 URL이 아닙니다: ${presign.uploadUrl}`
-    );
-  }
-
-  // 2) S3로 PUT
-  // - presign의 SignedHeaders에 content-type이 포함되었는지에 따라 헤더 결정
-  const signedHeadersParam =
-    presignUrl.searchParams.get('X-Amz-SignedHeaders') ??
-    presignUrl.searchParams.get('x-amz-signedheaders') ??
-    '';
-  const signedHeaders = decodeURIComponent(signedHeadersParam).toLowerCase();
-
-  const contentType = file.type || 'application/octet-stream';
+  // 2) S3 PUT
+  const url = new URL(presign.uploadUrl);
+  const signed = decodeURIComponent(
+    url.searchParams.get('X-Amz-SignedHeaders') ?? ''
+  ).toLowerCase();
   const headers: Record<string, string> = {};
-  if (signedHeaders.includes('content-type')) {
-    headers['Content-Type'] = contentType; // 서명에 포함된 경우만 설정
-  }
+  if (signed.includes('content-type'))
+    headers['Content-Type'] = file.type || 'application/octet-stream';
 
-  const putResp = await fetch(presign.uploadUrl, {
+  const put = await fetch(presign.uploadUrl, {
     method: 'PUT',
     headers,
     body: file,
     mode: 'cors',
     credentials: 'omit',
   });
-
-  if (!putResp.ok) {
-    const body = await putResp.text().catch(() => '');
-    throw new Error(`파일 업로드 실패 ${putResp.status}: ${body}`);
-  }
+  if (!put.ok)
+    throw new Error(
+      `파일 업로드 실패 ${put.status}: ${await put.text().catch(() => '')}`
+    );
 
   // 3) 완료 콜백
   await useChecklistApi.completePhotoUpload(placeId, checklistId, {
     s3Key: presign.s3Key,
   });
 
-  // 4) (선택) 접근 URL 조회 (Envelope 대응)
-  const { data: env } = await useChecklistApi.getPhotoAccessUrl(
-    placeId,
-    checklistId
-  );
-  const accessUrl = (env?.data ?? env)?.accessUrl;
-  return accessUrl; // 필요 없으면 호출부에서 무시 가능
+  // 4) 접근 URL (여기가 포인트)
+  const {
+    data: { data: photo },
+  }: { data: ApiEnvelope<PhotoAccessData> } =
+    await useChecklistApi.getPhotoAccessUrl(placeId, checklistId);
+
+  return photo.accessUrl; // ✅ 타입 확정
 }
