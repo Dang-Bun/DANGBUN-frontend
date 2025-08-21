@@ -697,67 +697,74 @@ const MemberHome: React.FC = () => {
         </div>
       </div>
 
-      {/* 목록 */}
-      <main className='relative z-10 px-5 flex flex-col flex-grow min-h-0'>
-        {/* 필터 섹션 - 항상 표시 */}
-        <div className='flex justify-between items-center mb-4'>
-          <div className='relative flex items-center'>
-            <h2 className='text-[14px] pl-1 text-[#4D83FD] font-semibold'>
-              {filter === 'all'
-                ? '전체 청소'
-                : filter === 'ing'
-                  ? '달성 미완료'
-                  : '달성 완료'}
-            </h2>
-            <img
-              src={toggle}
-              alt='정렬'
-              onClick={() => setMemberPopUp(!memberPopUp)}
-              className='w-5 h-5 cursor-pointer'
-            />
-            {memberPopUp && (
-              <div className='absolute ml-5 top-[calc(100%+10px)] z-50'>
-                <CategoryChip onSelect={handleFilterSelect} />
-              </div>
-            )}
+      {/* 고정된 상단 영역 */}
+      <div className="relative z-10 flex-shrink-0">
+        {/* 고정된 필터 섹션 */}
+        <div className="px-5 pb-4 bg-white">
+          <div className="flex justify-between items-center">
+            <div className="relative flex items-center">
+              <h2 className="text-[14px] pl-1 text-[#4D83FD] font-semibold">
+                {filter === 'all'
+                  ? '전체 청소'
+                  : filter === 'ing'
+                    ? '달성 미완료'
+                    : '달성 완료'}
+              </h2>
+              <img
+                src={toggle}
+                alt="정렬"
+                onClick={() => setMemberPopUp(!memberPopUp)}
+                className="w-5 h-5 cursor-pointer"
+              />
+              {memberPopUp && (
+                <div className="absolute ml-5 top-[calc(100%+10px)] z-50">
+                  <CategoryChip onSelect={handleFilterSelect} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* 체크리스트 카드 섹션 */}
-        {hasChecklist ? (
-          <div className='flex flex-col gap-3 overflow-y-auto pb-24 no-scrollbar'>
-            {visibleTasks.map((t) => (
-              <TaskCard
-                key={`${t.dutyId}:${t.cleaningId}`}
-                title={t.title}
-                dueTime={t.dueTime ?? ''}
-                members={t.members}
-                memberCount={t.memberCount}
-                isCamera={t.isCamera}
-                isChecked={t.isChecked}
-                completedAt={t.completedAt ?? undefined}
-                completedBy={t.completedBy ?? undefined}
-                // 멤버홈 전용: 내가 담당자가 아니면 disabled
-                disabled={!t.mine}
-                onToggle={() =>
-                  t.mine ? toggleTask(t.dutyId, t.cleaningId) : undefined
-                }
-                onCameraClick={() =>
-                  t.mine &&
-                  !t.isChecked &&
-                  t.isCamera &&
-                  openUploadFor(t.dutyId, t.cleaningId, t.checklistId)
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <section className='w-full mt-6 flex flex-col items-center text-center'>
-            <p className='text-[13px] text-[#99A2AE]'>
-              표시할 체크리스트가 없습니다.
-            </p>
-          </section>
-        )}
+      {/* 스크롤 가능한 목록 영역 */}
+      <main className="relative z-10 flex flex-col flex-grow min-h-0 w-full overflow-hidden">
+        <div className="px-5 w-full">
+          {/* 체크리스트 카드 섹션 */}
+          {hasChecklist ? (
+            <div className="flex flex-col gap-3 overflow-y-auto overflow-x-hidden pb-24 no-scrollbar w-full">
+              {visibleTasks.map((t) => (
+                <TaskCard
+                  key={`${t.dutyId}:${t.cleaningId}`}
+                  title={t.title}
+                  dueTime={t.dueTime ?? ''}
+                  members={t.members}
+                  memberCount={t.memberCount}
+                  isCamera={t.isCamera}
+                  isChecked={t.isChecked}
+                  completedAt={t.completedAt ?? undefined}
+                  completedBy={t.completedBy ?? undefined}
+                  // 멤버홈 전용: 내가 담당자가 아니면 disabled
+                  disabled={!t.mine}
+                  onToggle={() =>
+                    t.mine ? toggleTask(t.dutyId, t.cleaningId) : undefined
+                  }
+                  onCameraClick={() =>
+                    t.mine &&
+                    !t.isChecked &&
+                    t.isCamera &&
+                    openUploadFor(t.dutyId, t.cleaningId, t.checklistId)
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <section className="w-full mt-6 flex flex-col items-center text-center">
+              <p className="text-[13px] text-[#99A2AE]">
+                표시할 체크리스트가 없습니다.
+              </p>
+            </section>
+          )}
+        </div>
       </main>
 
       <div className='flex-shrink-0 z-10'>
