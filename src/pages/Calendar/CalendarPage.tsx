@@ -490,6 +490,9 @@ const CalendarPage: React.FC = () => {
 
       // 성공 메시지 (선택사항)
       console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
+      
+      // 삭제 성공 후 페이지 새로고침
+      window.location.reload();
     } catch (err: unknown) {
       console.error('❌ [Calendar] 체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
