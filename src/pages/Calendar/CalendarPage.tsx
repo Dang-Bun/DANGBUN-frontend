@@ -17,6 +17,7 @@ import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
+import CleaningDeletePopUp from '../../components/home/CleaningDeletePopUp';
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
@@ -91,7 +92,9 @@ const CalendarPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
+  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<number | null>(null);
 
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
@@ -786,18 +789,27 @@ const CalendarPage: React.FC = () => {
                   key={task.id}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
-                  <CalendarTaskCard
-                    title={task.title}
-                    dangbun={dutyName}
-                    isChecked={task.isChecked}
-                    isCamera={task.isCamera}
-                    completedAt={task.completedAt} // 현재 null (API에 없으니)
-                    completedBy={task.completedBy} // memberName에서 세팅됨
-                    onMenuClick={() => {
-                      setSelectTask({ ...task, date: selectedYMD });
-                      setIsSelectOpen(true);
-                    }}
-                  />
+                                     <CalendarTaskCard
+                     title={task.title}
+                     dangbun={dutyName}
+                     isChecked={task.isChecked}
+                     isCamera={task.isCamera}
+                     completedAt={task.completedAt} // 현재 null (API에 없으니)
+                     completedBy={task.completedBy} // memberName에서 세팅됨
+
+                     onMenuClick={() => {
+                       setSelectTask({ ...task, date: selectedYMD });
+                       setOpenDeletePopUpTaskId(openDeletePopUpTaskId === task.id ? null : task.id);
+                     }}
+                     showDeletePopUp={openDeletePopUpTaskId === task.id}
+                     onDeleteSelect={(type) => {
+                       console.log('🔍 삭제 선택:', type, task.id);
+                       if (type === 'name') {
+                         setOpenDeletePopUpTaskId(null);
+                         setIsDeleteOpen(true);
+                       }
+                     }}
+                   />
                 </SwipeableRow>
               ))
             )}
