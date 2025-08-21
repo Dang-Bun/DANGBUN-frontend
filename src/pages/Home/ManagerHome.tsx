@@ -752,8 +752,8 @@ const ManagerHome: React.FC = () => {
       </div>
 
       {/* 스크롤 가능한 목록 영역 */}
-      <main className='relative z-10 flex flex-col flex-grow min-h-0 w-full overflow-hidden'>
-        <div className='px-5 w-full'>
+      <main className='relative z-10 flex flex-col min-h-0 w-full overflow-auto no-scrollbar'>
+        <div className='px-2 w-full'>
           {/* 체크리스트 카드 섹션 */}
           {hasChecklist ? (
             <div className='flex flex-col gap-3 overflow-y-auto overflow-x-hidden pb-24 no-scrollbar w-full'>
