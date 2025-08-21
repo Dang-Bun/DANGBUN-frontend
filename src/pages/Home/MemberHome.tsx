@@ -99,32 +99,6 @@ const ICON_ALIASES: Record<string, DutyIconKey> = {
   SPRAY: 'SPRAY_BLUE',
 };
 
-// API 응답 데이터가 배열이 아닐 경우 배열로 변환
-const toArray = (x: unknown): unknown[] => {
-  if (Array.isArray(x)) return x;
-
-  const xObj = x as Record<string, any>;
-  if (Array.isArray(xObj?.data?.data?.duties)) {
-    return (xObj.data?.data?.duties as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.duties)) {
-    return (xObj.data?.duties as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.data?.tasks)) {
-    return (xObj.data?.data?.tasks as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.tasks)) {
-    return (xObj.data?.tasks as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.data)) {
-    return (xObj.data?.data as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data)) {
-    return (xObj.data as unknown[]) || [];
-  }
-  return [];
-};
-
 // ====== TaskUI에 cleaningId/checklistId 분리 ======
 type TaskUI = {
   cleaningId: number; // UI용(목록/키)
