@@ -275,8 +275,8 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
                         </p>
                       )}
 
-                      <div
-                        className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
+                      <button
+                        className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center cursor-pointer'
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePlus(cleaning);
@@ -286,9 +286,9 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
                         <img
                           src={plus}
                           alt='추가하기'
-                          className='cursor-pointer'
+                          className='pointer-events-none'
                         />
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>{' '}

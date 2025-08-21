@@ -42,7 +42,10 @@ const UnDangbun = () => {
       <HeaderBar
         title='당번 미지정 청소'
         onBackClick={() => {
-          navigate('/cleanuplist', { state: { data: { placeId } } });
+          console.log(placeId);
+          navigate('/cleanuplist', {
+            state: { data: { placeId: placeId.placeId } },
+          });
         }}
       />
 
