@@ -612,49 +612,35 @@ const MemberHome: React.FC = () => {
     }
 
     try {
-      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(
-        pid,
-        checklistId,
-        {
-          originalFileName: file.name,
-          contentType: file.type || 'application/octet-stream',
-        }
-      );
+      const {
+        data: { data: presign },
+      } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
+        originalFileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+      });
 
-      console.log('presign:', presign);
-      if (!presign?.uploadUrl || !/^https?:\/\//.test(presign.uploadUrl)) {
+      if (!presign?.uploadUrl?.startsWith('http')) {
+        console.error('Invalid presign:', presign);
         throw new Error(`잘못된 presign URL: ${String(presign?.uploadUrl)}`);
       }
 
-      // ── S3 업로드 단계 ──
+      // S3 PUT (presign 서명에 Content-Type 포함되어 있으므로 동일하게 전송)
       const put = await fetch(presign.uploadUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' }, // presign에 포함했을 때만!
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
         body: file,
         mode: 'cors',
         credentials: 'omit',
       });
       if (!put.ok) {
         const body = await put.text();
-        throw new Error(`S3 PUT 실패 ${put.status}: ${body}`);
+        throw new Error(`S3 업로드 실패 ${put.status}: ${body}`);
       }
-      console.log('✅ S3 PUT 성공');
 
-      // ── 완료 콜 단계 ──
-      console.log(
-        'completePhotoUpload -> pid:',
-        pid,
-        'checklistId:',
-        checklistId,
-        's3Key:',
-        presign.s3Key
-      );
-      if (checklistId == null) throw new Error('checklistId가 비어 있습니다.');
-
-      const done = await useChecklistApi.completePhotoUpload(pid, checklistId, {
+      // 완료 콜백
+      await useChecklistApi.completePhotoUpload(pid, checklistId, {
         s3Key: presign.s3Key,
       });
-      console.log('✅ completePhotoUpload 응답:', done);
 
       console.log('✅ 사진 업로드 완료');
 
