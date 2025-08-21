@@ -99,32 +99,6 @@ const ICON_ALIASES: Record<string, DutyIconKey> = {
   SPRAY: 'SPRAY_BLUE',
 };
 
-// API 응답 데이터가 배열이 아닐 경우 배열로 변환 (멤버 홈과 동일)
-const toArray = (x: unknown): unknown[] => {
-  if (Array.isArray(x)) return x;
-
-  const xObj = x as Record<string, any>; // Using 'any' to handle various API response structures
-  if (Array.isArray(xObj?.data?.data?.duties)) {
-    return (xObj.data?.data?.duties as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.duties)) {
-    return (xObj.data?.duties as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.data?.tasks)) {
-    return (xObj.data?.data?.tasks as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.tasks)) {
-    return (xObj.data?.tasks as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data?.data)) {
-    return (xObj.data?.data as unknown[]) || [];
-  }
-  if (Array.isArray(xObj?.data)) {
-    return (xObj.data as unknown[]) || [];
-  }
-  return [];
-};
-
 // ====== 여기부터 변경: TaskUI에 cleaningId/checklistId 분리 ======
 type TaskUI = {
   cleaningId: number; // UI용(목록/키)
@@ -581,39 +555,58 @@ const ManagerHome: React.FC = () => {
   // ====== 변경 끝 ======
 
   // ====== 변경: 사진 업로드 시 checklistId 사용 ======
+  // ✅ 기존 confirmUpload를 이걸로 교체
   const confirmUpload = async (file: File) => {
     if (!uploadTaskId) return;
     const { dutyId, cleaningId, checklistId } = uploadTaskId;
 
-    if (!checklistId) {
+    if (checklistId == null) {
       alert('체크리스트 ID가 없어 사진 업로드를 진행할 수 없습니다.');
       closeUpload();
       return;
     }
 
     try {
-      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(
-        pid,
-        checklistId,
-        {
-          originalFileName: file.name,
-          contentType: file.type,
-        }
-      );
+      // ⬇️ Envelope 맞춰서 꺼내기
+      const {
+        data: { data: presign },
+      } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
+        originalFileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+      });
 
+      // 절대 URL 가드(상대경로면 5173으로 가버립니다)
+      if (!presign?.uploadUrl) throw new Error('presign.uploadUrl가 비어 있음');
+      try {
+        new URL(presign.uploadUrl);
+      } catch {
+        throw new Error(
+          `presign.uploadUrl가 절대 URL이 아님: ${presign.uploadUrl}`
+        );
+      }
+
+      // S3 PUT — presign에 Content-Type이 포함되어 있으므로 동일하게 전송
       const put = await fetch(presign.uploadUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
         body: file,
+        mode: 'cors',
+        credentials: 'omit',
       });
-      if (!put.ok) throw new Error('S3 업로드 실패');
 
+      if (!put.ok) {
+        const body = await put.text();
+        throw new Error(`S3 업로드 실패 ${put.status}: ${body}`);
+      }
+
+      // 완료 콜백
       await useChecklistApi.completePhotoUpload(pid, checklistId, {
         s3Key: presign.s3Key,
       });
+
       console.log('✅ 사진 업로드 완료');
 
-      // 사진 업로드는 기본값 사용 (API에서 endTime/memberName 반환하지 않음)
+      // 로컬 상태 패치
       const now = new Date().toTimeString().slice(0, 5);
       patchLocal(dutyId, cleaningId, {
         isChecked: true,
@@ -627,7 +620,6 @@ const ManagerHome: React.FC = () => {
       closeUpload();
     }
   };
-  // ====== 변경 끝 ======
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => setActivePage((p) => Math.min(p + 1, totalPages - 1)),

@@ -1,6 +1,5 @@
 import api from '../apis/axios';
 
-
 /** 1) 업로드 URL 발급 - 요청 바디 */
 export interface CreateUploadUrlRequest {
   originalFileName: string;
@@ -10,7 +9,7 @@ export interface CreateUploadUrlRequest {
 /** 1) 업로드 URL 발급 - 응답 바디 */
 export interface CreateUploadUrlResponse {
   uploadUrl: string; // presigned PUT URL
-  s3Key: string;     // 2) complete 호출에 사용
+  s3Key: string; // 2) complete 호출에 사용
 }
 
 /** 2) 업로드 완료 콜백 - 요청 바디 */
@@ -29,13 +28,13 @@ export interface ApiEnvelope<T> {
 export interface CompleteChecklistData {
   checkListId: number;
   membersName: string; // "[홍길동, 김철수]"
-  endTime: string;     // "11:30"
+  endTime: string; // "11:30"
 }
 
 /** 4) 체크리스트 해제 응답 data */
 export interface IncompleteChecklistData {
-  memberName: string;  // "홍길동"
-  endTime: string;     // "11:30"
+  memberName: string; // "홍길동"
+  endTime: string; // "11:30"
 }
 
 /** 5) 사진 접근 URL 조회 응답 data */
@@ -51,7 +50,7 @@ export const useChecklistApi = {
     checklistId: number,
     body: CreateUploadUrlRequest
   ) =>
-    api.post<CreateUploadUrlResponse>(
+    api.post<ApiEnvelope<CreateUploadUrlResponse>>(
       `/places/${placeId}/checklists/${checklistId}/photos/upload-url`,
       body
     ),
