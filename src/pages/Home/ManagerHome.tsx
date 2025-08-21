@@ -8,6 +8,7 @@ import ProgressBar from '../../components/home/CircularProgressBar';
 import BottomBar from '../../components/BottomBar';
 import CategoryChip from '../../components/home/CategoryChip';
 import UpLoadPopUp from '../../components/PopUp/UpLoadPopUp';
+import type { CreateUploadUrlResponse } from '../../hooks/useChecklistApi';
 
 import mail from '../../assets/home/mail.svg';
 import mailDefault from '../../assets/home/mailDefault.svg';
@@ -558,8 +559,8 @@ const ManagerHome: React.FC = () => {
   // ✅ 기존 confirmUpload를 이걸로 교체
   const confirmUpload = async (file: File) => {
     if (!uploadTaskId) return;
-    const { dutyId, cleaningId, checklistId } = uploadTaskId;
 
+    const { dutyId, cleaningId, checklistId } = uploadTaskId;
     if (checklistId == null) {
       alert('체크리스트 ID가 없어 사진 업로드를 진행할 수 없습니다.');
       closeUpload();
@@ -567,54 +568,71 @@ const ManagerHome: React.FC = () => {
     }
 
     try {
-      // ⬇️ Envelope 맞춰서 꺼내기
-      const {
-        data: { data: presign },
-      } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
+      // 1) presign 발급 (Envelope 대응)
+      const res = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
         originalFileName: file.name,
         contentType: file.type || 'application/octet-stream',
       });
+      const presign = (res.data?.data ?? res.data) as CreateUploadUrlResponse;
 
-      // 절대 URL 가드(상대경로면 5173으로 가버립니다)
       if (!presign?.uploadUrl) throw new Error('presign.uploadUrl가 비어 있음');
-      try {
-        new URL(presign.uploadUrl);
-      } catch {
-        throw new Error(
-          `presign.uploadUrl가 절대 URL이 아님: ${presign.uploadUrl}`
-        );
+      const presignUrl = new URL(presign.uploadUrl); // 절대 URL 검증
+
+      // 2) 서명된 헤더 파싱 → content-type 포함일 때만 넣기
+      const signedHeadersParam =
+        presignUrl.searchParams.get('X-Amz-SignedHeaders') ??
+        presignUrl.searchParams.get('x-amz-signedheaders') ??
+        '';
+      const signedHeaders =
+        decodeURIComponent(signedHeadersParam).toLowerCase();
+
+      const contentType = file.type || 'application/octet-stream';
+      const putHeaders: Record<string, string> = {};
+      if (signedHeaders.includes('content-type')) {
+        putHeaders['Content-Type'] = contentType;
       }
 
-      // S3 PUT — presign에 Content-Type이 포함되어 있으므로 동일하게 전송
+      // (디버그) 뭐가 서명됐는지 확인
+      console.log(
+        '[upload] signedHeaders=',
+        signedHeaders,
+        ' putHeaders=',
+        putHeaders
+      );
+
+      // 3) S3로 PUT (자격증명/커스텀 헤더 금지)
       const put = await fetch(presign.uploadUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        headers: putHeaders,
         body: file,
         mode: 'cors',
         credentials: 'omit',
       });
 
       if (!put.ok) {
-        const body = await put.text();
+        const body = await put.text().catch(() => '');
         throw new Error(`S3 업로드 실패 ${put.status}: ${body}`);
       }
 
-      // 완료 콜백
+      // 4) 완료 콜백
       await useChecklistApi.completePhotoUpload(pid, checklistId, {
         s3Key: presign.s3Key,
       });
 
       console.log('✅ 사진 업로드 완료');
 
-      // 로컬 상태 패치
+      // 5) 로컬 상태 패치
       const now = new Date().toTimeString().slice(0, 5);
       patchLocal(dutyId, cleaningId, {
         isChecked: true,
         completedAt: now,
         completedBy: 'manager',
       });
-    } catch (e) {
-      console.error('사진 업로드 실패:', e);
+    } catch (e: any) {
+      console.error('사진 업로드 실패:', {
+        message: e?.message,
+        cause: e,
+      });
       alert('사진 업로드 실패');
     } finally {
       closeUpload();
