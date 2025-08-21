@@ -17,15 +17,11 @@ import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
-import CleaningDeletePopUp from '../../components/home/CleaningDeletePopUp';
-
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
-
 dayjs.locale('ko');
-
 type Task = {
   id: number;
   title: string;
@@ -35,12 +31,9 @@ type Task = {
   completedBy?: string | null;
   date: string; // YYYY-MM-DD
 };
-
 type TaskItem = { dutyName: string; task: Task };
 type FilterValue = 'all' | 'done' | 'undone';
-
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
-
 // API 응답 1개
 type ApiChecklist = {
   checklistId: number;
@@ -51,7 +44,6 @@ type ApiChecklist = {
   endTime: string; // "11:30" 형태 (마감/종료 시간)
   needPhoto: boolean;
 };
-
 // 카드에서 쓰는 UI 아이템 (지금 컴포넌트 구조와 맞춤)
 type UIItem = {
   dutyName: string;
@@ -65,7 +57,6 @@ type UIItem = {
     dueTime?: string; // "11:30" (정렬용)
   };
 };
-
 // API → UI 변환
 const toUIItem = (c: ApiChecklist): UIItem => ({
   dutyName: c.dutyName,
@@ -100,10 +91,10 @@ const CalendarPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
+
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
-  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<number | null>(null);
-
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
   const [items, setItems] = useState<UIItem[]>([]);
   const [checklistsloading, setChecklistsLoading] = useState(false);
@@ -795,25 +786,18 @@ const CalendarPage: React.FC = () => {
                   key={task.id}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
-                                     <CalendarTaskCard
-                     title={task.title}
-                     dangbun={dutyName}
-                     isChecked={task.isChecked}
-                     isCamera={task.isCamera}
-                     completedAt={task.completedAt} // 현재 null (API에 없으니)
-                     completedBy={task.completedBy} // memberName에서 세팅됨
-                                                                showDeletePopUp={openDeletePopUpTaskId === task.id}
-                     onDeleteSelect={(type) => {
-                       if (type === 'name') {
-                         setOpenDeletePopUpTaskId(null);
-                         setIsDeleteOpen(true);
-                       }
-                     }}
-                     onMenuClick={() => {
-                       setSelectTask({ ...task, date: selectedYMD });
-                       setOpenDeletePopUpTaskId(openDeletePopUpTaskId === task.id ? null : task.id);
-                     }}
-                   />
+                  <CalendarTaskCard
+                    title={task.title}
+                    dangbun={dutyName}
+                    isChecked={task.isChecked}
+                    isCamera={task.isCamera}
+                    completedAt={task.completedAt} // 현재 null (API에 없으니)
+                    completedBy={task.completedBy} // memberName에서 세팅됨
+                    onMenuClick={() => {
+                      setSelectTask({ ...task, date: selectedYMD });
+                      setIsSelectOpen(true);
+                    }}
+                  />
                 </SwipeableRow>
               ))
             )}
@@ -837,7 +821,18 @@ const CalendarPage: React.FC = () => {
 
                                                        
 
-       
+       {isCleaningDeletePopUpOpen && (
+         <div className="absolute right-5 top-[calc(100%-200px)] z-50">
+           <CleaningDeletePopUp 
+             onSelect={(type) => {
+               if (type === 'name') {
+                 setIsCleaningDeletePopUpOpen(false);
+                 setIsDeleteOpen(true);
+               }
+             }}
+           />
+         </div>
+       )}
 
        <PopUpCardDelete
          isOpen={isDeleteOpen}
@@ -890,3 +885,4 @@ const CalendarPage: React.FC = () => {
 };
 
 export default CalendarPage;
+
