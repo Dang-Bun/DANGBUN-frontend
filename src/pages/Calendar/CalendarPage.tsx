@@ -18,14 +18,11 @@ import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
 import CleaningDeletePopUp from '../../components/home/CleaningDeletePopUp';
-
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
-
 dayjs.locale('ko');
-
 type Task = {
   id: number;
   title: string;
@@ -35,12 +32,9 @@ type Task = {
   completedBy?: string | null;
   date: string; // YYYY-MM-DD
 };
-
 type TaskItem = { dutyName: string; task: Task };
 type FilterValue = 'all' | 'done' | 'undone';
-
 const toYMD = (d: Date | string) => dayjs(d).format('YYYY-MM-DD');
-
 // API 응답 1개
 type ApiChecklist = {
   checklistId: number;
@@ -51,7 +45,6 @@ type ApiChecklist = {
   endTime: string; // "11:30" 형태 (마감/종료 시간)
   needPhoto: boolean;
 };
-
 // 카드에서 쓰는 UI 아이템 (지금 컴포넌트 구조와 맞춤)
 type UIItem = {
   dutyName: string;
@@ -65,7 +58,6 @@ type UIItem = {
     dueTime?: string; // "11:30" (정렬용)
   };
 };
-
 // API → UI 변환
 const toUIItem = (c: ApiChecklist): UIItem => ({
   dutyName: c.dutyName,
@@ -100,10 +92,12 @@ const CalendarPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
+  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<number | null>(null);
+
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
-  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
-
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
   const [items, setItems] = useState<UIItem[]>([]);
   const [checklistsloading, setChecklistsLoading] = useState(false);
@@ -496,6 +490,9 @@ const CalendarPage: React.FC = () => {
 
       // 성공 메시지 (선택사항)
       console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
+      
+      // 삭제 성공 후 페이지 새로고침
+      window.location.reload();
     } catch (err: unknown) {
       console.error('❌ [Calendar] 체크리스트 삭제 실패:', err);
       setError('체크리스트 삭제에 실패했습니다.');
@@ -802,9 +799,18 @@ const CalendarPage: React.FC = () => {
                      isCamera={task.isCamera}
                      completedAt={task.completedAt} // 현재 null (API에 없으니)
                      completedBy={task.completedBy} // memberName에서 세팅됨
-                                                                onMenuClick={() => {
+
+                     onMenuClick={() => {
                        setSelectTask({ ...task, date: selectedYMD });
-                       setIsCleaningDeletePopUpOpen((prev) => !prev);
+                       setOpenDeletePopUpTaskId(openDeletePopUpTaskId === task.id ? null : task.id);
+                     }}
+                     showDeletePopUp={openDeletePopUpTaskId === task.id}
+                     onDeleteSelect={(type) => {
+                       console.log('🔍 삭제 선택:', type, task.id);
+                       if (type === 'name') {
+                         setOpenDeletePopUpTaskId(null);
+                         setIsDeleteOpen(true);
+                       }
                      }}
                    />
                 </SwipeableRow>
@@ -894,3 +900,4 @@ const CalendarPage: React.FC = () => {
 };
 
 export default CalendarPage;
+

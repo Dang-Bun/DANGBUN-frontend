@@ -42,7 +42,7 @@ const SwipeableRow: React.FC<Props> = ({ disabled, onToggle, onCardClick, childr
       </div>
 
       <div
-        className={`relative rounded-[8px] overflow-hidden ${revealed ? 'bg-[#E9ECF4]' : 'bg-white'}`}
+        className={`relative rounded-[8px] ${revealed ? 'bg-[#E9ECF4]' : 'bg-white'}`}
         style={{
           width: revealed ? `calc(100% - ${ACTION_W}px)` : '100%',
           transition: 'width 200ms ease',
