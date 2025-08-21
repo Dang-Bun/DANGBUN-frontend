@@ -13,6 +13,15 @@ import { useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
+type MemberInfoResp = {
+  member: {
+    name: string;
+    role: '매니저' | '멤버'; // ← 서버에서 한글로 옴
+    information?: Record<string, any>; // {"이메일": "...", "전화번호": "..."}
+  };
+  duties: { dutyId: number; dutyName: string }[];
+};
+
 const SettingMember = () => {
   const navigate = useNavigate();
   const [placeName, setPlaceName] = useState('');
@@ -24,7 +33,7 @@ const SettingMember = () => {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<MemberInfoResp | null>(null);
   const [selectedDutyNames, setSelectedDutyNames] = useState<
-    Array<number | null>
+    Array<string | null>
   >([]);
 
   useEffect(() => {

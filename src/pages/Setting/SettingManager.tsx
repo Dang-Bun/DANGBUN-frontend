@@ -35,7 +35,7 @@ const SettingManager = () => {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<MemberInfoResp | null>(null);
   const [selectedDutyNames, setSelectedDutyNames] = useState<
-    Array<number | null>
+    Array<string | null>
   >([]);
 
   //맴버 정보 불러오기
