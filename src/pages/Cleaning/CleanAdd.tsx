@@ -191,10 +191,19 @@ const CleanAdd = () => {
       };
       console.log(data);
       const res = await useCleaningApi.createCleaning(Number(placeId), data);
-      console.log(res.data.data);
-      navigate('/cleanuplist', { state: { data: { placeId } } });
+      if (res.data.code === 20000) {
+        navigate('/cleanuplist', { state: { data: { placeId } } });
+      } else {
+        alert(`⚠️ 청소 추가 실패: ${res.data.message}`);
+      }
     } catch (e) {
-      console.error(e);
+      const anyErr = e as any;
+      // 서버에서 내려준 에러 메시지
+      const serverMsg =
+        anyErr?.response?.data?.message ?? '알 수 없는 오류가 발생했습니다.';
+
+      alert(serverMsg);
+      setIsModalOpen1(false);
     }
   };
 
@@ -213,10 +222,19 @@ const CleanAdd = () => {
       };
       console.log(data);
       const res = await useCleaningApi.createCleaning(Number(placeId), data);
-      console.log(res.data.data);
-      navigate('/cleanuplist', { state: { data: { placeId } } });
+      if (res.data.code === 20000) {
+        navigate('/cleanuplist', { state: { data: { placeId } } });
+      } else {
+        alert(`⚠️ 청소 추가 실패: ${res.data.message}`);
+      }
     } catch (e) {
-      console.error(e);
+      const anyErr = e as any;
+      // 서버에서 내려준 에러 메시지
+      const serverMsg =
+        anyErr?.response?.data?.message ?? '알 수 없는 오류가 발생했습니다.';
+
+      alert(serverMsg);
+      setIsModalOpen2(false);
     }
   };
 
