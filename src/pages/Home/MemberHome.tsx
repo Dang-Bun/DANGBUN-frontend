@@ -612,12 +612,14 @@ const MemberHome: React.FC = () => {
     }
 
     try {
-      const {
-        data: { data: presign },
-      } = await useChecklistApi.createPhotoUploadUrl(pid, checklistId, {
-        originalFileName: file.name,
-        contentType: file.type || 'application/octet-stream',
-      });
+      const { data: presign } = await useChecklistApi.createPhotoUploadUrl(
+        pid,
+        checklistId,
+        {
+          originalFileName: file.name,
+          contentType: file.type || 'application/octet-stream',
+        }
+      );
 
       console.log('presign:', presign);
       if (!presign?.uploadUrl || !/^https?:\/\//.test(presign.uploadUrl)) {
