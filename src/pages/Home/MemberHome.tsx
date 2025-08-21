@@ -709,7 +709,7 @@ const MemberHome: React.FC = () => {
       {/* 고정된 상단 영역 */}
       <div className='relative z-10 flex-shrink-0'>
         {/* 고정된 필터 섹션 */}
-        <div className='px-5 pb-4 bg-white'>
+        <div className='px-5 pb-4'>
           <div className='flex justify-between items-center'>
             <div className='relative flex items-center'>
               <h2 className='text-[14px] pl-1 text-[#4D83FD] font-semibold'>
