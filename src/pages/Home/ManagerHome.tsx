@@ -594,7 +594,7 @@ const ManagerHome: React.FC = () => {
   const hasChecklist = visibleTasks.length > 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white">
       {/* 배경 */}
       <div
         className="fixed top-0 left-0 w-full h-full z-0"
@@ -691,11 +691,11 @@ const ManagerHome: React.FC = () => {
       </div>
 
       {/* 스크롤 가능한 목록 영역 */}
-      <main className="relative z-10 flex-1 overflow-y-auto">
+      <main className="relative z-10 flex flex-col flex-grow min-h-0 w-full overflow-hidden">
         <div className="px-5 w-full">
           {/* 체크리스트 카드 섹션 */}
           {hasChecklist ? (
-            <div className="flex flex-col gap-3 pb-24 w-full">
+            <div className="flex flex-col gap-3 overflow-y-auto overflow-x-hidden pb-24 no-scrollbar w-full">
               {visibleTasks.map((t) => (
                 <TaskCard
                   key={`${t.dutyId}:${t.checklistId || t.cleaningId}`}

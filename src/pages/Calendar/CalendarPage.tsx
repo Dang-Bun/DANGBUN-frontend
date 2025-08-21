@@ -102,7 +102,7 @@ const CalendarPage: React.FC = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
-  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
+  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<number | null>(null);
 
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
   const [items, setItems] = useState<UIItem[]>([]);
@@ -802,9 +802,16 @@ const CalendarPage: React.FC = () => {
                      isCamera={task.isCamera}
                      completedAt={task.completedAt} // 현재 null (API에 없으니)
                      completedBy={task.completedBy} // memberName에서 세팅됨
-                                                                onMenuClick={() => {
+                                                                showDeletePopUp={openDeletePopUpTaskId === task.id}
+                     onDeleteSelect={(type) => {
+                       if (type === 'name') {
+                         setOpenDeletePopUpTaskId(null);
+                         setIsDeleteOpen(true);
+                       }
+                     }}
+                     onMenuClick={() => {
                        setSelectTask({ ...task, date: selectedYMD });
-                       setIsCleaningDeletePopUpOpen((prev) => !prev);
+                       setOpenDeletePopUpTaskId(openDeletePopUpTaskId === task.id ? null : task.id);
                      }}
                    />
                 </SwipeableRow>
@@ -830,18 +837,7 @@ const CalendarPage: React.FC = () => {
 
                                                        
 
-       {isCleaningDeletePopUpOpen && (
-         <div className="absolute right-5 top-[calc(100%-200px)] z-50">
-           <CleaningDeletePopUp 
-             onSelect={(type) => {
-               if (type === 'name') {
-                 setIsCleaningDeletePopUpOpen(false);
-                 setIsDeleteOpen(true);
-               }
-             }}
-           />
-         </div>
-       )}
+       
 
        <PopUpCardDelete
          isOpen={isDeleteOpen}
