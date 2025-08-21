@@ -13,12 +13,28 @@ import { useNavigate } from 'react-router-dom';
 import { useMemberApi } from '../../hooks/useMemberApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 
+type MemberInfoResp = {
+  member: {
+    name: string;
+    role: '매니저' | '멤버'; // ← 서버에서 한글로 옴
+    information?: Record<string, any>; // {"이메일": "...", "전화번호": "..."}
+  };
+  duties: { dutyId: number; dutyName: string }[];
+};
+
 const SettingMember = () => {
   const navigate = useNavigate();
   const [placeName, setPlaceName] = useState('');
   const [name, setName] = useState('');
   const [memberId, setMemberId] = useState('');
   const placeId = Number(localStorage.getItem('placeId'));
+
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [data, setData] = useState<MemberInfoResp | null>(null);
+  const [selectedDutyNames, setSelectedDutyNames] = useState<
+    Array<string | null>
+  >([]);
 
   useEffect(() => {
     if (!placeId) return;
@@ -60,6 +76,32 @@ const SettingMember = () => {
       fetchPlaceInfo();
     }
   }, [placeId]);
+
+  //당번 정보 불러오기
+  useEffect(() => {
+    if (!placeId || !memberId) return;
+    (async () => {
+      try {
+        setLoading(true);
+        setErr(null);
+        const res = await useMemberApi.get(placeId, memberId);
+        const body: MemberInfoResp = res?.data?.data;
+        setData(body ?? null);
+      } catch (e: any) {
+        setErr(
+          e?.response?.data?.message ?? e?.message ?? '멤버 정보 불러오기 실패'
+        );
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [placeId, memberId]);
+  useEffect(() => {
+    if (!data) return;
+    const Name = (data.duties ?? []).map((d) => d.dutyName);
+    // 최소 1행은 보이도록
+    setSelectedDutyNames(Name.length ? Name : [null]);
+  }, [data]);
 
   return (
     <div className='flex flex-col justify-between pt-3 px-4'>
@@ -115,7 +157,7 @@ const SettingMember = () => {
             <button className='w-[287px] bg-[#39be7b] text-white rounded-[8px] mt-[16px] px-6 py-2 text-sm flex items-center justify-center gap-4'>
               <span className='text-[12px]'>당번</span>
               <div className='w-px h-4 bg-white' />
-              <span className='text-[12px]'>청소 점검</span>
+              <span className='text-[12px]'>{selectedDutyNames[0]}</span>
             </button>
           </div>
         </div>
