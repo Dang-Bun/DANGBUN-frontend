@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
         {rightElement && (
           <button
             onClick={onRightClick}
-            className='absolute right-4 w-[36px] h-[36px]'
+            className='absolute right-4 w-[36px] h-[36px] cursor-pointer'
             aria-label='오른쪽 아이콘'
           >
             {rightElement}

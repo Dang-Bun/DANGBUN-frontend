@@ -26,6 +26,8 @@ const CleanUpList = () => {
   const location = useLocation();
   const placeId = location.state?.data?.placeId;
 
+  const [role] = useState<string | null>(() => localStorage.getItem('role'));
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -145,6 +147,13 @@ const CleanUpList = () => {
           rightElement={<img src={grayPlus} alt='추가' />}
           showBackButton={true}
           onRightClick={handleAdd}
+          onBackClick={() => {
+            if (role === '매니저' || role === 'manager') {
+              navigate('/setting/manager');
+            } else {
+              navigate('/setting/member');
+            }
+          }}
         />
         <div className='flex flex-row justify-between mt-[52px] mb-3 '>
           <p className='text-black text-sm font-normal leading-tight'>
