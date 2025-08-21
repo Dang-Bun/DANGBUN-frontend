@@ -135,15 +135,18 @@ const CleanUpList = () => {
         );
 
   return (
-    <div className='flex flex-col w-full px-4'>
-      <div ref={headerRef} className='fixed w-[353px] bg-[#fff]'>
+    <div className='flex flex-col w-full px-4 relative'>
+      <div
+        ref={headerRef}
+        className='fixed w-[353px] left-1/2 -translate-x-1/2 bg-[#fff]'
+      >
         <Header
           title='청소 관리'
           rightElement={<img src={grayPlus} alt='추가' />}
           showBackButton={true}
           onRightClick={handleAdd}
         />
-        <div className='flex flex-row justify-between mt-[52px] mb-3'>
+        <div className='flex flex-row justify-between mt-[52px] mb-3 '>
           <p className='text-black text-sm font-normal leading-tight'>
             총 {totalCleaningCount}개
           </p>
