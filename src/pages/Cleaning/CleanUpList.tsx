@@ -135,7 +135,7 @@ const CleanUpList = () => {
         );
 
   return (
-    <div className='flex flex-col w-[393px] px-5 '>
+    <div className='flex flex-col w-full px-4'>
       <div ref={headerRef} className='fixed w-[353px] bg-[#fff]'>
         <Header
           title='청소 관리'
