@@ -17,6 +17,7 @@ import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
+import CleaningDeletePopUp from '../../components/home/CleaningDeletePopUp';
 
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
@@ -98,10 +99,10 @@ const CalendarPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'alpha' | 'completed'>('alpha');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
+  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
 
   const selectedYMD = useMemo(() => toYMD(selectedDate), [selectedDate]);
   const [items, setItems] = useState<UIItem[]>([]);
@@ -794,18 +795,18 @@ const CalendarPage: React.FC = () => {
                   key={task.id}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
-                  <CalendarTaskCard
-                    title={task.title}
-                    dangbun={dutyName}
-                    isChecked={task.isChecked}
-                    isCamera={task.isCamera}
-                    completedAt={task.completedAt} // 현재 null (API에 없으니)
-                    completedBy={task.completedBy} // memberName에서 세팅됨
-                    onMenuClick={() => {
-                      setSelectTask({ ...task, date: selectedYMD });
-                      setIsSelectOpen(true);
-                    }}
-                  />
+                                     <CalendarTaskCard
+                     title={task.title}
+                     dangbun={dutyName}
+                     isChecked={task.isChecked}
+                     isCamera={task.isCamera}
+                     completedAt={task.completedAt} // 현재 null (API에 없으니)
+                     completedBy={task.completedBy} // memberName에서 세팅됨
+                                                                onMenuClick={() => {
+                       setSelectTask({ ...task, date: selectedYMD });
+                       setIsCleaningDeletePopUpOpen((prev) => !prev);
+                     }}
+                   />
                 </SwipeableRow>
               ))
             )}
@@ -827,22 +828,37 @@ const CalendarPage: React.FC = () => {
         />
       )}
 
-      <PopUpCardDelete
-        isOpen={isDeleteOpen}
-        onRequestClose={() => setIsDeleteOpen(false)}
-        title={
-          <span>
-            청소 목록을 <span className='text-[#4D83FD]'>삭제</span>
-            하시겠습니까?
-          </span>
-        }
-        descript='해당 청소를 체크리스트에서 완전히 삭제합니다.'
-        first='취소'
-        second='확인'
-        userEmail=''
-        onFirstClick={() => setIsDeleteOpen(false)}
-        onSecondClick={handleDeleteChecklist}
-      />
+                                                       
+
+       {isCleaningDeletePopUpOpen && (
+         <div className="absolute right-5 top-[calc(100%-200px)] z-50">
+           <CleaningDeletePopUp 
+             onSelect={(type) => {
+               if (type === 'name') {
+                 setIsCleaningDeletePopUpOpen(false);
+                 setIsDeleteOpen(true);
+               }
+             }}
+           />
+         </div>
+       )}
+
+       <PopUpCardDelete
+         isOpen={isDeleteOpen}
+         onRequestClose={() => setIsDeleteOpen(false)}
+         title={
+           <span>
+             청소 목록을 <span className='text-[#4D83FD]'>삭제</span>
+             하시겠습니까?
+           </span>
+         }
+         descript='해당 청소를 체크리스트에서 완전히 삭제합니다.'
+         first='취소'
+         second='확인'
+         userEmail=''
+         onFirstClick={() => setIsDeleteOpen(false)}
+         onSecondClick={handleDeleteChecklist}
+       />
 
       <DownloadPopUp
         isOpen={isPhotoOpen}
