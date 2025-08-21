@@ -275,7 +275,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
                         </p>
                       )}
 
-                      <button
+                      <div
                         className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
                         onClick={(e) => {
                           e.stopPropagation();
@@ -288,7 +288,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
                           alt='추가하기'
                           className='cursor-pointer'
                         />
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>{' '}
