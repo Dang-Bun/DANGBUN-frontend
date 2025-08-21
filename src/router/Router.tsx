@@ -50,6 +50,7 @@ import ManagerHome from '../pages/Home/ManagerHome';
 import MemberHome from '../pages/Home/MemberHome';
 import ManagerOverview from '../pages/Home/ManagerOverview';
 import CalendarDetail from '../pages/Calendar/CalendarDetail';
+import CleanDelete from '../pages/Cleaning/CleanDelete';
 
 const router = createBrowserRouter([
   // === 공개 라우트 ===
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
       { path: '/undangbunmember', element: <UnDangbun_Member /> },
       { path: '/cleaninfo', element: <CleanInfo data={undefined} /> },
       { path: '/placedetailed', element: <PlaceDetailed /> },
+      {
+        path: '/cleandelete',
+        element: <CleanDelete />,
+      },
 
       // === 매니저 전용(여기 아래 전부 매니저만) ===
 

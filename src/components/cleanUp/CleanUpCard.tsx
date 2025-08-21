@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import FLOOR_BLUE from '../../assets/cleanIcon/sweepImg_2.svg';
 import CLEANER_PINK from '../../assets/cleanIcon/cleanerImg.svg';
@@ -62,6 +63,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [specOpen, setSpecOpen] = useState(false);
+  const navigate = useNavigate();
 
   const [cleaningList, setCleaningList] = useState<Cleaning[]>([]);
   const [clickedMembers, setClickedMembers] = useState<string[]>([]);
@@ -221,7 +223,18 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
         <div className='flex flex-col gap-3'>
           {filteredCleaningList.map((cleaning) => (
             <div key={cleaning.cleaningId}>
-              <div className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'>
+              <div
+                className='flex flex-row w-[353px] rounded-lg shadow-[0px_0px_8px_0px_rgba(0,0,0,0.05)]'
+                onClick={() => {
+                  navigate('/cleandelete', {
+                    state: {
+                      cleaningId: cleaning.cleaningId,
+                      cleaningName: cleaning.cleaningName,
+                      placeId: placeId,
+                    },
+                  });
+                }}
+              >
                 <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg'></div>
                 <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
                   <div className='flex flex-col justify-center items-start gap-3'>
