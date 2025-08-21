@@ -236,7 +236,7 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
                 }}
               >
                 <div className='w-[9px] h-[73px] bg-zinc-200 rounded-tl-lg rounded-bl-lg'></div>
-                <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-lg justify-center items-start'>
+                <div className='flex flex-col w-[344px] h-[73px] px-3 py-0 bg-[#f9f9f9] rounded-tr-lg rounded-br-lg justify-center items-start'>
                   <div className='flex flex-col justify-center items-start gap-3'>
                     <p className='text-black text-base font-normal leading-snug'>
                       {cleaning.cleaningName}
@@ -277,7 +277,8 @@ const CleanUpCard: React.FC<CleanUpCardProps> = ({
 
                       <button
                         className='flex w-5 h-5 bg-neutral-100 rounded-[300px] justify-center items-center'
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           handlePlus(cleaning);
                           setClickedCleaning(cleaning.cleaningId);
                         }}
