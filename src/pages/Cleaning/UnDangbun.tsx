@@ -39,7 +39,12 @@ const UnDangbun = () => {
 
   return (
     <div>
-      <HeaderBar title='당번 미지정 청소' />
+      <HeaderBar
+        title='당번 미지정 청소'
+        onBackClick={() => {
+          navigate('/cleanuplist', { state: { data: { placeId } } });
+        }}
+      />
 
       {undangbunList.length === 0 ? (
         <div className='flex flex-col h-[852px] overflow-y-auto items-center justify-center gap-5 pt-[52px]'>
