@@ -15,7 +15,7 @@ import onBoarding5 from '../../assets/onBoarding/onBoardingImg_5.svg';
 const onboardingData = [
   { img: onBoarding1 },
   { img: onBoarding2 },
-  { img: onBoarding3 }, 
+  { img: onBoarding3 },
   { img: onBoarding4 },
   { img: onBoarding5 },
 ];
@@ -44,7 +44,7 @@ const Z_OnBoarding = () => {
   }, [swiperInstance]);
 
   return (
-    <div className='w-full min-h-screen flex flex-col items-center justify-center bg-white px-4 py-10'>
+    <div className='w-full min-h-screen flex flex-col items-center justify-center bg-white px-4'>
       {/* 슬라이드 */}
       <Swiper
         modules={[Pagination, Autoplay]}
@@ -65,7 +65,7 @@ const Z_OnBoarding = () => {
             <img
               src={item.img}
               alt={`onboarding-${index}`}
-              className='w-full h-[615px] object-cover overflow-hidden mb-[40px]'
+              className='w-full h-[669px] object-cover overflow-hidden mb-[40px]'
             />
           </SwiperSlide>
         ))}
@@ -74,7 +74,7 @@ const Z_OnBoarding = () => {
         ref={paginationRef}
         className='swiper-pagination flex justify-center gap-2 !static'
       />
-      <div className='w-full mb-[15px]'>
+      <div className='w-full mb-[15px] flex justify-center'>
         <CTAButton onClick={handleSkip}>
           {currentIndex === onboardingData.length - 1
             ? '당번 시작하기'
