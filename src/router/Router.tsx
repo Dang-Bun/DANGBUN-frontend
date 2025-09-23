@@ -52,8 +52,6 @@ import ManagerOverview from '../pages/Home/ManagerOverview';
 import CalendarDetail from '../pages/Calendar/CalendarDetail';
 import CleanDelete from '../pages/Cleaning/CleanDelete';
 
-//test
-
 const router = createBrowserRouter([
   // === 공개 라우트 ===
   { path: '/', element: <SplashScreen /> },
