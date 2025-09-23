@@ -48,6 +48,13 @@
   --color-pink: #fa9efa; /* c2 */
 }
 
+#root {
+  max-width: 430px;
+  height: 100dvh;
+  margin: auto;
+  padding: 0;
+}
+
 p {
   margin: 0;
 }
