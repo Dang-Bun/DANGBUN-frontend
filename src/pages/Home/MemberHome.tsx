@@ -584,6 +584,10 @@ const MemberHome: React.FC = () => {
       closeUpload();
       return;
     }
+    const t = page.tasks.find(
+      (x) => x.checklistId === checklistId && x.dutyId === dutyId
+    ) as TaskUI | undefined;
+    if (!t) return;
 
     try {
       const {
@@ -625,6 +629,9 @@ const MemberHome: React.FC = () => {
         completedAt: now,
         completedBy: userName,
       });
+
+      // 체크리스트 완료 요청도 함께
+      await useChecklistApi.completeChecklist(pid, t.checklistId);
     } catch (e) {
       console.error('사진 업로드 실패:', e);
       alert('사진 업로드 실패');
