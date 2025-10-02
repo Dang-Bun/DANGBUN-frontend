@@ -567,6 +567,10 @@ const ManagerHome: React.FC = () => {
       closeUpload();
       return;
     }
+    const t = page.tasks.find(
+      (x) => x.checklistId === checklistId && x.dutyId === dutyId
+    ) as TaskUI | undefined;
+    if (!t) return;
 
     try {
       // 1) presign 발급 (Envelope 대응)
@@ -592,14 +596,6 @@ const ManagerHome: React.FC = () => {
       if (signedHeaders.includes('content-type')) {
         putHeaders['Content-Type'] = contentType;
       }
-
-      // (디버그) 뭐가 서명됐는지 확인
-      console.log(
-        '[upload] signedHeaders=',
-        signedHeaders,
-        ' putHeaders=',
-        putHeaders
-      );
 
       // 3) S3로 PUT (자격증명/커스텀 헤더 금지)
       const put = await fetch(presign.uploadUrl, {
@@ -629,6 +625,9 @@ const ManagerHome: React.FC = () => {
         completedAt: now,
         completedBy: 'manager',
       });
+
+      // 체크리스트 완료 요청도 함께
+      await useChecklistApi.completeChecklist(pid, t.checklistId);
     } catch (e: any) {
       console.error('사진 업로드 실패:', {
         message: e?.message,
