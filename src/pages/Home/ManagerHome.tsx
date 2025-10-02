@@ -40,6 +40,7 @@ import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 import { useDutyApi } from '../../hooks/useDutyApi';
+import { div } from 'framer-motion/client';
 
 /* ============================
  * 상수/타입
@@ -662,150 +663,149 @@ const ManagerHome: React.FC = () => {
   const hasChecklist = visibleTasks.length > 0;
 
   return (
-    <div className='flex flex-col h-screen bg-white'>
-      {/* 배경 */}
-      <div
-        className='fixed top-0 left-0 w-full h-full z-0'
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: '626px',
-          backgroundPosition: 'center -200px',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+    <div className='relative justify-center items-center'>
+      <div className='flex flex-col h-screen min-h-0 bg-white w-full max-w-[430px] max-h-[932px]'>
+        {/* 고정된 상단 영역 */}
+        <div
+          className='relative z-10 flex flex-col flex-1 min-h-0'
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: '626px',
+            backgroundPosition: 'center -200px',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+          <div {...swipeHandlers} className='pt-7'>
+            <div className='flex flex-col items-center h-[420px]'>
+              <div className='flex items-center w-full justify-center'>
+                <span className='font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2'>
+                  당번
+                </span>
+                <div className='flex items-center gap-[210px]'>
+                  <PlaceNameCard
+                    place={placeInfo.placeName}
+                    type={page.percent >= 100 ? 'complete' : 'default'}
+                    onClick={() => navigate('/myplace')}
+                  />
+                  <img
+                    src={notificationImage}
+                    alt='알림'
+                    className='w-[36px] cursor-pointer'
+                    onClick={goToNotification}
+                  />
+                </div>
+              </div>
 
-      {/* 고정된 상단 영역 */}
-      <div className='relative z-10 flex-shrink-0'>
-        {/* 상단 헤더 */}
-        <div {...swipeHandlers} className='px-5 pt-4'>
-          <div className='flex flex-col items-center h-[420px]'>
-            <div className='flex items-center relative'>
-              <span className='font-passion-one font-bold text-[24px] text-white absolute left-1/2 -translate-x-1/2'>
-                당번
-              </span>
-              <div className='flex items-center gap-[210px]'>
-                <PlaceNameCard
-                  place={placeInfo.placeName}
-                  type={page.percent >= 100 ? 'complete' : 'default'}
-                  onClick={() => navigate('/myplace')}
-                />
-                <img
-                  src={notificationImage}
-                  alt='알림'
-                  className='w-[36px] cursor-pointer'
-                  onClick={goToNotification}
+              {/* 가운데 동그라미 (%) */}
+              <div className='mt-[45px] mb-[18px]'>
+                <ProgressBar
+                  percentage={page.percent}
+                  iconSrc={page.icon}
+                  title={page.name}
+                  onCenterClick={() => {
+                    const payload = {
+                      placeId: pid,
+                      placeName: placeInfo.placeName,
+                      percent: Math.min(100, Math.max(0, page.percent)),
+                      placeIconKey: placeInfo.placeIconKey,
+                      duties: duties.map((d) => {
+                        const total = d.tasks.length;
+                        const done = d.tasks.filter((t) => t.isChecked).length;
+                        return {
+                          id: d.id,
+                          name: d.name,
+                          percent: total ? Math.round((done / total) * 100) : 0,
+                          iconKey: d.iconKey,
+                        };
+                      }),
+                    };
+                    sessionStorage.setItem(
+                      'overviewPayload',
+                      JSON.stringify(payload)
+                    );
+                    navigate('/home/manager/overview', { state: payload });
+                  }}
+                  dotCount={totalPages}
+                  dotIndex={activePage}
+                  onDotSelect={setActivePage}
                 />
               </div>
             </div>
+          </div>
 
-            <div className='mt-[66px] mb-[18px]'>
-              <ProgressBar
-                percentage={page.percent}
-                iconSrc={page.icon}
-                title={page.name}
-                onCenterClick={() => {
-                  const payload = {
-                    placeId: pid,
-                    placeName: placeInfo.placeName,
-                    percent: Math.min(100, Math.max(0, page.percent)),
-                    placeIconKey: placeInfo.placeIconKey,
-                    duties: duties.map((d) => {
-                      const total = d.tasks.length;
-                      const done = d.tasks.filter((t) => t.isChecked).length;
-                      return {
-                        id: d.id,
-                        name: d.name,
-                        percent: total ? Math.round((done / total) * 100) : 0,
-                        iconKey: d.iconKey,
-                      };
-                    }),
-                  };
-                  sessionStorage.setItem(
-                    'overviewPayload',
-                    JSON.stringify(payload)
-                  );
-                  navigate('/home/manager/overview', { state: payload });
-                }}
-                dotCount={totalPages}
-                dotIndex={activePage}
-                onDotSelect={setActivePage}
-              />
+          {/* 고정된 필터 섹션 */}
+          <div className='px-5 pb-4'>
+            <div className='flex justify-between items-center'>
+              <div className='relative flex items-center'>
+                <h2 className='text-[14px] pl-1 text-[#4D83FD] font-semibold'>
+                  {filter === 'all'
+                    ? '전체 청소'
+                    : filter === 'ing'
+                      ? '달성 미완료'
+                      : '달성 완료'}
+                </h2>
+                <img
+                  src={toggle}
+                  alt='정렬'
+                  onClick={() => setMemberPopUp(!memberPopUp)}
+                  className='w-5 h-5 cursor-pointer'
+                />
+                {memberPopUp && (
+                  <div className='absolute ml-5 top-[calc(100%+10px)] z-50'>
+                    <CategoryChip onSelect={handleFilterSelect} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 고정된 필터 섹션 */}
-        <div className='px-5 pb-4'>
-          <div className='flex justify-between items-center'>
-            <div className='relative flex items-center'>
-              <h2 className='text-[14px] pl-1 text-[#4D83FD] font-semibold'>
-                {filter === 'all'
-                  ? '전체 청소'
-                  : filter === 'ing'
-                    ? '달성 미완료'
-                    : '달성 완료'}
-              </h2>
-              <img
-                src={toggle}
-                alt='정렬'
-                onClick={() => setMemberPopUp(!memberPopUp)}
-                className='w-5 h-5 cursor-pointer'
-              />
-              {memberPopUp && (
-                <div className='absolute ml-5 top-[calc(100%+10px)] z-50'>
-                  <CategoryChip onSelect={handleFilterSelect} />
+          {/* 스크롤 가능한 목록 영역 */}
+          <main className='flex flex-col w-full flex-1 min-h-0 overflow-y-auto no-scrollbar'>
+            <div className='w-full px-5'>
+              {/* 체크리스트 카드 섹션 */}
+              {hasChecklist ? (
+                <div className='flex flex-col items-center gap-3 pb-5 no-scrollbar w-full'>
+                  {visibleTasks.map((t) => (
+                    <TaskCard
+                      key={`${t.dutyId}:${t.checklistId || t.cleaningId}`}
+                      title={t.title}
+                      dueTime={t.dueTime ?? ''}
+                      members={t.members}
+                      memberCount={t.memberCount}
+                      isCamera={t.isCamera}
+                      isChecked={t.isChecked}
+                      completedAt={t.completedAt ?? undefined}
+                      completedBy={t.completedBy ?? undefined}
+                      onToggle={() => toggleTask(t.dutyId, t.checklistId || 0)}
+                      onCameraClick={() =>
+                        !t.isChecked &&
+                        t.isCamera &&
+                        openUploadFor(t.dutyId, t.checklistId)
+                      }
+                    />
+                  ))}
                 </div>
+              ) : (
+                <section className='w-full mt-6 flex flex-col items-center text-center'>
+                  <p className='text-[13px] text-[#99A2AE]'>
+                    표시할 체크리스트가 없습니다.
+                  </p>
+                </section>
               )}
             </div>
-          </div>
+          </main>
         </div>
-      </div>
 
-      {/* 스크롤 가능한 목록 영역 */}
-      <main className='relative z-10 flex flex-col min-h-0 w-full overflow-auto no-scrollbar'>
-        <div className='px-2 w-full'>
-          {/* 체크리스트 카드 섹션 */}
-          {hasChecklist ? (
-            <div className='flex flex-col gap-3 overflow-y-auto overflow-x-hidden pb-24 no-scrollbar w-full'>
-              {visibleTasks.map((t) => (
-                <TaskCard
-                  key={`${t.dutyId}:${t.checklistId || t.cleaningId}`}
-                  title={t.title}
-                  dueTime={t.dueTime ?? ''}
-                  members={t.members}
-                  memberCount={t.memberCount}
-                  isCamera={t.isCamera}
-                  isChecked={t.isChecked}
-                  completedAt={t.completedAt ?? undefined}
-                  completedBy={t.completedBy ?? undefined}
-                  onToggle={() => toggleTask(t.dutyId, t.checklistId || 0)}
-                  onCameraClick={() =>
-                    !t.isChecked &&
-                    t.isCamera &&
-                    openUploadFor(t.dutyId, t.checklistId)
-                  }
-                />
-              ))}
-            </div>
-          ) : (
-            <section className='w-full mt-6 flex flex-col items-center text-center'>
-              <p className='text-[13px] text-[#99A2AE]'>
-                표시할 체크리스트가 없습니다.
-              </p>
-            </section>
-          )}
+        <div className='flex-shrink-0 z-10'>
+          <BottomBar />
         </div>
-      </main>
 
-      <div className='flex-shrink-0 z-10'>
-        <BottomBar />
+        <UpLoadPopUp
+          isOpen={isUploadOpen}
+          onRequestClose={closeUpload}
+          onConfirm={confirmUpload}
+        />
       </div>
-
-      <UpLoadPopUp
-        isOpen={isUploadOpen}
-        onRequestClose={closeUpload}
-        onConfirm={confirmUpload}
-      />
     </div>
   );
 };

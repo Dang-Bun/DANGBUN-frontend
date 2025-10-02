@@ -9,14 +9,14 @@ import toggleDown from '../../assets/home/toggleDown.svg';
 
 interface TaskCardProps {
   title: string;
-  dueTime?: string;        // API의 endTime을 그대로 받음 (옵션)
+  dueTime?: string; // API의 endTime을 그대로 받음 (옵션)
   members: string[];
   isChecked: boolean;
   isCamera: boolean;
   memberCount?: number;
   onToggle: () => void;
-  completedAt?: string;    // API의 completeTime을 그대로 받음 (옵션)
-  completedBy?: string;    // (선택) 있으면 표시하지 않고 보관만
+  completedAt?: string; // API의 completeTime을 그대로 받음 (옵션)
+  completedBy?: string; // (선택) 있으면 표시하지 않고 보관만
   disabled?: boolean;
   onCameraClick?: () => void;
 }
@@ -33,7 +33,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   completedBy,
   disabled = false,
   onCameraClick,
-  memberCount
+  memberCount,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -46,7 +46,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
     [cleanedMembers]
   );
   const sortedMembers = useMemo(
-    () => cleanedMembers.filter((m) => m !== '멤버 전체').sort((a, b) => a.localeCompare(b, 'ko-KR')),
+    () =>
+      cleanedMembers
+        .filter((m) => m !== '멤버 전체')
+        .sort((a, b) => a.localeCompare(b, 'ko-KR')),
     [cleanedMembers]
   );
   const showExpandButton = !isAllMembers && sortedMembers.length >= 2;
@@ -55,10 +58,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleToggle = () => setIsExpanded((prev) => !prev);
 
   const effectiveMemberCount = useMemo(
-    () => (typeof memberCount === 'number' ? memberCount : sortedMembers.length),
+    () =>
+      typeof memberCount === 'number' ? memberCount : sortedMembers.length,
     [memberCount, sortedMembers.length]
   );
-  const memberLabel = isAllMembers ? '멤버 전체' : `멤버 ${effectiveMemberCount}명`;
+  const memberLabel = isAllMembers
+    ? '멤버 전체'
+    : `멤버 ${effectiveMemberCount}명`;
   const memberSummary = () => {
     if (isAllMembers) return '';
     if (sortedMembers.length === 0) return '';
@@ -84,67 +90,98 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   //  완료면 API의 completeTime 그대로, 아니면 endTime 기준 남은 시간
-  const rightTopText = isChecked && completedAt ? completedAt : calculateRemainingTime();
+  const rightTopText =
+    isChecked && completedAt ? completedAt : calculateRemainingTime();
 
   const isCheckboxDisabled = disabled && !isChecked;
-  const checkboxIcon = isCheckboxDisabled ? checkDisabled : isChecked ? checkDone : checkDefault;
+  const checkboxIcon = isCheckboxDisabled
+    ? checkDisabled
+    : isChecked
+      ? checkDone
+      : checkDefault;
 
   return (
     <div
-      className={`flex rounded-[8px] w-[353px] min-h-[73px] transition-colors ${
+      className={`flex rounded-[8px] w-full min-h-[73px] transition-colors ${
         isChecked ? 'bg-[#F1F3F6]' : 'bg-[#F9F9F9]'
       }`}
     >
-      <div className={`w-[9px] h-auto rounded-l-[8px] ${isChecked ? 'bg-[#8E8E8E]' : 'bg-[#E1E4EA]'}`} />
-      <div className="flex justify-between w-full p-3">
-        <div className="flex">
+      <div
+        className={`w-[9px] h-auto rounded-l-[8px] ${isChecked ? 'bg-[#8E8E8E]' : 'bg-[#E1E4EA]'}`}
+      />
+      <div className='flex justify-between w-full p-3'>
+        <div className='flex'>
           <img
             src={checkboxIcon}
-            alt={isChecked ? '체크 완료' : isCheckboxDisabled ? '체크 비활성화' : '체크박스'}
-            className="w-5 h-5 mr-3 mt-1 cursor-pointer"
+            alt={
+              isChecked
+                ? '체크 완료'
+                : isCheckboxDisabled
+                  ? '체크 비활성화'
+                  : '체크박스'
+            }
+            className='w-5 h-5 mr-3 mt-1 cursor-pointer'
             onClick={isCheckboxDisabled ? undefined : handleCheck}
             aria-disabled={isCheckboxDisabled}
-            role="button"
+            role='button'
           />
           <div>
-            <div className="flex items-center gap-1 mb-1">
-              <p className={`text-[16px] ${isChecked ? 'text-[#5A5D62]' : 'text-[#111827]'}`}>{title}</p>
+            <div className='flex items-center gap-1 mb-1'>
+              <p
+                className={`text-[16px] ${isChecked ? 'text-[#5A5D62]' : 'text-[#111827]'}`}
+              >
+                {title}
+              </p>
               {isCamera && (
                 <button
-                  type="button"
+                  type='button'
                   onClick={onCameraClick}
-                  className="w-[14px] h-[14px] shrink-0 cursor-pointer"
-                  aria-label="사진 업로드"
+                  className='w-[14px] h-[14px] shrink-0 cursor-pointer'
+                  aria-label='사진 업로드'
                 >
-                  <img src={isChecked ? cameraGray : cameraDefault} alt="카메라" className="w-[14px] h-[14px]" />
+                  <img
+                    src={isChecked ? cameraGray : cameraDefault}
+                    alt='카메라'
+                    className='w-[14px] h-[14px]'
+                  />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className='flex items-center gap-1'>
               <div
                 className={`inline-block whitespace-nowrap rounded-[300px] px-[7px] py-[2px] text-[11px] ${
-                  isChecked ? 'bg-white text-[#8E8E8E]' : 'bg-[#EBFFF6] text-[#00DD7C]'
+                  isChecked
+                    ? 'bg-white text-[#8E8E8E]'
+                    : 'bg-[#EBFFF6] text-[#00DD7C]'
                 }`}
               >
                 {memberLabel}
               </div>
               {!isAllMembers && (
-                <p className="text-[12px] leading-[18px] break-words text-[#8E8E8E]">{memberSummary()}</p>
+                <p className='text-[12px] leading-[18px] break-words text-[#8E8E8E]'>
+                  {memberSummary()}
+                </p>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col justify-between items-end">
+        <div className='flex flex-col justify-between items-end'>
           {/*  완료시 completeTime, 미완료시 endTime 남은시간 */}
-          <div className="text-[12px] whitespace-nowrap text-[#8E8E8E]">{rightTopText}</div>
+          <div className='text-[12px] whitespace-nowrap text-[#8E8E8E]'>
+            {rightTopText}
+          </div>
           {showExpandButton ? (
-            <button className="w-5 h-5 mt-2" onClick={handleToggle} aria-label="멤버 전체 보기">
-              <img src={isExpanded ? toggleUp : toggleDown} alt="토글 버튼" />
+            <button
+              className='w-5 h-5 mt-2'
+              onClick={handleToggle}
+              aria-label='멤버 전체 보기'
+            >
+              <img src={isExpanded ? toggleUp : toggleDown} alt='토글 버튼' />
             </button>
           ) : (
-            <div className="w-5 h-5 mt-2" />
+            <div className='w-5 h-5 mt-2' />
           )}
         </div>
       </div>
