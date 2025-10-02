@@ -107,6 +107,10 @@ const CalendarPage: React.FC = () => {
   const [checklistserror, setChecklistsError] = useState<string | null>(null);
   const placeId = state?.placeId ?? localStorage.getItem('placeId');
 
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
   // API 데이터 로드
   const loadData = useCallback(async () => {
     try {
@@ -370,6 +374,48 @@ const CalendarPage: React.FC = () => {
     })();
   }, [placeId, selectedYMD]);
 
+  //사진 모달 오픈
+  useEffect(() => {
+    // 팝업이 열렸고, 선택된 task가 있어야 호출
+    if (!isPhotoOpen || !selectTask?.id) return;
+
+    const placeIdStr = localStorage.getItem('placeId');
+    if (!placeIdStr) return;
+
+    let canceled = false;
+    (async () => {
+      try {
+        setPhotoLoading(true);
+        setPhotoError(null);
+        setPhotoUrl(undefined);
+
+        const res = await useChecklistApi.getPhotoAccessUrl(
+          Number(placeIdStr),
+          selectTask.id
+        );
+        console.log(selectTask.id);
+
+        // ✅ 스펙에 맞춰 accessUrl 파싱
+        const url: string | undefined = res?.data?.data?.accessUrl;
+        if (!canceled) setPhotoUrl(url);
+      } catch (e: any) {
+        if (!canceled) {
+          setPhotoError(
+            e?.response?.data?.message ??
+              e?.message ??
+              '사진 URL을 불러오지 못했어요.'
+          );
+        }
+      } finally {
+        if (!canceled) setPhotoLoading(false);
+      }
+    })();
+
+    return () => {
+      canceled = true;
+    };
+  }, [isPhotoOpen, selectTask?.id]);
+
   // 체크리스트 토글 함수 - 완료/취소 모두 처리
   const handleToggleChecklist = useCallback(
     async (taskId: number) => {
@@ -386,20 +432,12 @@ const CalendarPage: React.FC = () => {
           return;
         }
 
-        console.log('🔍 체크리스트 토글 시도:', {
-          taskId,
-          currentStatus: currentTask.task.isChecked,
-          placeId,
-        });
-
         if (currentTask.task.isChecked) {
           // 완료된 상태면 취소
-          console.log('🔍 체크리스트 취소 시도...');
           const response = await useChecklistApi.incompleteChecklist(
             placeId,
             taskId
           );
-          console.log('✅ 체크리스트 취소 성공:', response.data);
 
           // 취소 시 상태 즉시 업데이트
           setItems((prev) =>
@@ -420,7 +458,6 @@ const CalendarPage: React.FC = () => {
           );
         } else {
           // 미완료 상태면 완료
-          console.log('🔍 체크리스트 완료 시도...');
           const response = await useChecklistApi.completeChecklist(
             placeId,
             taskId
@@ -876,18 +913,20 @@ const CalendarPage: React.FC = () => {
 
       <DownloadPopUp
         isOpen={isPhotoOpen}
-        onRequestClose={() => setIsPhotoOpen(false)}
-        hasPhoto={selectTask?.isCamera || false}
+        onRequestClose={() => {
+          setIsPhotoOpen(false);
+          setPhotoUrl(undefined);
+          setPhotoError(null);
+          setPhotoLoading(false);
+        }}
+        // URL 유무로 사진 보유 판단 (API가 URL 없으면 사진 없음으로 간주)
+        hasPhoto={!!photoUrl}
         taskTitle={selectTask?.title || '청소'}
         dutyName={
           displayedItems.find((item) => item.task.id === selectTask?.id)
             ?.dutyName || '당번'
         }
-        photoUrl={
-          selectTask?.isCamera
-            ? 'https://via.placeholder.com/264x196/4D83FD/FFFFFF?text=청소+사진'
-            : undefined
-        }
+        photoUrl={photoUrl} // ← API에서 받은 accessUrl 사용
         completedAt={selectTask?.completedAt || null}
       />
 

@@ -1,8 +1,6 @@
 // src/hooks/useCalendarApi.ts
 import api from '../apis/axios';
 
-
-
 export const useCalendarApi = {
   // 체크리스트 완료 (매니저)
   completeChecklist: (placeId: number, checklistId: number) =>
