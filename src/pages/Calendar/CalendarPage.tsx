@@ -831,11 +831,10 @@ const CalendarPage: React.FC = () => {
 
       {isFilterOpen && (
         <FilterBottomSheet
+          isOpen={isFilterOpen}
           selected={filterValue}
-          onSelect={(v) => {
-            setFilterValue(v);
-            setIsFilterOpen(false);
-          }}
+          onSelect={(v) => setFilterValue(v)}
+          onClose={() => setIsFilterOpen(false)}
         />
       )}
 
