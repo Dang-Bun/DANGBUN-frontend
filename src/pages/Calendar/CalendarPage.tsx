@@ -17,7 +17,7 @@ import filter from '../../assets/calendar/filter.svg';
 import FilterBottomSheet from '../../components/calendar/FilterBottomSheet';
 import PopUpCardDelete from '../../components/PopUp/PopUpCardDelete';
 import DownloadPopUp from '../../components/calendar/DownloadPopUp';
-import CleaningDeletePopUp from '../../components/home/CleaningDeletePopUp';
+import CleaningDeleteBottomSheet from '../../components/home/CleaningDeleteBottomSheet';
 // 실제 API 사용
 import useCalendarApi from '../../hooks/useCalendarApi';
 import { useChecklistApi } from '../../hooks/useChecklistApi';
@@ -93,8 +93,11 @@ const CalendarPage: React.FC = () => {
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
-  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] = useState(false);
-  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<number | null>(null);
+  const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] =
+    useState(false);
+  const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<
+    number | null
+  >(null);
 
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [selectTask, setSelectTask] = useState<Task | null>(null);
@@ -490,7 +493,7 @@ const CalendarPage: React.FC = () => {
 
       // 성공 메시지 (선택사항)
       console.log(`✅ [Calendar] 체크리스트 삭제 완료: ${selectTask.id}`);
-      
+
       // 삭제 성공 후 페이지 새로고침
       window.location.reload();
     } catch (err: unknown) {
@@ -792,27 +795,29 @@ const CalendarPage: React.FC = () => {
                   key={task.id}
                   onToggle={() => handleToggleChecklist(task.id)}
                 >
-                                     <CalendarTaskCard
-                     title={task.title}
-                     dangbun={dutyName}
-                     isChecked={task.isChecked}
-                     isCamera={task.isCamera}
-                     completedAt={task.completedAt} // 현재 null (API에 없으니)
-                     completedBy={task.completedBy} // memberName에서 세팅됨
-
-                     onMenuClick={() => {
-                       setSelectTask({ ...task, date: selectedYMD });
-                       setOpenDeletePopUpTaskId(openDeletePopUpTaskId === task.id ? null : task.id);
-                     }}
-                     showDeletePopUp={openDeletePopUpTaskId === task.id}
-                     onDeleteSelect={(type) => {
-                       console.log('🔍 삭제 선택:', type, task.id);
-                       if (type === 'name') {
-                         setOpenDeletePopUpTaskId(null);
-                         setIsDeleteOpen(true);
-                       }
-                     }}
-                   />
+                  <CalendarTaskCard
+                    title={task.title}
+                    dangbun={dutyName}
+                    isChecked={task.isChecked}
+                    isCamera={task.isCamera}
+                    completedAt={task.completedAt} // 현재 null (API에 없으니)
+                    completedBy={task.completedBy} // memberName에서 세팅됨
+                    onMenuClick={() => {
+                      setSelectTask({ ...task, date: selectedYMD });
+                      setIsCleaningDeletePopUpOpen(true);
+                      setOpenDeletePopUpTaskId(
+                        openDeletePopUpTaskId === task.id ? null : task.id
+                      );
+                    }}
+                    showDeletePopUp={openDeletePopUpTaskId === task.id}
+                    onDeleteSelect={(type) => {
+                      console.log('🔍 삭제 선택:', type, task.id);
+                      if (type === 'name') {
+                        setOpenDeletePopUpTaskId(null);
+                        setIsDeleteOpen(true);
+                      }
+                    }}
+                  />
                 </SwipeableRow>
               ))
             )}
@@ -834,37 +839,41 @@ const CalendarPage: React.FC = () => {
         />
       )}
 
-                                                       
+      {isCleaningDeletePopUpOpen && (
+        <CleaningDeleteBottomSheet
+          isOpen={isCleaningDeletePopUpOpen}
+          onClose={() => setIsCleaningDeletePopUpOpen(false)}
+          onSelect={(type) => {
+            if (type === 'photo') {
+              setIsCleaningDeletePopUpOpen(false);
+              setIsPhotoOpen(true);
+            } else if (type === 'info') {
+              setIsCleaningDeletePopUpOpen(false);
+              // navigate('/cleaninfo', { state: {...} })
+            } else if (type === 'name') {
+              setIsCleaningDeletePopUpOpen(false);
+              setIsDeleteOpen(true);
+            }
+          }}
+        />
+      )}
 
-       {isCleaningDeletePopUpOpen && (
-         <div className="absolute right-5 top-[calc(100%-200px)] z-50">
-           <CleaningDeletePopUp 
-             onSelect={(type) => {
-               if (type === 'name') {
-                 setIsCleaningDeletePopUpOpen(false);
-                 setIsDeleteOpen(true);
-               }
-             }}
-           />
-         </div>
-       )}
-
-       <PopUpCardDelete
-         isOpen={isDeleteOpen}
-         onRequestClose={() => setIsDeleteOpen(false)}
-         title={
-           <span>
-             청소 목록을 <span className='text-[#4D83FD]'>삭제</span>
-             하시겠습니까?
-           </span>
-         }
-         descript='해당 청소를 체크리스트에서 완전히 삭제합니다.'
-         first='취소'
-         second='확인'
-         userEmail=''
-         onFirstClick={() => setIsDeleteOpen(false)}
-         onSecondClick={handleDeleteChecklist}
-       />
+      <PopUpCardDelete
+        isOpen={isDeleteOpen}
+        onRequestClose={() => setIsDeleteOpen(false)}
+        title={
+          <span>
+            청소 목록을 <span className='text-[#4D83FD]'>삭제</span>
+            하시겠습니까?
+          </span>
+        }
+        descript='해당 청소를 체크리스트에서 완전히 삭제합니다.'
+        first='취소'
+        second='확인'
+        userEmail=''
+        onFirstClick={() => setIsDeleteOpen(false)}
+        onSecondClick={handleDeleteChecklist}
+      />
 
       <DownloadPopUp
         isOpen={isPhotoOpen}
@@ -900,4 +909,3 @@ const CalendarPage: React.FC = () => {
 };
 
 export default CalendarPage;
-
