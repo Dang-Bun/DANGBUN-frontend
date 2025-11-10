@@ -3,7 +3,9 @@ import dayjs from 'dayjs';
 import cameraGray from '../../assets/home/cameraGray.svg';
 import cameraDefault from '../../assets/home/cameraBlue.svg';
 import kebab from '../../assets/calendar/kebab.svg';
-import CleaningDeletePopUp from '../home/CleaningDeleteBottomSheet';
+import CleaningDeleteBottomSheet from '../home/CleaningDeleteBottomSheet';
+
+type MenuType = 'photo' | 'info' | 'name';
 
 type Props = {
   title: string;
@@ -14,8 +16,13 @@ type Props = {
   completedBy?: string | null;
   onMenuClick?: () => void;
   className?: string;
+
+  /** 바텀시트 표시 여부 */
   showDeletePopUp?: boolean;
-  onDeleteSelect?: (type: string) => void;
+  /** 바텀시트에서 항목 선택 */
+  onDeleteSelect?: (type: MenuType) => void;
+  /** 바텀시트 닫기 */
+  onDeleteClose?: () => void;
 };
 
 const CalendarTaskCard: React.FC<Props> = ({
@@ -29,6 +36,7 @@ const CalendarTaskCard: React.FC<Props> = ({
   className = '',
   showDeletePopUp = false,
   onDeleteSelect,
+  onDeleteClose,
 }) => {
   const bg = isChecked ? 'bg-[#DEDEDE]' : 'bg-[#F9F9F9]';
   const bar = isChecked ? 'bg-[#8E8E8E]' : 'bg-[#E1E4EA]';
@@ -87,18 +95,13 @@ const CalendarTaskCard: React.FC<Props> = ({
         </button>
       </div>
 
-      {showDeletePopUp &&
-        (() => {
-          console.log('🔍 CleaningDeletePopUp 렌더링:', {
-            showDeletePopUp,
-            title,
-          });
-          return (
-            <div className='absolute right-0 top-[calc(70%)] z-[99999]'>
-              <CleaningDeletePopUp onSelect={onDeleteSelect} />
-            </div>
-          );
-        })()}
+      {showDeletePopUp && (
+        <CleaningDeleteBottomSheet
+          isOpen={showDeletePopUp}
+          onClose={onDeleteClose ?? (() => {})}
+          onSelect={(t) => onDeleteSelect?.(t)}
+        />
+      )}
     </div>
   );
 };
