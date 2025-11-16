@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className='fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center'>
-      <div className='relative w-full max-w-[393px] h-full flex items-center justify-center mx-auto'>
+      <div className='relative w-full h-full flex items-center justify-center mx-auto'>
         {showBackButton && (
           <button
             onClick={handleBack}
@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
         {rightElement && (
           <button
             onClick={onRightClick}
-            className='absolute right-4 w-[36px] h-[36px] cursor-pointer'
+            className='absolute right-5 cursor-pointer'
             aria-label='오른쪽 아이콘'
           >
             {rightElement}
