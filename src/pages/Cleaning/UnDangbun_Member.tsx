@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import HeaderBar from '../../components/HeaderBar';
 import cleanUpImg from '../../assets/cleanUpList/cleanUp.svg';
 import BottomBar from '../../components/BottomBar';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import useCleaningApi from '../../hooks/useCleaningApi';
 
 const UnDangbun_Member = () => {
   const [undangbunList, setUndangbunList] = useState<string[]>([]);
-  const navigate = useNavigate();
   const location = useLocation();
   const placeId = location.state;
 
