@@ -119,7 +119,7 @@ const Modifyduty = () => {
   };
 
   return (
-    <div className='p-4'>
+    <div className='relative p-4 h-full'>
       {/* 상단 네비 */}
       <div className='relative flex w-full h-[50px] items-center mb-4'>
         <div className='absolute'>
@@ -127,7 +127,7 @@ const Modifyduty = () => {
             src={left_chevron}
             alt='뒤로가기'
             className='cursor-pointer'
-            onClick={() => navigate('/management/manager')}
+            onClick={() => navigate(-1)}
           />
         </div>
       </div>
@@ -164,7 +164,7 @@ const Modifyduty = () => {
       </div>
 
       {/* 버튼 */}
-      <div className='mt-[339px] flex flex-col gap-[8px]'>
+      <div className='absolute w-full flex flex-col gap-[8px] bottom-0 left-1/2 -translate-x-1/2 items-center pb-8'>
         <CTAButton
           variant={isFormValid ? 'blue' : 'thickGray'}
           onClick={() => {
@@ -189,7 +189,7 @@ const Modifyduty = () => {
         onRequestClose={() => setCreateModalOpen(false)}
         title={
           <span className='font-normal text-center block'>
-            <span className='font-bold'>"{dangbunName}"</span>을
+            <span className='font-bold'>&quot;{dangbunName}&quot;</span>을
             <br />
             <span className='text-blue'>수정</span>할까요?
           </span>
@@ -210,7 +210,7 @@ const Modifyduty = () => {
         title={
           <span className='font-normal text-center block'>
             <span>정말 </span>
-            <span className='font-bold'>"{dangbunName}"</span>을
+            <span className='font-bold'>&quot;{dangbunName}&quot;</span>을
             <br />
             <span className='text-blue'>삭제</span>할까요?
           </span>
