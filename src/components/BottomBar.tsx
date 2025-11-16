@@ -25,7 +25,7 @@ const BottomBar = () => {
   const isSetting = pathname.startsWith('/setting/');
 
   return (
-    <div className='bottom-0 left-0 right-0 w-full max-w-[430px] h-[70px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
+    <div className='fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[70px] bg-white z-50 border-t border-[#F6F6F6] flex justify-center items-center gap-[112px]'>
       <button
         type='button'
         className='cursor-pointer'
