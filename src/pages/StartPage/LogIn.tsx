@@ -48,20 +48,30 @@ const LogIn = () => {
         <img src={icon} alt='아이콘' />
       </div>
       <div className='w-full flex flex-col items-center gap-[10px]'>
-        <Input
-          placeholder='이메일을 입력하세요.'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          maxLength={35}
-        />
-        <Input
-          placeholder='비밀번호를 입력하세요.'
-          type='password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          maxLength={20}
-        />
-        <CTAButton onClick={handleSign}>로그인</CTAButton>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSign();
+          }}
+          className='w-full flex flex-col items-center gap-[10px]'
+        >
+          <Input
+            placeholder='이메일을 입력하세요.'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            maxLength={35}
+          />
+          <Input
+            placeholder='비밀번호를 입력하세요.'
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            maxLength={20}
+          />
+          <CTAButton onClick={handleSign} type='submit'>
+            로그인
+          </CTAButton>
+        </form>
         <div className='w-[353px] flex flex-row justify-end -mt-[2.75px] -mb-[2px]'>
           <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
           <img
