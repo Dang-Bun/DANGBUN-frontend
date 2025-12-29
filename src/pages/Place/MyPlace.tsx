@@ -109,7 +109,7 @@ const MyPlace: React.FC = () => {
 
   // 상단 바
   const Header = (
-    <div className='fixed left-1/2 -translate-x-1/2 top-0 flex w-full max-w-[430px] h-[50px] justify-center items-center py-4 px-4'>
+    <div className='fixed left-1/2 -translate-x-1/2 top-0 flex w-full max-w-[430px] h-[50px] justify-center items-center py-4 px-4 bg-[var(--color-gray-default)] z-30'>
       <div className='absolute flex text-[20px] justify-center'>
         내 플레이스
       </div>
@@ -139,7 +139,7 @@ const MyPlace: React.FC = () => {
   // 빈 상태 (기존 화면 유지)
   if (!places.length) {
     return (
-      <div>
+      <div className='bg-[var(--color-gray-default)]'>
         {Header}
         <div className='w-full flex justify-center my-[60px] mt-[212px] mb-[229px]'>
           <img src={nothingPlace} alt='플레이스 없음' />
@@ -152,7 +152,7 @@ const MyPlace: React.FC = () => {
   }
 
   return (
-    <div className='px-4 pt-3 pb-24'>
+    <div className='px-4 pt-3 pb-24 bg-[var(--color-gray-default)]'>
       {Header}
 
       {/* 남은 청소 안내 배지 */}

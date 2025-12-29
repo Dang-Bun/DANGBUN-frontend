@@ -37,7 +37,8 @@
   --color-green: #78f5be /*c3*/;
   --color-green-1: #ebfff6;
   --color-green-2: #00dd7c;
-  --color-gray-default: #f9f9f9 /* c4 */ --color-gray-5: #f6f6f6; /* c5 */
+  --color-gray-default: #f9f9f9; /* c4 */
+  --color-gray-5: #f6f6f6; /* c5 */
   --color-gray-6: #8e8e8e; /* c6 */
   --color-gray-7: #dedede; /* c7 */
   --color-gray-hover: #797c82; /* hover */
