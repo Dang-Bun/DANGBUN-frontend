@@ -109,14 +109,14 @@ const MyPlace: React.FC = () => {
 
   // 상단 바
   const Header = (
-    <div className='fixed left-1/2 -translate-x-1/2 top-0 flex w-full max-w-[430px] h-[50px] justify-center items-center py-4 px-4 bg-[var(--color-gray-default)] z-30'>
+    <div className='absolute left-1/2 -translate-x-1/2 top-0 flex w-full max-w-[430px] h-[50px] justify-center items-center py-4.5 px-4 bg-[var(--color-gray-default)] z-30'>
       <div className='absolute flex text-[20px] justify-center'>
         내 플레이스
       </div>
       <img
         src={threebar}
         alt='목록'
-        className='absolute cursor-pointer right-0'
+        className='absolute cursor-pointer right-4.5'
         onClick={() => navigate('/myInfo')}
       />
     </div>
@@ -152,12 +152,12 @@ const MyPlace: React.FC = () => {
   }
 
   return (
-    <div className='px-4 pt-3 pb-24 bg-[var(--color-gray-default)]'>
+    <div className='px-4 pt-7 pb-24 bg-[var(--color-gray-default)]'>
       {Header}
 
       {/* 남은 청소 안내 배지 */}
       <div className='w-full flex justify-center mb-3 mt-[50px]'>
-        <div className='inline-flex w-[250px] h-[31px] flex justify-center items-center rounded-full bg-white border border-blue text-black text-[12px]'>
+        <div className='w-[250px] h-[31px] flex justify-center items-center rounded-full bg-white border border-blue text-black text-[12px]'>
           오늘 남은 청소는 총{' '}
           <span className='mx-1 font-normal text-blue'>{remainingCount}건</span>
           이에요.
