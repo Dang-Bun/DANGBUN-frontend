@@ -13,7 +13,7 @@ const AddPlace = () => {
   return (
     <div className='px-5'>
       <Header title='' showBackButton={true}></Header>
-      <div className='text-[20px] font-normal pl-[20px] mt-[13px] mb-[42px]'>
+      <div className='text-[20px] font-normal pl-[20px] pt-14 mb-[42px]'>
         어떤 목적으로 사용하시나요?
       </div>
       <div>

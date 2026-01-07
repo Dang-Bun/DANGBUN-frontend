@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../apis/axios';
 import RequestPopUp from '../../components/PopUp/RequestPopUp';
 import PopupCard from '../../components/PopUp/PopUpCard';
+import Header from '../../components/HeaderBar';
 
 const MyInfoPage = () => {
   const navigate = useNavigate();
@@ -47,23 +48,10 @@ const MyInfoPage = () => {
     <>
       <div className='relative w-full bg-white flex flex-col py-3 px-4'>
         {/* 상단 헤더 */}
+        <Header title='내 정보' showBackButton={true} />
         <div className='mb-[500px]'>
-          <div className='flex items-center justify-center pt-3 mb-[34px]'>
-            <img
-              src={leftChevron}
-              alt='뒤로가기'
-              className='absolute left-0 flex w-[36px] h-[36px]'
-              onClick={() => {
-                navigate('/myPlace');
-              }}
-            />
-            <div className='flex-1 text-center text-[20px] font-400'>
-              내 정보
-            </div>
-          </div>
-
           {/* 이름 */}
-          <div className='flex justify-between items-center py-4'>
+          <div className='flex justify-between items-center pt-20'>
             <span className='text-[16px] font-semibold text-black'>이름</span>
             <span className='text-[16px] text-[#B7B7B7]'>
               {userInfo?.name || ''}

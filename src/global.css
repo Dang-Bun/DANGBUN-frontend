@@ -69,7 +69,7 @@ body {
 
 @media (max-width: 430px) {
   #root {
-    height: 100vh;
+    height: 100dvh;
     margin-left: auto;
     margin-right: auto;
     padding: 0;
