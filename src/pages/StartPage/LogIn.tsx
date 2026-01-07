@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import icon from '../../assets/Icon_reverse.svg';
 import CTAButton from '../../components/button/CTAButton';
 import Input from '../../components/input/Input';
-import right_chevron from '../../assets/chevron/right_chevronImg.svg';
+import KakaoLogInButton from '../../components/button/KakaoLogInButton';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserApi } from '../../hooks/useUserApi';
 
 const LogIn = () => {
   const navigate = useNavigate();
-  const handleClick = () => {
-    navigate('/join');
-  };
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,11 +40,11 @@ const LogIn = () => {
   };
 
   return (
-    <div className='w-full'>
+    <div className='w-full pr-5 pl-5'>
       <div className='flex justify-center pb-[104px] pt-[120px]'>
         <img src={icon} alt='아이콘' />
       </div>
-      <div className='w-full flex flex-col items-center gap-[10px]'>
+      <div className='w-full flex flex-col items-center'>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -72,20 +69,24 @@ const LogIn = () => {
             로그인
           </CTAButton>
         </form>
-        <div className='w-[353px] flex flex-row justify-end -mt-[2.75px] -mb-[2px]'>
-          <div className='text-[14px] font-normal pr-[9px]'>비밀번호 찾기</div>
-          <img
-            src={right_chevron}
-            alt='오른쪽 화살표'
+        <div className='w-full flex flex-row justify-end mt-3 mb-9'>
+          <div
+            className='cursor-pointer text-sm font-normal'
+            onClick={() => navigate('/join')}
+          >
+            회원 가입
+          </div>
+          <div className='text-sm font-normal'>&nbsp;|&nbsp;</div>
+          <div
+            className='text-sm font-normal pr-[9px]'
             onClick={() => {
               navigate('/findPassWord');
             }}
-            className='cursor-pointer'
-          />
+          >
+            비밀번호 찾기
+          </div>
         </div>
-        <CTAButton onClick={handleClick} variant='gray'>
-          회원가입
-        </CTAButton>
+        <KakaoLogInButton />
       </div>
     </div>
   );
