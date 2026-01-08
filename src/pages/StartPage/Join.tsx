@@ -109,8 +109,8 @@ const Join = () => {
 
   return (
     <>
-      <div className='w-full max-w-[393px] min-h-screen mx-auto px-4 py-6 flex flex-col gap-6'>
-        <div className='relative flex items-center mb-[48px]'>
+      <div className='w-full max-w-[393px] min-h-screen mx-auto px-5 py-6 flex flex-col'>
+        <div className='relative flex items-center mb-12'>
           <img
             src={left_chevron}
             alt='뒤로가기'
@@ -169,10 +169,10 @@ const Join = () => {
             </div>
             <div className='flex flex-row gap-2'>
               {/* 인증번호 입력 + 타이머 */}
-              <div className='relative w-[187px]'>
+              <div className='relative'>
                 <FreeInput
                   placeholder='인증번호 입력'
-                  maxWidth={187}
+                  maxWidth={241}
                   height={50}
                   fontSize={16}
                   value={verificationCode}
@@ -200,7 +200,7 @@ const Join = () => {
                       ? 'blue'
                       : 'thickGray'
                 }
-                maxWidth={158}
+                maxWidth={104}
                 height={50}
                 fontSize={16}
                 onClick={() => {
@@ -208,7 +208,7 @@ const Join = () => {
                   handleRequestVerification();
                 }}
               >
-                {isRequested ? '인증번호 재요청' : '인증번호 요청'}
+                {isRequested ? '재요청' : '인증 요청'}
               </FreeButton>
             </div>
             {!isVerifyCode && (
