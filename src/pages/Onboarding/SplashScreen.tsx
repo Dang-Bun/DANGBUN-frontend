@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import splashImg from '../../assets/Icon.svg';
+import splashImg from '../../assets/splashImg.svg';
 
 const SplashScreen = () => {
   const navigate = useNavigate();
@@ -18,9 +18,8 @@ const SplashScreen = () => {
       <img
         src={splashImg}
         alt='splash'
-        className='w-[118.11px] h-[118.11px] object-contain'
+        className='w-[118.11px] h-[170px] object-contain'
       />
-      <p className='text-[40px] text-[#FFFFFF] leading-tight'>당번</p>
     </div>
   );
 };
