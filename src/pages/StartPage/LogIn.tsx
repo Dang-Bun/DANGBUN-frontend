@@ -39,6 +39,12 @@ const LogIn = () => {
     }
   };
 
+  const handleOauthLogin = () => {
+    const kakaoAuthUrl =
+      'https://kauth.kakao.com/oauth/authorize?client_id=e7d2804c1a2ccb6f02972f17b06694cb&redirect_uri=https://dangbun.o-r.kr/users/kakao&response_type=code';
+    window.location.href = kakaoAuthUrl;
+  };
+
   return (
     <div className='w-full pr-5 pl-5'>
       <div className='flex justify-center pb-[104px] pt-[120px]'>
@@ -86,7 +92,7 @@ const LogIn = () => {
             비밀번호 찾기
           </div>
         </div>
-        <KakaoLogInButton />
+        <KakaoLogInButton onClick={handleOauthLogin} />
       </div>
     </div>
   );
