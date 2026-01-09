@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import leftChevron from '../../assets/chevron/left_chevronImg.svg';
 import CTAButton from '../../components/button/CTAButton';
 import { useNavigate } from 'react-router-dom';
 import api from '../../apis/axios';
