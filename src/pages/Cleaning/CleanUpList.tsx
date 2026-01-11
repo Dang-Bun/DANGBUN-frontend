@@ -138,24 +138,21 @@ const CleanUpList = () => {
 
   return (
     <div className='flex flex-col w-full px-4 relative'>
-      <div
-        ref={headerRef}
-        className='fixed w-full left-1/2 -translate-x-1/2 bg-[#fff]'
-      >
-        <Header
-          title='청소 관리'
-          rightElement={<img src={grayPlus} alt='추가' />}
-          showBackButton={true}
-          onRightClick={handleAdd}
-          onBackClick={() => {
-            if (role === '매니저' || role === 'manager') {
-              navigate('/setting/manager');
-            } else {
-              navigate('/setting/member');
-            }
-          }}
-        />
-        <div className='flex flex-row justify-between mt-[52px] mb-3 px-5'>
+      <Header
+        title='청소 관리'
+        rightElement={<img src={grayPlus} alt='추가' />}
+        showBackButton={true}
+        onRightClick={handleAdd}
+        onBackClick={() => {
+          if (role === '매니저' || role === 'manager') {
+            navigate('/setting/manager');
+          } else {
+            navigate('/setting/member');
+          }
+        }}
+      />
+      <div className='flex flex-col justify-between mt-[52px] mb-3 px-5'>
+        <div className='w-full flex justify-between'>
           <p className='text-black text-sm font-normal leading-tight'>
             총 {totalCleaningCount}개
           </p>
@@ -171,7 +168,7 @@ const CleanUpList = () => {
         </div>
 
         <button
-          className='flex flex-row justify-center items-center mb-3 ml-5 pt-1.5 pr-2 pb-1 pl-3 rounded-lg outline-1 outline-[#e5e5e5] cursor-pointer'
+          className='flex flex-row w-16.5 h-8 justify-center items-center my-3 pt-1.5 pr-2 pb-1 pl-3 rounded-lg outline-1 outline-[#e5e5e5] cursor-pointer'
           onClick={() => {
             setOpen(true);
           }}

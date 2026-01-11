@@ -152,7 +152,7 @@ const MyPlace: React.FC = () => {
   }
 
   return (
-    <div className='px-4 pt-7 pb-24 bg-[var(--color-gray-default)]'>
+    <div className='h-[100dvh] px-4 pt-7 pb-24 bg-[var(--color-gray-default)]'>
       {Header}
 
       {/* 남은 청소 안내 배지 */}

@@ -5,6 +5,7 @@ import CTAButton from '../../components/button/CTAButton';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from '../../hooks/useDutyApi';
 import { useLocation } from 'react-router-dom';
+import Header from '../../components/HeaderBar';
 
 type Cleaning = {
   cleaningId: number;
@@ -82,19 +83,7 @@ export default function AddClean() {
 
   return (
     <div className='w-full min-h-screen bg-white mx-auto pt-3'>
-      {/* 헤더 */}
-      <div className='relative flex items-center mb-6'>
-        <button className='absolute left-0'>
-          <img
-            src={left_chevron}
-            alt='뒤로가기'
-            className='cursor-pointer'
-            onClick={() => navigate(-1)}
-          />
-        </button>
-        <div className='mx-auto font-normal text-[20px]'>당번 미지정 청소</div>
-      </div>
-
+      <Header title='미지정 청소 추가' showBackButton={true} />
       {/* 본문 */}
       <div className='px-4'>
         {loading && (
