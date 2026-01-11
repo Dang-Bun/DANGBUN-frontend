@@ -183,7 +183,7 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
       />
       {/* Bottom Sheet */}
       <div
-        className='fixed w-[393px] bottom-0 z-50 rounded-t-[18px] bg-white shadow-2xl'
+        className='fixed w-full max-w-[430px] bottom-0 z-50 rounded-t-[18px] bg-white shadow-2xl'
         role='dialog'
         aria-modal='true'
       >
@@ -207,17 +207,19 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
             </div>
           </div>
           {/* 전체 선택 */}
-          <button
-            onClick={toggleAllFiltered}
-            className='flex items-center gap-2 pl-[250px] h-10 text-[16px] font-normal cursor-pointer'
-            title='필터된 결과 기준 전체 선택/해제'
-          >
-            <span className='text-gray-600'>전체 선택</span>
-            <img
-              src={allFilteredSelected ? selectedDangbun : unselectedDangbun}
-              alt='전체 선택'
-            />
-          </button>
+          <div className='flex justify-end'>
+            <button
+              onClick={toggleAllFiltered}
+              className='flex items-center gap-2 h-10 text-[16px] font-normal cursor-pointer'
+              title='필터된 결과 기준 전체 선택/해제'
+            >
+              <span className='text-gray-600'>전체 선택</span>
+              <img
+                src={allFilteredSelected ? selectedDangbun : unselectedDangbun}
+                alt='전체 선택'
+              />
+            </button>
+          </div>
         </div>
 
         {/* 목록(칩) */}
@@ -788,7 +790,7 @@ const DutyManagement = () => {
       <MembersPickerModal
         open={rolepickerOpen}
         allMembers={assignedMembers}
-        initialSelectedIds={roleInitialIds} // ✅ 역할 모달은 역할 기준으로!
+        initialSelectedIds={roleInitialIds}
         dutyId={dutyId}
         placeId={placeId}
         mode='assign'
