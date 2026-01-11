@@ -21,6 +21,27 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDutyApi } from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 
+export const EmptyCleanMarker = ({
+  contentMargin,
+}: {
+  contentMargin: number;
+}) => (
+  <div
+    className='flex flex-col overflow-y-auto items-center justify-center gap-5 h-[90dvh]'
+    style={{ paddingTop: contentMargin }}
+  >
+    <img src={cleanUpImg} alt='empty' />
+    <div className='flex flex-col gap-[11px] items-center'>
+      <p className='text-zinc-500 text-base font-semibold leading-snug'>
+        미지정된 청소가 없어요.
+      </p>
+      <p className='text-neutral-400 text-sm font-normal leading-tight text-center'>
+        플레이스에 필요한 청소 목록을 추가해 <br /> 관리해보세요.
+      </p>{' '}
+    </div>
+  </div>
+);
+
 const CleanUpList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -231,20 +252,7 @@ const CleanUpList = () => {
       </div>
 
       {dangbunList.length === 0 ? (
-        <div
-          className='flex flex-col overflow-y-auto items-center justify-center gap-5 h-[832px]'
-          style={{ paddingTop: contentMargin }}
-        >
-          <img src={cleanUpImg} alt='empty' />
-          <div className='flex flex-col gap-[11px] items-center'>
-            <p className='text-zinc-500 text-base font-semibold leading-snug'>
-              저장된 청소가 없어요.
-            </p>
-            <p className='text-neutral-400 text-sm font-normal leading-tight text-center'>
-              플레이스에 필요한 청소 목록을 추가해 <br /> 관리해보세요.
-            </p>{' '}
-          </div>
-        </div>
+        <EmptyCleanMarker contentMargin={contentMargin} />
       ) : (
         <div
           className='flex flex-col overflow-y-auto items-center justify-start gap-4'
