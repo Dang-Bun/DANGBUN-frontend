@@ -9,6 +9,7 @@ import plus from '../../assets/dangbun/plus.svg';
 import unselectedDangbun from '../../assets/checkIcon/unselectedDangbun.svg';
 import selectedDangbun from '../../assets/checkIcon/selectedDangbun.svg';
 import PopUpCard from '../../components/PopUp/PopUpCard';
+import magnifier from '../../assets/nav/magnifier.svg';
 
 type DutyMember = { memberId: number; role: string; name: string };
 type Cleaning = { cleaningId: number; name: string };
@@ -197,7 +198,9 @@ const MembersPickerModal: React.FC<MembersPickerModalProps> = ({
           <div className='flex items-center mb-[18px]'>
             {/* 검색 입력 */}
             <div className='flex-1 flex items-center gap-2 px-3 h-10 rounded-full bg-gray-100'>
-              <span className='text-gray-400'>🔍</span>
+              <span>
+                <img src={magnifier} alt='검색 아이콘' />
+              </span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -293,12 +296,6 @@ const DutyManagement = () => {
   const selectedMembers = useMemo(
     () => allMembers.filter((m) => selectedMemberIds.includes(m.memberId)),
     [allMembers, selectedMemberIds]
-  );
-  // 이름 -> id 매핑
-  const nameToId = useMemo(
-    () =>
-      Object.fromEntries(allMembers.map((m) => [m.name, m.memberId] as const)),
-    [allMembers]
   );
 
   const [loading, setLoading] = useState(false);
