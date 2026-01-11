@@ -13,6 +13,7 @@ api.interceptors.request.use(
       '/users/signup/email-code',
       '/users/signup',
       '/users/login',
+      '/users/login/kakao',
     ];
     const url = config.url || '';
 

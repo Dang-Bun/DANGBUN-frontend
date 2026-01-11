@@ -51,6 +51,7 @@ import MemberHome from '../pages/Home/MemberHome';
 import ManagerOverview from '../pages/Home/ManagerOverview';
 import CalendarDetail from '../pages/Calendar/CalendarDetail';
 import CleanDelete from '../pages/Cleaning/CleanDelete';
+import KakaoCallback from '../pages/StartPage/KakaoCallback';
 
 const router = createBrowserRouter([
   // === 공개 라우트 ===
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
   { path: '/findPassWord', element: <FindPassword /> },
   { path: '/join', element: <Join /> },
   { path: '/joinComplete', element: <JoinComplete /> },
+  { path: '/users/login/kakao', element: <KakaoCallback /> },
 
   // === 로그인 필요(여기 아래 전부 보호됨) ===
   {

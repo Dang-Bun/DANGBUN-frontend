@@ -1,9 +1,16 @@
 import React from 'react';
 import KakaoLogo from '../../assets/login/kakao.svg';
 
-const KakaoLogInButton = () => {
+interface KakaoLogInButtonProps {
+  onClick?: () => void;
+}
+
+const KakaoLogInButton: React.FC<KakaoLogInButtonProps> = ({ onClick }) => {
   return (
-    <button className='w-full h-14 relative flex items-center justify-center bg-[#FEE500] rounded-lg'>
+    <button
+      onClick={onClick}
+      className='w-full h-14 relative flex items-center justify-center bg-[#FEE500] rounded-lg cursor-pointer'
+    >
       <img
         src={KakaoLogo}
         alt='카카오 로고'
