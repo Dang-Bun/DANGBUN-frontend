@@ -40,7 +40,6 @@ import { useChecklistApi } from '../../hooks/useChecklistApi';
 import useNotificationApi from '../../hooks/useNotificationApi';
 import { usePlaceApi } from '../../hooks/usePlaceApi';
 import { useDutyApi } from '../../hooks/useDutyApi';
-import { div } from 'framer-motion/client';
 
 /* ============================
  * 상수/타입
@@ -690,14 +689,14 @@ const ManagerHome: React.FC = () => {
                   <img
                     src={notificationImage}
                     alt='알림'
-                    className='w-[36px] cursor-pointer'
+                    className='cursor-pointer pb-1.5'
                     onClick={goToNotification}
                   />
                 </div>
               </div>
 
               {/* 가운데 동그라미 (%) */}
-              <div className='mt-[45px] mb-[18px]'>
+              <div className='mt-11 mb-4.5'>
                 <ProgressBar
                   percentage={page.percent}
                   iconSrc={page.icon}
