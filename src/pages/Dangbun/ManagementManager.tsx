@@ -128,7 +128,7 @@ const ManagementManager = () => {
 
               {/* 배경 위 내용 */}
               <div className='absolute inset-0 flex items-start justify-between pt-[40px] pl-[10px]'>
-                <span className='h-[25px] px-[3px] inline-flex items-center font-semibold text-[12px] text-white bg-blue rounded-[8px] whitespace-nowrap'>
+                <span className='h-[25px] px-2 inline-flex items-center font-semibold text-[12px] text-white bg-blue rounded-lg whitespace-nowrap'>
                   {duty.name}
                 </span>
                 <img

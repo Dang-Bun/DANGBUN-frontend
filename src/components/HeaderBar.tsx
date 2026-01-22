@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className='fixed top-0 left-0 right-0 h-[52px] bg-white z-50 flex items-center justify-center max-w-[430px] mx-auto'>
+    <header className='fixed top-0 left-0 right-0 h-13 bg-white z-50 flex items-center justify-center max-w-[430px] mx-auto'>
       <div className='relative w-full h-full flex items-center justify-center mx-auto'>
         {showBackButton && (
           <button

@@ -62,11 +62,9 @@ const Z_OnBoarding = () => {
       >
         {onboardingData.map((item, index) => (
           <SwiperSlide key={index}>
-            <img
-              src={item.img}
-              alt={`onboarding-${index}`}
-              className='w-full h-[669px] object-cover overflow-hidden mb-[40px]'
-            />
+            <div className='w-full h-[610px] object-cover overflow-hidden mb-[40px]'>
+              <img src={item.img} alt={`onboarding-${index}`} />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>

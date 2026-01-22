@@ -21,6 +21,27 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDutyApi } from '../../hooks/useDutyApi';
 import { useMemberApi } from '../../hooks/useMemberApi';
 
+export const EmptyCleanMarker = ({
+  contentMargin,
+}: {
+  contentMargin: number;
+}) => (
+  <div
+    className='flex flex-col overflow-y-auto items-center justify-center gap-5 h-[90dvh]'
+    style={{ paddingTop: contentMargin }}
+  >
+    <img src={cleanUpImg} alt='empty' />
+    <div className='flex flex-col gap-[11px] items-center'>
+      <p className='text-zinc-500 text-base font-semibold leading-snug'>
+        미지정된 청소가 없어요.
+      </p>
+      <p className='text-neutral-400 text-sm font-normal leading-tight text-center'>
+        플레이스에 필요한 청소 목록을 추가해 <br /> 관리해보세요.
+      </p>{' '}
+    </div>
+  </div>
+);
+
 const CleanUpList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,24 +159,21 @@ const CleanUpList = () => {
 
   return (
     <div className='flex flex-col w-full px-4 relative'>
-      <div
-        ref={headerRef}
-        className='fixed w-full left-1/2 -translate-x-1/2 bg-[#fff]'
-      >
-        <Header
-          title='청소 관리'
-          rightElement={<img src={grayPlus} alt='추가' />}
-          showBackButton={true}
-          onRightClick={handleAdd}
-          onBackClick={() => {
-            if (role === '매니저' || role === 'manager') {
-              navigate('/setting/manager');
-            } else {
-              navigate('/setting/member');
-            }
-          }}
-        />
-        <div className='flex flex-row justify-between mt-[52px] mb-3 px-5'>
+      <Header
+        title='청소 관리'
+        rightElement={<img src={grayPlus} alt='추가' />}
+        showBackButton={true}
+        onRightClick={handleAdd}
+        onBackClick={() => {
+          if (role === '매니저' || role === 'manager') {
+            navigate('/setting/manager');
+          } else {
+            navigate('/setting/member');
+          }
+        }}
+      />
+      <div className='flex flex-col justify-between mt-[52px] mb-3 px-5'>
+        <div className='w-full flex justify-between'>
           <p className='text-black text-sm font-normal leading-tight'>
             총 {totalCleaningCount}개
           </p>
@@ -171,7 +189,7 @@ const CleanUpList = () => {
         </div>
 
         <button
-          className='flex flex-row justify-center items-center mb-3 ml-5 pt-1.5 pr-2 pb-1 pl-3 rounded-lg outline-1 outline-[#e5e5e5] cursor-pointer'
+          className='flex flex-row w-16.5 h-8 justify-center items-center my-3 pt-1.5 pr-2 pb-1 pl-3 rounded-lg outline-1 outline-[#e5e5e5] cursor-pointer'
           onClick={() => {
             setOpen(true);
           }}
@@ -234,20 +252,7 @@ const CleanUpList = () => {
       </div>
 
       {dangbunList.length === 0 ? (
-        <div
-          className='flex flex-col overflow-y-auto items-center justify-center gap-5 h-[832px]'
-          style={{ paddingTop: contentMargin }}
-        >
-          <img src={cleanUpImg} alt='empty' />
-          <div className='flex flex-col gap-[11px] items-center'>
-            <p className='text-zinc-500 text-base font-semibold leading-snug'>
-              저장된 청소가 없어요.
-            </p>
-            <p className='text-neutral-400 text-sm font-normal leading-tight text-center'>
-              플레이스에 필요한 청소 목록을 추가해 <br /> 관리해보세요.
-            </p>{' '}
-          </div>
-        </div>
+        <EmptyCleanMarker contentMargin={contentMargin} />
       ) : (
         <div
           className='flex flex-col overflow-y-auto items-center justify-start gap-4'

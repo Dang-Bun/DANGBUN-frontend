@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import left_chevron from '../../assets/chevron/left_chevronImg.svg';
+import { EmptyCleanMarker } from '../Cleaning/CleanUpList';
 import CTAButton from '../../components/button/CTAButton';
 import { useCleaningApi } from '../../hooks/useCleaningApi';
 import { useDutyApi } from '../../hooks/useDutyApi';
 import { useLocation } from 'react-router-dom';
+import Header from '../../components/HeaderBar';
 
 type Cleaning = {
   cleaningId: number;
@@ -82,30 +83,16 @@ export default function AddClean() {
 
   return (
     <div className='w-full min-h-screen bg-white mx-auto pt-3'>
-      {/* 헤더 */}
-      <div className='relative flex items-center mb-6'>
-        <button className='absolute left-0'>
-          <img
-            src={left_chevron}
-            alt='뒤로가기'
-            className='cursor-pointer'
-            onClick={() => navigate(-1)}
-          />
-        </button>
-        <div className='mx-auto font-normal text-[20px]'>당번 미지정 청소</div>
-      </div>
-
+      <Header title='미지정 청소 추가' showBackButton={true} />
       {/* 본문 */}
-      <div className='px-4'>
+      <div className='px-4 mt-13'>
         {loading && (
           <div className='text-center text-gray-500 py-10'>불러오는 중…</div>
         )}
         {error && <div className='text-center text-red-500 py-10'>{error}</div>}
 
         {!loading && !error && list.length === 0 && (
-          <div className='text-center text-gray-400 py-10'>
-            미지정 청소가 없습니다.
-          </div>
+          <EmptyCleanMarker contentMargin={0} />
         )}
 
         <ul className='space-y-3'>
