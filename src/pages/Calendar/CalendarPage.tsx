@@ -697,7 +697,7 @@ const CalendarPage: React.FC = () => {
 
   return (
     <div className='flex flex-col min-h-screen'>
-      <Header title='캘린더' />
+      <Header title='캘린더' showBackButton={false} />
       <div className='flex flex-col flex-1 min-h-0 mt-12 py-4'>
         <div className='flex items-center justify-between px-5'>
           <button
