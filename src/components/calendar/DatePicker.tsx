@@ -45,11 +45,14 @@ export default function DatePicker({
   if (!isOpen) return null;
 
   return (
-    <>
+    <div
+      className='fixed inset-0 z-50 bg-black/30 flex items-end justify-center'
+      onClick={onClose}
+    >
       <div
         role='dialog'
         aria-modal='true'
-        className='fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[24px] shadow-[0_-8px_24px_rgba(0,0,0,0.15)]'
+        className='w-full max-w-108 bottom-0 bg-white rounded-t-[24px] shadow-[0_-8px_24px_rgba(0,0,0,0.15)]'
       >
         <div className='px-5 pt-5 pb-4 flex items-center justify-between'>
           <p className='text-base font-medium text-gray-800'>날짜 설정</p>
@@ -107,6 +110,6 @@ export default function DatePicker({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
