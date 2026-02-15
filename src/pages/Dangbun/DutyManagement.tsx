@@ -780,6 +780,10 @@ const DutyManagement = () => {
         onClose={() => setPickerOpen(false)}
         onConfirm={(ids) => {
           setSelectedMemberIds(ids);
+          const nextAssigned = allMembers.filter((m) =>
+            ids.includes(m.memberId)
+          );
+          setAssignedMembers(nextAssigned);
           setPickerOpen(false);
         }}
       />

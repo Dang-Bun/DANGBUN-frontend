@@ -92,7 +92,6 @@ const CalendarPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState<FilterValue>('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isCleaningDeletePopUpOpen, setIsCleaningDeletePopUpOpen] =
     useState(false);
   const [openDeletePopUpTaskId, setOpenDeletePopUpTaskId] = useState<
@@ -715,8 +714,8 @@ const CalendarPage: React.FC = () => {
           </button>
         </div>
 
-        <div className='relative mt-4 w-full bg-[#4D83FD] rounded-r-[24px] p-2'>
-          <div className='bg-white rounded-[20px] p-2 ml-5 max-w-[353px]'>
+        <div className='relative mt-4 max-w-97 bg-[#4D83FD] rounded-r-[20px] pr-0 p-2'>
+          <div className='bg-white rounded-[20px] pr-0 p-2 ml-5 max-w-[353px]'>
             <Calendar
               className='w-full'
               onClickDay={handleDayClick}
@@ -805,9 +804,6 @@ const CalendarPage: React.FC = () => {
                     onMenuClick={() => {
                       setSelectTask({ ...task, date: selectedYMD });
                       setIsCleaningDeletePopUpOpen(true);
-                      setOpenDeletePopUpTaskId(
-                        openDeletePopUpTaskId === task.id ? null : task.id
-                      );
                     }}
                     showDeletePopUp={openDeletePopUpTaskId === task.id}
                     onDeleteSelect={(type) => {

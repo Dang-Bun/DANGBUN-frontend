@@ -51,7 +51,7 @@ const CalendarTaskCard: React.FC<Props> = ({
 
   return (
     <div
-      className={`relative flex w-full min-h-[56px] rounded-[8px] ${bg} ${className}`}
+      className={`relative flex w-full min-h-16 rounded-[8px] ${bg} ${className}`}
       role='group'
     >
       <div className={`w-[9px] rounded-l-lg ${bar}`} />

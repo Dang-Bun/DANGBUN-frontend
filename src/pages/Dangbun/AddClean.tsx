@@ -74,7 +74,7 @@ export default function AddClean() {
       if (cleaningIds.length === 0) return;
 
       await useDutyApi.addCleaning(placeId, dutyId, { cleaningIds });
-      navigate('/management/manager/duty');
+      navigate(-1);
     } catch (err) {
       console.error('미지정 청소 추가 실패:', err);
       alert('청소 추가에 실패했습니다.');

@@ -343,7 +343,7 @@ const CleanAdd = () => {
           </div>
         ))}
       </div>
-      <div>
+      <div className='mx-auto'>
         <div className='w-[353px] flex flex-row justify-between'>
           <p className='text-lg font-normal leading-relaxed'>세부 날짜 설정</p>
           <select
@@ -367,34 +367,38 @@ const CleanAdd = () => {
             className='w-80'
             onClickDay={handleDateClick}
             value={null}
-            // tileContent={({ date }) => (
-            //   <div
-            //     onPointerUp={() => handleDateClick(date)}
-            //     style={{ width: '100%', height: '100%' }}
-            //   />
-            // )}
-            tileClassName={({ date, view, activeStartDate }) => {
+            tileContent={({ date, view, activeStartDate }) => {
               if (view === 'month') {
                 const isSameMonth =
                   activeStartDate.getMonth() === date.getMonth() &&
                   activeStartDate.getFullYear() === date.getFullYear();
 
-                const isSelected = selectedDates.some(
-                  (d) => d.toDateString() === date.toDateString()
+                const isSelected =
+                  isSameMonth &&
+                  selectedDates.some(
+                    (d) => d.toDateString() === date.toDateString()
+                  );
+                return (
+                  <div className='flex items-center justify-center w-full h-full'>
+                    <div
+                      className={`w-[36px] h-[36px] flex items-center justify-center rounded-full text-base ${
+                        isSelected
+                          ? 'bg-blue-500 text-white'
+                          : isSameMonth
+                            ? 'text-black'
+                            : 'text-[#8e8e8e]'
+                      }`}
+                    >
+                      {date.getDate()}
+                    </div>
+                  </div>
                 );
-                return [
-                  '  !w-[10px] !h-[36px] !my-[9px] text-base text-center ',
-                  isSelected
-                    ? 'bg-blue-500 text-white rounded-full'
-                    : isSameMonth
-                      ? 'text-black'
-                      : 'text-[#8e8e8e]',
-                ].join('');
               }
-              return '';
+              return null;
             }}
+            tileClassName='my-[9px]'
             activeStartDate={selectedMonth}
-            formatDay={(_, date) => date.getDate().toString()}
+            formatDay={() => ''}
             showNeighboringMonth={true}
             prevLabel={null}
             prev2Label={null}

@@ -5,7 +5,6 @@ import WritingChip from '../../components/notification/WritingChip';
 import ScrollToTop from '../../components/notification/ScrollToTop';
 import BottomBar from '../../components/BottomBar';
 import useNotificationApi from '../../hooks/useNotificationApi';
-import { useMemberApi } from '../../hooks/useMemberApi';
 
 type NotificationDetailType = {
   id: number;
@@ -20,7 +19,8 @@ const NotificationDetail = () => {
   const { placeId, id } = useParams<{ placeId: string; id: string }>();
   const notificationId = id; // 라우터에서 :id로 정의되어 있으므로 id를 사용
   const location = useLocation();
-  const [notification, setNotification] = useState<NotificationDetailType | null>(null);
+  const [notification, setNotification] =
+    useState<NotificationDetailType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,31 +32,37 @@ const NotificationDetail = () => {
 
       // 항상 API 호출
       try {
-        const res = await useNotificationApi.detail(Number(placeId), notificationId);
+        const res = await useNotificationApi.detail(
+          Number(placeId),
+          notificationId
+        );
         const data = res?.data?.data || res?.data;
 
         // 제목을 첫 번째 마침표까지만 표시
         const apiTitle = data?.title ?? '';
-        const apiTitleWithFirstPeriod = apiTitle.includes('.') 
+        const apiTitleWithFirstPeriod = apiTitle.includes('.')
           ? apiTitle.split('.')[0] + '.'
           : apiTitle;
-        
+
         // 받는 사람 정보 파싱
         let receivers: { id: number; name: string }[] = [];
-        
-        if (Array.isArray(data?.receiverNames) && data.receiverNames.length > 0) {
+
+        if (
+          Array.isArray(data?.receiverNames) &&
+          data.receiverNames.length > 0
+        ) {
           receivers = data.receiverNames.map((name: string, index: number) => ({
             id: index + 1,
-            name: String(name || '멤버')
+            name: String(name || '멤버'),
           }));
         }
-        
+
         // 날짜 형식 변환
         const formatDate = (dateStr: string) => {
           try {
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return dateStr;
-            
+
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
@@ -64,8 +70,9 @@ const NotificationDetail = () => {
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const ampm = hours < 12 ? '오전' : '오후';
             const displayHours = hours < 12 ? hours : hours - 12;
-            const displayHoursStr = displayHours === 0 ? '12' : String(displayHours);
-            
+            const displayHoursStr =
+              displayHours === 0 ? '12' : String(displayHours);
+
             return `${year}.${month}.${day} ${ampm} ${displayHoursStr}:${minutes}`;
           } catch {
             return dateStr;
@@ -89,40 +96,50 @@ const NotificationDetail = () => {
         setLoading(false);
       }
     };
-    
+
     fetchDetail();
   }, [placeId, notificationId]);
 
-  if (loading) return <div className="p-4">로딩 중...</div>;
-  if (!notification) return <div className="p-4">존재하지 않는 알림입니다.</div>;
+  if (loading) return <div className='p-4'>로딩 중...</div>;
+  if (!notification)
+    return <div className='p-4'>존재하지 않는 알림입니다.</div>;
 
   return (
     <div>
-      <Header title="알림함" />
-      <div className="px-[20px] pt-[68px] gap-[8px]">
-        <p className="text-base font-bold mb-2">{notification.title}</p>
+      <Header title='알림함' />
+      <div className='px-[20px] pt-[68px] gap-[8px]'>
+        <p className='text-base font-bold mb-2'>{notification.title}</p>
 
-        <div className="flex gap-[12px] items-center my-[10px]">
-          <span className="text-sm font-medium">보낸 사람</span>
-          <WritingChip label={notification.sender} type="member" selected={true}/>
+        <div className='flex gap-[12px] items-center my-[10px]'>
+          <span className='text-sm font-medium'>보낸 사람</span>
+          <WritingChip
+            label={notification.sender}
+            type='member'
+            selected={true}
+          />
         </div>
 
-        <div className="flex gap-[12px] items-center my-[10px]">
-          <span className="text-sm font-medium">받는 사람</span>
+        <div className='flex gap-[12px] items-center my-[10px]'>
+          <span className='text-sm font-medium'>받는 사람</span>
           {notification.receivers.length > 0 ? (
             notification.receivers.map((r) => (
-              <WritingChip key={r.id} label={r.name} type="member" selected={true} />
+              <WritingChip
+                key={r.id}
+                label={r.name}
+                type='member'
+                selected={true}
+              />
             ))
           ) : (
-            <WritingChip label="전체" type="member" selected={true}/>
+            <WritingChip label='전체' type='member' selected={true} />
           )}
         </div>
 
-        <p className="text-xs text-gray-500 mb-4">{notification.time}</p>
+        <p className='text-xs text-gray-500 mb-4'>{notification.time}</p>
 
-        <div className="bg-[#F6F6F6] h-[1px] my-[16px]"></div>
+        <div className='bg-[#F6F6F6] h-[1px] my-[16px]'></div>
 
-        <p className="text-sm leading-relaxed mt-[6px] whitespace-pre-wrap">
+        <p className='text-sm leading-relaxed mt-[6px] whitespace-pre-wrap'>
           {notification.content}
         </p>
       </div>
